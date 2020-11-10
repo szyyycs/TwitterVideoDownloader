@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ImageView
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+
+        android:src="@mipmap/app_icon"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="5dp"
+
+        android:id="@+id/small_icon"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+       android:layout_toRightOf="@+id/small_icon"
+        android:textSize="13sp"
+        android:id="@+id/title"
+        android:text="@string/app_name"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
+
+        />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="这是通知内容"
+        android:id="@+id/content"
+        android:textSize="25sp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="5dp"
+
+        android:visibility="gone"
+        />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="请输入链接"
+        android:id="@+id/input"
+        android:background="@drawable/shape_eee"
+        android:layout_below="@+id/small_icon"
+        android:layout_marginRight="5dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="5dp"
+        android:textColor="#333"
+        android:textSize="18sp"
+        android:layout_marginBottom="10dp"
+        />
+</RelativeLayout>
