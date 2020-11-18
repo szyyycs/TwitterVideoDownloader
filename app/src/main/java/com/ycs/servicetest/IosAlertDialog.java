@@ -6,13 +6,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Message;
 import android.provider.Settings;
 import android.view.Display;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -20,9 +23,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.zip.Inflater;
-
 
 public class IosAlertDialog {
     private Context context;
@@ -220,12 +220,30 @@ public class IosAlertDialog {
         setLayout();
         dialog.show();
     }
-    public IosAlertDialog getWindow(){
-        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+    public IosAlertDialog setWindow(){
+        if (Build.VERSION.SDK_INT >= 26)
+        {
+            dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+        }else
+        {
+            dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        }
         return this;
     }
-//    public Button getButton(){
-//        return dialog.getButton(AlertDialog.BUTTON_NEUTRAL);
-//    }
+    public IosAlertDialog setEnter(){
+        editText.setOnEditorActionListener(new EditText.OnEditorActionListener(){
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEND) {
+                    Toast.makeText(context, getEditText(), Toast.LENGTH_SHORT).show();
+                    MainService.updateNotification(context, getEditText());
+                    dialog.dismiss();
+                }
+                return false;
+            }
+        });
+        return this;
+    }
+
 
 }

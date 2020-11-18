@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/dp_150" android:layout_height="@dimen/dp_200">
+<ImageView
+    android:layout_width="@dimen/dp_150"
+    android:layout_height="@dimen/dp_200"
+
+    android:layout_centerInParent="true"
+    android:scaleType="fitCenter"
+    android:id="@+id/src"/>
+</RelativeLayout>

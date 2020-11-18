@@ -5,27 +5,26 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ImageView
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
 
         android:src="@mipmap/app_icon"
         android:layout_marginLeft="10dp"
-        android:layout_marginTop="5dp"
+        android:layout_centerVertical="true"
 
         android:id="@+id/small_icon"
         />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-       android:layout_toRightOf="@+id/small_icon"
-        android:textSize="13sp"
-        android:id="@+id/title"
-        android:text="@string/app_name"
-        android:layout_marginLeft="5dp"
+<!--    <TextView-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_toRightOf="@+id/small_icon"-->
+<!--        android:textSize="13sp"-->
+<!--        android:id="@+id/title"-->
+<!--        android:text="@string/app_name"-->
+<!--        android:layout_marginLeft="5dp"-->
+<!--        android:layout_marginTop="5dp"-->
 
-        android:layout_marginTop="5dp"
-
-        />
+<!--        />-->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -39,37 +38,38 @@
         />
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="请输入链接"
+        android:layout_height="@dimen/dp_100"
+        android:text="点击此处输入链接"
+        android:gravity="center|left"
         android:id="@+id/input"
         android:autoSizeTextType="uniform"
-        android:autoSizeMaxTextSize="15sp"
+        android:autoSizeMaxTextSize="18sp"
         android:autoSizeMinTextSize="5sp"
         android:autoSizeStepGranularity="1sp"
-
-        android:background="@drawable/shape_eee"
-        android:layout_below="@+id/small_icon"
+        android:background="@drawable/shape_ddd"
+        android:layout_toRightOf="@+id/small_icon"
         android:layout_marginRight="5dp"
         android:layout_marginLeft="10dp"
-        android:layout_marginTop="5dp"
-        android:textColor="#777"
-        android:textSize="15sp"
+        android:layout_centerVertical="true"
+        android:textColor="#666"
+
+        android:textSize="18sp"
         android:layout_marginBottom="10dp"
 
         />
     <ProgressBar
         android:id="@+id/pb"
+        android:layout_marginRight="5dp"
+        android:layout_marginLeft="10dp"
         android:layout_centerVertical="true"
         android:layout_width="match_parent"
         style="?android:attr/progressBarStyleHorizontal"
-        android:layout_marginRight="5dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="5dp"
-        android:max="100"
+        android:layout_toRightOf="@+id/small_icon"
         android:progress="80"
+        android:max="100"
         android:visibility="gone"
         android:progressDrawable="@drawable/progressbar_bg"
-        android:layout_below="@+id/small_icon"
-        android:layout_height="@dimen/dp_40"/>
+        android:layout_marginTop="@dimen/dp_10"
+        android:layout_marginBottom="@dimen/dp_10"
+        android:layout_height="@dimen/dp_50"/>
 </RelativeLayout>

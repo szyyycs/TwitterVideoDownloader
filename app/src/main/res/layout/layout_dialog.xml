@@ -41,7 +41,10 @@
         android:layout_marginTop="15dp"
         android:gravity="center"
         android:hint="请输入链接"
-        android:textColorHint = "#707070"
+        android:singleLine="true"
+        android:imeOptions="actionSend"
+        android:textColorHint = "#999"
+        android:background="@drawable/shape_eee"
         android:visibility="gone"
         android:textColor="#333333"
         android:textSize="18dp"
@@ -65,7 +68,7 @@
             android:layout_weight="1"
             android:background="@drawable/iosdialog_left_selector"
             android:gravity="center"
-            android:textColor="@color/colorRed"
+            android:textColor="@color/colorIosBlue"
             android:textSize="15sp" />
 
         <ImageView
@@ -81,7 +84,7 @@
             android:layout_weight="1"
             android:background="@drawable/iosdialog_right_selector"
             android:gravity="center"
-            android:textColor="#1b9bfc"
+            android:textColor="@color/colorIosBlue"
             android:textSize="15sp" />
     </LinearLayout>
 

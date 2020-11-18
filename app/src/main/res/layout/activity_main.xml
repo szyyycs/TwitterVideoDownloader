@@ -9,13 +9,13 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="@dimen/dp_50"
-
+        android:maxWidth="@dimen/dp_300"
         android:text="Android10以下版本可自动识别剪切板内容，10以上需人工输入"
         android:textColor="#fff"
         android:id="@+id/btn"
         android:gravity="center"
         android:textSize="20sp"
-        android:background="#4CAF50"
+        android:background="#0b989d"
         android:textIsSelectable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"

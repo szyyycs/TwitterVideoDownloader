@@ -24,14 +24,17 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.downloader.PRDownloader;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
     final static String TAG="yang";
-    public Handler h;
+
     private Button btn;
-    private String[] permissions = {Manifest.permission.SYSTEM_ALERT_WINDOW};
+    private String[] permissions = {Manifest.permission.SYSTEM_ALERT_WINDOW,Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE};
 //    private final Timer timer = new Timer();
 //    private TimerTask task = new TimerTask() {
 //        @Override
@@ -48,13 +51,26 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
+        PRDownloader.initialize(getApplicationContext());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.canDrawOverlays(this)) {
                 Toast.makeText(this, "当前无权限，请授权", Toast.LENGTH_SHORT);
                 startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName())), 0);
             }
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED)
+            {
+                ActivityCompat.requestPermissions(this, permissions,199);
+            }
         }
-        startService(new Intent(MainActivity.this, MainService.class));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(new Intent(MainActivity.this, MainService.class));
+
+        }else{
+            startService(new Intent(MainActivity.this, MainService.class));
+
+        }
         Handler handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
