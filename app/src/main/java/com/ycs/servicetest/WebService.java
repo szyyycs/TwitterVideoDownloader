@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
@@ -32,6 +33,7 @@ public class WebService extends Service  {
                 synchronized(object){
                     object.notifyAll();
                 }
+                stopSelf();
             }else if(msg.what==2){
                 String src=msg.obj.toString();
                 WebUtil.download(handler,src,
@@ -56,45 +58,65 @@ public class WebService extends Service  {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //url=intent.getStringExtra("url");
+        url=intent.getStringExtra("url");
+        if(!url.contains("http")){
+            url="https://"+url;
+        }
+        if(!url.contains("weibo")){
+            Toast.makeText(this, "粘贴的不是微博链接噢！", Toast.LENGTH_SHORT).show();
+            stopSelf();
+            return super.onStartCommand(intent, flags, startId);
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
+                Looper.prepare();
                 Document document= null;
+                Document do1= null;
                 try {
-                    document = Jsoup.connect("https://www.amazon.cn/b?node=1852543071").get();
-                    Elements elements = document.getElementsByClass("a-carousel-card");
-                    Log.e("yyy",elements.size()+"");
+                    //document = Jsoup.connect("https://www.amazon.cn/b?node=1852543071").get();
+                    //Elements elements = document.getElementsByClass("a-carousel-card");
+
+                    do1=Jsoup.connect(url).get();
+                    Elements elements=do1.getElementsByTag("script");
+                    Log.e("yyy","elements.size:"+elements.size()+"");
+                    String[] elScriptList = elements.get(1).data().toString().split("var");
+
                     if(elements.size()==0){
-                        Toast.makeText(WebService.this,"糟糕，太频繁了！",Toast.LENGTH_SHORT);
+                        Toast.makeText(WebService.this,"糟糕，找不到视频！",Toast.LENGTH_SHORT);
                         stopSelf();
                         return;
                     }
-                    for (Element li : elements) {
-                        Element content =li.select("img").first();
-                        String bookImgUrl=content.attr("src");
-                        srcList.add(bookImgUrl);
-                        //Log.e("yyy", bookTitle);
-                    }
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(WebService.this, "开始下载"+srcList.size()+"项", Toast.LENGTH_SHORT).show();
-                            Log.e("yyy","开始下载"+srcList.size()+"项");
-                        }
-                    });
-                    for(String src:srcList){
-                        synchronized (object){
-                            Message msg=new Message();
-                            msg.what=2;
-                            msg.obj=src;
-                            handler.sendMessage(msg);
-                            try {
-                                object.wait();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
+                    Log.e("yyy","elScriptList.length:"+elScriptList.length+"");
+                    //Log.e("yyy","-------------------------element.toString():【"+elScriptList[2]+"】------------------------");
+                    String script=elScriptList[2];
+                    if(script.contains("urls")){
+                        script=script.substring(script.indexOf("urls"),script.length());
+                        script=script.substring(0,script.indexOf("}"));
+
+                        String[] urls=script.split("\"");
+                        for(String url:urls){
+                            if(url.contains("http")){
+                                srcList.add(url);
                             }
                         }
+                        Log.e("yyy","长度"+srcList.size());
+                        //Toast.makeText(WebService.this, "为您找到"+srcList.size()+"个视频，自动为您下载第一个视频", Toast.LENGTH_SHORT).show();
+                        //for(String src:srcList) {
+                            Log.e("","");
+                            synchronized (object) {
+                                Message msg = new Message();
+                                msg.what = 2;
+                                msg.obj = srcList.get(0);
+                                handler.sendMessage(msg);
+                                try {
+                                    object.wait();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                       // }
+                    }else{
 
                     }
 

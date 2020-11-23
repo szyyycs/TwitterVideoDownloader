@@ -35,10 +35,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
+import androidx.core.app.NotificationCompat;
+
+import com.downloader.PRDownloader;
+import com.downloader.Status;
 
 import java.util.Timer;
 
 
+import static com.ycs.servicetest.WebUtil.downloadId;
 import static com.ycs.servicetest.WebUtil.isHttpUrl;
 
 
@@ -54,6 +59,8 @@ public class MainService extends Service {
     private WindowManager windowManager;
     private final Timer timer = new Timer();
     private WindowManager.LayoutParams layoutParams;
+    public static NotificationManager nm;
+    private DialogReceiver dialogReceiver;
 
     //    private TimerTask task = new TimerTask() {
 //        @Override
@@ -144,6 +151,7 @@ public class MainService extends Service {
             NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             manager.createNotificationChannel(notificationChannel);
         }
+        nm= (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Notification.Builder builder = new Notification.Builder(MainService.this.getApplicationContext());
         Intent it = new Intent(MainService.this, MainActivity.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -163,8 +171,8 @@ public class MainService extends Service {
 //                        .setContentText("粘贴的内容是"+new ClipBoardUtil(MainService.this).paste())
                 .setWhen(System.currentTimeMillis());
         final Intent intentInput = new Intent(this, DialogReceiver.class);
+       // intentInput.setAction("");
         final PendingIntent pi = PendingIntent.getBroadcast(this, 0, intentInput, PendingIntent.FLAG_UPDATE_CURRENT);
-
         notification = builder.build();
         if (Build.VERSION.SDK_INT < 29) {
             views.setTextViewText(R.id.input, new ClipBoardUtil(MainService.this).paste());
@@ -173,6 +181,7 @@ public class MainService extends Service {
         } else {
             notification.contentView = views;
         }
+
         views.setOnClickPendingIntent(R.id.input, pi);
         notification.contentIntent = pi;
         notification.iconLevel = 1000;
@@ -186,95 +195,93 @@ public class MainService extends Service {
                     views.setTextViewText(R.id.input, new ClipBoardUtil(MainService.this).paste());
                     NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                     nm.notify(110, notification);
-//                            if(msg.equals("o")){
-//                                sendBroadcast(intentInput);
-//                            }
-                    Toast.makeText(MainService.this, msg, Toast.LENGTH_SHORT).show();
-                    if (isHttpUrl(msg)) {
-                        Intent i = new Intent(MainService.this, WebActivity.class);
-                        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
-                        startActivity(i);
+                    //Toast.makeText(MainService.this, msg, Toast.LENGTH_SHORT).show();
+                    if (isHttpUrl(msg)&&WebUtil.isNetworkConnected(MainService.this)) {
+                        if(PRDownloader.getStatus(downloadId)== Status.RUNNING&&PRDownloader.getStatus(downloadId)== Status.PAUSED){
+                            Toast.makeText(MainService.this, "正在下载中，请等会再下载", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        Intent i = new Intent(MainService.this, WebService.class);
+                        i.putExtra("url",msg);
+                        startService(i);
                     }
                 }
             });
         } else {
-            String msg = new ClipBoardUtil(MainService.this).paste();
+            //String msg = new ClipBoardUtil(MainService.this).paste();
 //                    views.setTextViewText(R.id.input,"点击此处输入链接");
-            NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            //NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             nm.notify(110, notification);
-//                    if(msg.equals("o")){
-//                        sendBroadcast(intentInput);
-//                    }
         }
 
         return super.onStartCommand(intent, flags, startId);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    private void showFloatingWindow() {
-        if (Settings.canDrawOverlays(this)) {
-            // 获取WindowManager服务
-            windowManager = (WindowManager) getApplicationContext().getSystemService(WINDOW_SERVICE);
+//    @RequiresApi(api = Build.VERSION_CODES.M)
+//    private void showFloatingWindow() {
+//        if (Settings.canDrawOverlays(this)) {
+//            // 获取WindowManager服务
+//            windowManager = (WindowManager) getApplicationContext().getSystemService(WINDOW_SERVICE);
+//
+//            // 新建悬浮窗控件
+//            LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+//            view = (RelativeLayout) inflater.inflate(R.layout.float_window, null);
+//            tv = view.findViewById(R.id.content);
+//            tv.setText("粘贴内容为" + new ClipBoardUtil(MainService.this).paste());
+//            view.setOnTouchListener(new FloatingOnTouchListener());
+//            // 设置LayoutParam
+//            layoutParams = new WindowManager.LayoutParams();
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                layoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+//            } else {
+//                layoutParams.type = WindowManager.LayoutParams.TYPE_PHONE;
+//            }
+//            layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+//            layoutParams.format = PixelFormat.RGBA_8888;
+////            layoutParams.width = 300;
+////            layoutParams.height = 200;
+//            layoutParams.gravity = Gravity.LEFT;
+//            layoutParams.x = windowManager.getDefaultDisplay().getWidth();
+//            layoutParams.y = (int) getResources().getDimension(R.dimen.dp_m_90);
+//            layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
+//            layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+//
+//            // 将悬浮窗控件添加到WindowManager
+//            windowManager.addView(view, layoutParams);
+//
+//        }
+//    }
 
-            // 新建悬浮窗控件
-            LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-            view = (RelativeLayout) inflater.inflate(R.layout.float_window, null);
-            tv = view.findViewById(R.id.content);
-            tv.setText("粘贴内容为" + new ClipBoardUtil(MainService.this).paste());
-            view.setOnTouchListener(new FloatingOnTouchListener());
-            // 设置LayoutParam
-            layoutParams = new WindowManager.LayoutParams();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                layoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-            } else {
-                layoutParams.type = WindowManager.LayoutParams.TYPE_PHONE;
-            }
-            layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-            layoutParams.format = PixelFormat.RGBA_8888;
-//            layoutParams.width = 300;
-//            layoutParams.height = 200;
-            layoutParams.gravity = Gravity.LEFT;
-            layoutParams.x = windowManager.getDefaultDisplay().getWidth();
-            layoutParams.y = (int) getResources().getDimension(R.dimen.dp_m_90);
-            layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
-            layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-
-            // 将悬浮窗控件添加到WindowManager
-            windowManager.addView(view, layoutParams);
-
-        }
-    }
-
-    private class FloatingOnTouchListener implements View.OnTouchListener {
-        private int x;
-        private int y;
-
-        @Override
-        public boolean onTouch(View view, MotionEvent event) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    x = (int) event.getRawX();
-                    y = (int) event.getRawY();
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    int nowX = (int) event.getRawX();
-                    int nowY = (int) event.getRawY();
-                    int movedX = nowX - x;
-                    int movedY = nowY - y;
-                    x = nowX;
-                    y = nowY;
-                    layoutParams.x = layoutParams.x + movedX;
-                    layoutParams.y = layoutParams.y + movedY;
-
-                    // 更新悬浮窗控件布局
-                    windowManager.updateViewLayout(view, layoutParams);
-                    break;
-                default:
-                    break;
-            }
-            return false;
-        }
-    }
+//    private class FloatingOnTouchListener implements View.OnTouchListener {
+//        private int x;
+//        private int y;
+//
+//        @Override
+//        public boolean onTouch(View view, MotionEvent event) {
+//            switch (event.getAction()) {
+//                case MotionEvent.ACTION_DOWN:
+//                    x = (int) event.getRawX();
+//                    y = (int) event.getRawY();
+//                    break;
+//                case MotionEvent.ACTION_MOVE:
+//                    int nowX = (int) event.getRawX();
+//                    int nowY = (int) event.getRawY();
+//                    int movedX = nowX - x;
+//                    int movedY = nowY - y;
+//                    x = nowX;
+//                    y = nowY;
+//                    layoutParams.x = layoutParams.x + movedX;
+//                    layoutParams.y = layoutParams.y + movedY;
+//
+//                    // 更新悬浮窗控件布局
+//                    windowManager.updateViewLayout(view, layoutParams);
+//                    break;
+//                default:
+//                    break;
+//            }
+//            return false;
+//        }
+//    }
 
     public static RemoteViews getContentView(Context context, Notification notification) {
         if (notification.contentView != null)
@@ -288,22 +295,45 @@ public class MainService extends Service {
     public static void updateNotification(Context context, String msg) {
         views.setTextViewText(R.id.input, msg);
 
-        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+//        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         nm.notify(110, notification);
     }
+    public static void updateTitle( String msg) {
+        views.setTextViewText(R.id.title, msg);
+
+//        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.notify(110, notification);
+    }
+    static int progress=0;
     public synchronized static void updateProgress(Context context, int percent) {
+        if(progress==percent){
+            return;
+        }
+        progress=percent;
         if(percent==100){
             Log.e("yyu","成功");
             views.setViewVisibility(R.id.input, View.VISIBLE);
             views.setViewVisibility(R.id.pb, View.GONE);
-        }else{
+        }else {
             views.setViewVisibility(R.id.input, View.GONE);
             views.setViewVisibility(R.id.pb, View.VISIBLE);
             views.setProgressBar(R.id.pb,100,percent,false);
         }
-        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         nm.notify(110, notification);
     }
+    public synchronized static void update(String msg){
+        views.setViewVisibility(R.id.input, View.VISIBLE);
+        views.setViewVisibility(R.id.pb, View.GONE);
+        views.setTextViewText(R.id.input,msg);
+        nm.notify(110, notification);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(dialogReceiver);
+    }
+
     public static void setTextMarquee(TextView textView) {
         if (textView != null) {
             textView.setEllipsize(TextUtils.TruncateAt.MARQUEE);
@@ -313,4 +343,5 @@ public class MainService extends Service {
             textView.setFocusableInTouchMode(true);
         }
     }
+    
 }

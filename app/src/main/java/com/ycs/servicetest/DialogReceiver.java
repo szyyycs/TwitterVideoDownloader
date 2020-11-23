@@ -18,7 +18,12 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.downloader.PRDownloader;
+import com.downloader.Status;
+
 import java.lang.reflect.Method;
+
+import static com.ycs.servicetest.WebUtil.downloadId;
 import static com.ycs.servicetest.WebUtil.isHttpUrl;
 
 
@@ -31,19 +36,20 @@ public class DialogReceiver extends BroadcastReceiver {
             super.handleMessage(msg);
             if(msg.what==1){
                 if(Build.VERSION.SDK_INT < 29) {
-                    Toast.makeText(context, msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(context, msg.obj.toString(), Toast.LENGTH_SHORT).show();
                     MainService.updateNotification(context,msg.obj.toString());
                 }else{
-                    Toast.makeText(context, msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(context, msg.obj.toString(), Toast.LENGTH_SHORT).show();
                     MainService.updateNotification(context,msg.obj.toString());
                 }
-//                Intent intent=new Intent(context,WebActivity.class);
+//                Intent intent=new Intent(context,TestActivity.class);
 //                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
 //                intent.putExtra("url",msg.obj.toString());
 //                context.startActivity(intent);
+//
                 Intent i=new Intent(context,WebService.class);
+                i.putExtra("url",msg.obj.toString());
                 context.startService(i);
-
             }
         }
     };;
@@ -51,34 +57,51 @@ public class DialogReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, Intent intent) {
         this.context=context;
-        collapseStatusBar(context);
-        final IosAlertDialog dialog=new IosAlertDialog(context).builder();
-        dialog.setTitle("提示")
-                .setEditText("请输入下载链接")
-                .setNegativeButton("取消", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
+        if(PRDownloader.getStatus(downloadId)== Status.RUNNING){
+            PRDownloader.pause(downloadId);
+            Toast.makeText(context, "下载已暂停", Toast.LENGTH_SHORT).show();
+            if (Build.VERSION.SDK_INT < 29) {
+                MainService.updateTitle("下载已暂停");
+            }
+        }else if(PRDownloader.getStatus(downloadId)== Status.PAUSED){
+            PRDownloader.resume(downloadId);
+            Toast.makeText(context, "下载已重新开始", Toast.LENGTH_SHORT).show();
+            if (Build.VERSION.SDK_INT < 29) {
+                MainService.updateTitle(context.getResources().getString(R.string.app_name));
+            }
+        }else{
+            collapseStatusBar(context);
+            final IosAlertDialog dialog=new IosAlertDialog(context).builder();
+            dialog.setTitle("提示")
+                    .setEditText("请输入下载链接")
+                    .setNegativeButton("取消", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
 
-                    }
-                })
-                .setPositiveButton("开始下载", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if(isHttpUrl(dialog.getEditText())){
-                            Message ms=new Message();
-                            ms.what=1;
-                            ms.obj=dialog.getEditText();
-                            handler.sendMessage(ms);
-                            Log.d("yangchaosheng", dialog.getEditText());
-                        }else {
-                            Toast.makeText(context, "您粘贴的不是网址噢", Toast.LENGTH_SHORT).show();
                         }
+                    })
+                    .setPositiveButton("开始下载", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if(isHttpUrl(dialog.getEditText())){
+                                Message ms=new Message();
+                                ms.what=1;
+                                ms.obj=dialog.getEditText();
+                                handler.sendMessage(ms);
+                                Log.d("yangchaosheng", dialog.getEditText());
+                            }else if(WebUtil.isNetworkConnected(context)){
+                                Toast.makeText(context, "网络未打开", Toast.LENGTH_SHORT).show();
+                            }else {
+                                Toast.makeText(context, "您粘贴的不是网址噢", Toast.LENGTH_SHORT).show();
+                            }
 
-                    }
-                })
-                .setWindow()
-                .setEnter()
-                .show();
+                        }
+                    })
+                    .setWindow()
+                    .setEnter()
+                    .show();
+
+        }
 
     }
 

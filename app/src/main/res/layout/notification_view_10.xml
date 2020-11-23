@@ -67,6 +67,7 @@
         android:layout_toRightOf="@+id/small_icon"
         android:progress="80"
         android:max="100"
+
         android:visibility="gone"
         android:progressDrawable="@drawable/progressbar_bg"
         android:layout_marginTop="@dimen/dp_10"

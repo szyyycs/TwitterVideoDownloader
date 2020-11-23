@@ -18,12 +18,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
+        <activity android:name=".TestActivity"></activity>
+
         <service
             android:name=".WebService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
 
-        <activity android:name=".WebActivity" />
+        <activity android:name=".VideoActivity" />
 
         <service
             android:name=".MainService"
@@ -41,8 +43,9 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".DialogReceiver" />
-
+        <receiver
+            android:name=".DialogReceiver"
+            ></receiver>
 
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -4,26 +4,56 @@
     android:background="@drawable/shape_fff"
     android:layout_marginBottom="@dimen/dp_5"
     android:layout_marginTop="@dimen/dp_5"
+    android:layout_marginLeft="@dimen/dp_5"
+    android:layout_marginRight="@dimen/dp_5"
     >
 <ImageView
     android:layout_width="@dimen/dp_100"
     android:layout_height="@dimen/dp_100"
     android:src="@mipmap/app_icon"
     android:id="@+id/item_icon"
+    android:scaleType="centerCrop"
+    android:background="#eee"
 
-    android:padding="@dimen/dp_10"
     />
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:id="@+id/item_tv"
         android:layout_toRightOf="@+id/item_icon"
         android:text="默认的字"
         android:ellipsize="end"
-        android:maxLines="4"
+        android:maxLines="1"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMaxTextSize="20sp"
+        android:autoSizeMinTextSize="10sp"
+        android:autoSizeStepGranularity="1sp"
         android:textColor="#111"
         android:padding="@dimen/dp_10"
-        android:textSize="12sp"
+        android:textSize="20sp"
 
+
+        />
+    <TextView
+        android:id="@+id/size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="13sp"
+        android:text="20M"
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@+id/item_icon"
+        android:layout_marginLeft="@dimen/dp_10"
+        android:layout_marginBottom="@dimen/dp_10"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="13sp"
+        android:id="@+id/time"
+        android:text="2020-11-11 20:00:00"
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@+id/size"
+        android:layout_marginLeft="@dimen/dp_20"
+        android:layout_marginBottom="@dimen/dp_10"
         />
 </RelativeLayout>

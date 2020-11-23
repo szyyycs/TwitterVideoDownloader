@@ -1,15 +1,13 @@
 package com.ycs.servicetest;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -18,33 +16,40 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.downloader.PRDownloader;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import static com.ycs.servicetest.WebUtil.isHttpUrl;
 
 public class MainActivity extends AppCompatActivity {
     final static String TAG="yang";
 
     private Button btn;
+    private EditText etInput;
+
     private String[] permissions = {Manifest.permission.SYSTEM_ALERT_WINDOW,Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE};
-//    private final Timer timer = new Timer();
-//    private TimerTask task = new TimerTask() {
-//        @Override
-//        public void run() {
-//            Message message = new Message();
-//            message.what = 1;
-//            handler.sendMessage(message);
-//        }
-//    };
-
+    private ImageView iv;
+    private Handler handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                if(msg.what==1){
+                    Intent i=new Intent(MainActivity.this,WebService.class);
+                    i.putExtra("url",msg.obj.toString());
+                    startService(i);
+                }
+                super.handleMessage(msg);
+            }
+        };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +57,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
         PRDownloader.initialize(getApplicationContext());
+        iv=findViewById(R.id.download);
+        TextView tv=findViewById(R.id.btn);
+        btn=findViewById(R.id.confirm);
+        etInput=findViewById(R.id.input);
+
+        iv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LoadingUtil.Loading_show(MainActivity.this);
+                Intent i=new Intent(MainActivity.this, VideoActivity.class);
+                startActivity(i);
+            }
+        });
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.canDrawOverlays(this)) {
                 Toast.makeText(this, "当前无权限，请授权", Toast.LENGTH_SHORT);
@@ -71,20 +89,48 @@ public class MainActivity extends AppCompatActivity {
             startService(new Intent(MainActivity.this, MainService.class));
 
         }
-        Handler handler = new Handler() {
+        etInput.addTextChangedListener(new TextWatcher() {
             @Override
-            public void handleMessage(Message msg) {
-                if(msg.what==1){
-                    getWindow().getDecorView().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(MainActivity.this, new ClipBoardUtil(MainActivity.this).paste(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-                super.handleMessage(msg);
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
             }
-        };
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(etInput.getHint()!="在这粘贴链接"){
+                    btn.setText("下载");
+                } else{
+                    btn.setText("粘贴");
+
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String text=etInput.getText().toString();
+                if(text.isEmpty()){
+                    text=etInput.getHint().toString();
+                }
+                if(isHttpUrl(text)){
+                    Message ms=new Message();
+                    ms.what=1;
+                    ms.obj=text;
+                    handler.sendMessage(ms);
+                    //Toast.makeText(MainActivity.this, "开始"+text, Toast.LENGTH_SHORT).show();
+                }else if(!WebUtil.isNetworkConnected(MainActivity.this)){
+                    Toast.makeText(MainActivity.this, "网络未打开", Toast.LENGTH_SHORT).show();
+                }else {
+                    Toast.makeText(MainActivity.this, "您粘贴的不是网址噢", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
     }
 
     @Override
@@ -112,8 +158,26 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-    public void startService(){
-        Intent intent=new Intent(this,MainService.class);
-        startService(intent);
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                getWindow().getDecorView().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        String paste=new ClipBoardUtil(MainActivity.this).paste();
+                        etInput.setHint(paste);
+                        if(etInput.getHint().toString().equals("在这粘贴链接")){
+                            btn.setText("粘贴");
+                        } else{
+                            btn.setText("下载");
+                        }
+                    }
+                });
+            }
+        });
     }
 }

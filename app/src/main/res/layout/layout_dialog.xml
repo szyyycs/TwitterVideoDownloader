@@ -41,7 +41,7 @@
         android:layout_marginTop="15dp"
         android:gravity="center"
         android:hint="请输入链接"
-        android:singleLine="true"
+
         android:imeOptions="actionSend"
         android:textColorHint = "#999"
         android:background="@drawable/shape_eee"

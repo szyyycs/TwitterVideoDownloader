@@ -47,6 +47,8 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         final Items items = itemslist.get(position);
         holder.items_tv.setText(items.getText());
         holder.items_img.setImageBitmap(items.getSrc());
+        holder.size_tv.setText(items.getSize());
+        holder.time_tv.setText(items.getTime());
     }
 
     @Override
@@ -59,6 +61,8 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
     static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,View.OnLongClickListener{
         TextView items_tv;
         ImageView items_img;
+        TextView time_tv;
+        TextView size_tv;
         private OnItemClickListener mListener;
         private OnItemLongClickListener itemLongClickListener;
         public ViewHolder(View view, OnItemClickListener listener, OnItemLongClickListener longClickListener) {
@@ -70,6 +74,9 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
             itemView.setOnLongClickListener(this);
             items_tv = (TextView) view.findViewById(R.id.item_tv);
             items_img=(ImageView) view.findViewById(R.id.item_icon);
+            time_tv=view.findViewById(R.id.time);
+            size_tv=view.findViewById(R.id.size);
+
         }
 
         @Override
