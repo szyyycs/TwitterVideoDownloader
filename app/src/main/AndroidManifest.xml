@@ -34,7 +34,10 @@
         <service
             android:name=".MainIntentService"
             android:exported="false" />
-
+        <service
+            android:name=".FloatWindowService"
+            android:exported="false" />
+        <activity android:name=".FloatActivity"/>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

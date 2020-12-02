@@ -23,6 +23,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,7 +33,7 @@ import static com.ycs.servicetest.WebUtil.isHttpUrl;
 
 public class MainActivity extends AppCompatActivity {
     final static String TAG="yang";
-
+    private RelativeLayout floatWindow;
     private Button btn;
     private EditText etInput;
 
@@ -61,7 +62,16 @@ public class MainActivity extends AppCompatActivity {
         TextView tv=findViewById(R.id.btn);
         btn=findViewById(R.id.confirm);
         etInput=findViewById(R.id.input);
+        floatWindow=findViewById(R.id.floatWindow);
+        floatWindow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(MainActivity.this,FloatActivity.class);
 
+                startActivity(intent);
+
+            }
+        });
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -130,6 +140,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        Intent i=new Intent(MainActivity.this,FloatWindowService.class);
+        startService(i);
 
     }
 

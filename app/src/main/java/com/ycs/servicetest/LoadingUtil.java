@@ -18,6 +18,7 @@ public class LoadingUtil {
         if(dialog==null||!dialog.isShowing()){
             AVLoadingIndicatorView view = new AVLoadingIndicatorView(context);
             view.setIndicator("PacmanIndicator");
+
             view.setIndicatorColor(Color.parseColor("#0b989d"));
             LinearLayout ll = new LinearLayout(context);
 

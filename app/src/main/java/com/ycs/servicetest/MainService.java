@@ -217,71 +217,7 @@ public class MainService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
-//    @RequiresApi(api = Build.VERSION_CODES.M)
-//    private void showFloatingWindow() {
-//        if (Settings.canDrawOverlays(this)) {
-//            // 获取WindowManager服务
-//            windowManager = (WindowManager) getApplicationContext().getSystemService(WINDOW_SERVICE);
 //
-//            // 新建悬浮窗控件
-//            LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-//            view = (RelativeLayout) inflater.inflate(R.layout.float_window, null);
-//            tv = view.findViewById(R.id.content);
-//            tv.setText("粘贴内容为" + new ClipBoardUtil(MainService.this).paste());
-//            view.setOnTouchListener(new FloatingOnTouchListener());
-//            // 设置LayoutParam
-//            layoutParams = new WindowManager.LayoutParams();
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                layoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-//            } else {
-//                layoutParams.type = WindowManager.LayoutParams.TYPE_PHONE;
-//            }
-//            layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-//            layoutParams.format = PixelFormat.RGBA_8888;
-////            layoutParams.width = 300;
-////            layoutParams.height = 200;
-//            layoutParams.gravity = Gravity.LEFT;
-//            layoutParams.x = windowManager.getDefaultDisplay().getWidth();
-//            layoutParams.y = (int) getResources().getDimension(R.dimen.dp_m_90);
-//            layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
-//            layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-//
-//            // 将悬浮窗控件添加到WindowManager
-//            windowManager.addView(view, layoutParams);
-//
-//        }
-//    }
-
-//    private class FloatingOnTouchListener implements View.OnTouchListener {
-//        private int x;
-//        private int y;
-//
-//        @Override
-//        public boolean onTouch(View view, MotionEvent event) {
-//            switch (event.getAction()) {
-//                case MotionEvent.ACTION_DOWN:
-//                    x = (int) event.getRawX();
-//                    y = (int) event.getRawY();
-//                    break;
-//                case MotionEvent.ACTION_MOVE:
-//                    int nowX = (int) event.getRawX();
-//                    int nowY = (int) event.getRawY();
-//                    int movedX = nowX - x;
-//                    int movedY = nowY - y;
-//                    x = nowX;
-//                    y = nowY;
-//                    layoutParams.x = layoutParams.x + movedX;
-//                    layoutParams.y = layoutParams.y + movedY;
-//
-//                    // 更新悬浮窗控件布局
-//                    windowManager.updateViewLayout(view, layoutParams);
-//                    break;
-//                default:
-//                    break;
-//            }
-//            return false;
-//        }
-//    }
 
     public static RemoteViews getContentView(Context context, Notification notification) {
         if (notification.contentView != null)

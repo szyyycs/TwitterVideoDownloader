@@ -39,6 +39,8 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.4.0'
     implementation 'org.jsoup:jsoup:1.13.1'
     implementation 'com.mindorks.android:prdownloader:0.5.0'
+    implementation 'de.hdodenhof:circleimageview:3.0.0'
+
 }
 repositories {
     mavenCentral()
