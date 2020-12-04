@@ -8,6 +8,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -29,6 +31,8 @@ import android.widget.Toast;
 
 import com.downloader.PRDownloader;
 
+import java.util.List;
+
 import static com.ycs.servicetest.WebUtil.isHttpUrl;
 
 public class MainActivity extends AppCompatActivity {
@@ -40,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private String[] permissions = {Manifest.permission.SYSTEM_ALERT_WINDOW,Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE};
     private ImageView iv;
+
     private Handler handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
@@ -140,8 +145,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        Intent i=new Intent(MainActivity.this,FloatWindowService.class);
-        startService(i);
+
+
 
     }
 

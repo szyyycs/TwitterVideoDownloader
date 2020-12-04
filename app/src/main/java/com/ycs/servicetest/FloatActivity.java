@@ -21,6 +21,9 @@ public class FloatActivity extends AppCompatActivity {
     private TextView tv;
     private EditText ed;
     private ImageView line;
+    private TextView tvv;
+    private Boolean isTextview=true;
+    public static boolean isFloatWindowsshow=false;
     private SharedPreferences sp;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -30,26 +33,42 @@ public class FloatActivity extends AppCompatActivity {
         btn=findViewById(R.id.save);
         tv=findViewById(R.id.tv);
         ed=findViewById(R.id.ed);
-
+        tvv=findViewById(R.id.tvv);
         sp=getSharedPreferences("data", Context.MODE_PRIVATE);
         SharedPreferences.Editor e = sp.edit();
         if(sp.getString("text",null)==null){
             e.putString("text","");
             e.commit();
         }else{
+            tvv.setText(sp.getString("text",null));
             tv.setText(sp.getString("text",null));
         }
         ed.setText(sp.getString("text",null));
         tv.setMovementMethod(ScrollingMovementMethod.getInstance());
+        tvv.setMovementMethod(ScrollingMovementMethod.getInstance());
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SharedPreferences.Editor e = sp.edit();
-                e.putString("text",ed.getText().toString());
-                e.commit();
+                if(isTextview){
+                    tvv.setVisibility(View.GONE);
+                    ed.setVisibility(View.VISIBLE);
+                    ed.setText(sp.getString("text",null));
+                    btn.setText("保存");
+                    isTextview=false;
+                }else{
+                    tvv.setVisibility(View.VISIBLE);
+                    ed.setVisibility(View.GONE);
 
-                tv.setText(sp.getString("text",null));
-                Toast.makeText(FloatActivity.this, "保存成功", Toast.LENGTH_SHORT).show();
+                    btn.setText("编辑");
+                    isTextview=true;
+                    SharedPreferences.Editor e = sp.edit();
+                    e.putString("text",ed.getText().toString());
+                    e.commit();
+                    tvv.setText(sp.getString("text",null));
+
+                    Toast.makeText(FloatActivity.this, "保存成功", Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
         btn.setOnLongClickListener(new View.OnLongClickListener() {
@@ -72,8 +91,9 @@ public class FloatActivity extends AppCompatActivity {
                                 }
                                 e.putString("text",s);
                                 e.commit();
-                                tv.setText(sp.getString("text",null));
+                                tvv.setText(sp.getString("text",null));
                                 ed.setText(sp.getString("text",null));
+
                                 Toast.makeText(FloatActivity.this, "删除成功", Toast.LENGTH_SHORT).show();
                             }
                         })
@@ -87,7 +107,11 @@ public class FloatActivity extends AppCompatActivity {
                 return false;
             }
         });
-
+        if(!isFloatWindowsshow){
+            Intent i=new Intent(FloatActivity.this,FloatWindowService.class);
+            startService(i);
+            isFloatWindowsshow=true;
+        }
     }
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {

@@ -19,6 +19,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -31,8 +32,10 @@ public class FloatWindowService extends Service {
     private RelativeLayout view2;
     private TextView tv;
     private CircleImageView civ;
+    private TextView y;
+    private int Y=0;
     private Boolean flag=true;
-    //private ImageView line;
+    private ImageView line;
     private WindowManager windowManager;
     private WindowManager.LayoutParams layoutParams;
     @Nullable
@@ -47,6 +50,7 @@ public class FloatWindowService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             showFloatingWindow();
         }
+
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -60,7 +64,23 @@ public class FloatWindowService extends Service {
             LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
             view = (RelativeLayout) inflater.inflate(R.layout.float_window, null);
             tv = view.findViewById(R.id.content);
-            //line=view.findViewById(R.id.line);
+            //y=view.findViewById(R.id.y);
+//            y.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    Toast.makeText(FloatWindowService.this, "嘿嘿", Toast.LENGTH_SHORT).show();
+//                }
+//            });
+
+            tv.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+                @Override
+                public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                    Y=oldScrollY;
+                    Log.e("滚动", "Y"+Y );
+                   // Log.e("滚动","scrollX:"+scrollX+"\nscrollY:"+scrollX+"\noldScrollX:"+oldScrollX+"\noldScrollY:"+oldScrollY);
+                }
+            });
+            line=view.findViewById(R.id.line);
             tv.setMovementMethod(ScrollingMovementMethod.getInstance());
             final SharedPreferences sp=getSharedPreferences("data", Context.MODE_PRIVATE);
             tv.setText(sp.getString("text",""));
@@ -81,11 +101,11 @@ public class FloatWindowService extends Service {
 //                        case MotionEvent.ACTION_MOVE:
 //                            int nowY = (int) event.getRawY();
 //                            int movedY = nowY - y;
-//                            layoutParam1.height = layoutParam1.height + movedY;
-//                            layoutParam1.y=layoutParam1.y+movedY;
+//                           // layoutParam1.height = layoutParam1.height + movedY;
+//                           // layoutParam1.y=layoutParam1.y+movedY;
 //                            layoutParams.height=layoutParams.height + movedY;
 //                           // windowManager.updateViewLayout(view, layoutParams);
-//                            windowManager.updateViewLayout(tv, layoutParam1);
+//                            windowManager.updateViewLayout(line, layoutParams);
 //                            break;
 //                        default:
 //                            break;
@@ -96,14 +116,14 @@ public class FloatWindowService extends Service {
 
             tv.setOnClickListener(new View.OnClickListener() {
                 int i=0;
-                long[] mHits = new long[2];
+                long[] mHits = new long[3];
                 @Override
                 public void onClick(View v) {
                     System.arraycopy(mHits, 1, mHits, 0, mHits.length - 1);
                     mHits[mHits.length - 1] = SystemClock.uptimeMillis();
                     if (mHits[0] >= (SystemClock.uptimeMillis() - 500)) {
                         i++;
-                        tv.setMaxLines((i%5)+2);
+                        tv.setMaxLines((i%6)+3);
                     }
                 }
             });
@@ -114,19 +134,23 @@ public class FloatWindowService extends Service {
                         flag=false;
                         tv.setVisibility(View.VISIBLE);
                         tv.setText(sp.getString("text",""));
+                        tv.setScrollY(Y);
+                        tv.scrollTo(0,Y);
 //                        line.setVisibility(View.VISIBLE);
-//                        layoutParams.x = windowManager.getDefaultDisplay().getWidth();
-//                        layoutParams.width= WindowManager.LayoutParams.MATCH_PARENT;
+                        layoutParams.x = windowManager.getDefaultDisplay().getWidth();
+                        layoutParams.width= WindowManager.LayoutParams.MATCH_PARENT;
                         windowManager.updateViewLayout(view, layoutParams);
                     }else{
                         flag=true;
+                        windowManager.removeView(view);
+                        Y=tv.getScrollY();
+                        Log.e("滚动数", Y+"" );
                        // line.setVisibility(View.INVISIBLE);
-                        tv.setVisibility(View.INVISIBLE);
-//                        layoutParams.x = windowManager.getDefaultDisplay().getWidth();
-
+                        tv.setVisibility(View.GONE);
+                        layoutParams.x = windowManager.getDefaultDisplay().getWidth();
 //                        windowManager.updateViewLayout(view, layoutParams);
-//                        layoutParams.width= (int) getResources().getDimension(R.dimen.dp_20);
-                        windowManager.updateViewLayout(view, layoutParams);
+                        layoutParams.width= (int) getResources().getDimension(R.dimen.dp_20);
+                        windowManager.addView(view, layoutParams);
                     }
 
                 }

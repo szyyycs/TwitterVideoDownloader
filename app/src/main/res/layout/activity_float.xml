@@ -11,16 +11,33 @@
     android:layout_above="@+id/save"
     android:gravity="left"
     android:textColor="#555"
+    android:visibility="gone"
     android:textCursorDrawable="@drawable/edittext_shape"
     android:textColorLink="@color/colorBlue"
     android:layout_centerHorizontal="true"
     />
+    <TextView
+
+        android:id="@+id/tvv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/shape_ddd"
+        android:layout_margin="@dimen/dp_10"
+        android:layout_above="@+id/save"
+        android:gravity="left"
+        android:textIsSelectable="true"
+        android:scrollbars="vertical"
+        android:textColor="#555"
+        android:textCursorDrawable="@drawable/edittext_shape"
+        android:textColorLink="@color/colorBlue"
+        android:layout_centerHorizontal="true"
+        />
     <Button
         android:id="@+id/save"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_50"
         android:background="@drawable/shape_blue"
-        android:text="保存"
+        android:text="编辑"
         android:textColor="#fff"
         android:textSize="25sp"
 
@@ -30,6 +47,7 @@
         android:layout_marginBottom="@dimen/dp_10"
         />
     <TextView
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_150"
         android:id="@+id/tv"
@@ -41,7 +59,7 @@
         android:layout_below="@+id/save"
         android:layout_marginTop="@dimen/dp_100"
         android:layout_marginBottom="@dimen/dp_20"
-        android:visibility="gone"
+
         />
 
 </RelativeLayout>
