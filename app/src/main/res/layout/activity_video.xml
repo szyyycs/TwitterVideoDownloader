@@ -45,12 +45,16 @@
         android:id="@+id/r"
         android:layout_below="@+id/title"
         >
-        <VideoView
-            android:layout_width="wrap_content"
+<!--        <VideoView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="@dimen/dp_300"-->
+<!--            android:id="@+id/videoview"-->
+<!--            android:layout_centerInParent="true"-->
+<!--            />-->
+        <com.ycs.servicetest.MyVideoPlayer
+            android:id="@+id/detail_player"
+            android:layout_width="match_parent"
             android:layout_height="@dimen/dp_300"
-            android:id="@+id/videoview"
-            android:layout_centerInParent="true"
-
             />
     </RelativeLayout>
 

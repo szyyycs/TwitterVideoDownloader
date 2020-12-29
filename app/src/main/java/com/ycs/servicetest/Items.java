@@ -8,6 +8,15 @@ public class Items {
     private Bitmap src;
     private String size;
     private String time;
+    private String video_len;
+
+    public String getVideo_len() {
+        return video_len;
+    }
+
+    public void setVideo_len(String video_len) {
+        this.video_len = video_len;
+    }
 
     public String getSize() {
         return size;

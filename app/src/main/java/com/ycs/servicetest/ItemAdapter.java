@@ -49,6 +49,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         holder.items_img.setImageBitmap(items.getSrc());
         holder.size_tv.setText(items.getSize());
         holder.time_tv.setText(items.getTime());
+        holder.videolen_tv.setText(items.getVideo_len());
     }
 
     @Override
@@ -63,6 +64,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         ImageView items_img;
         TextView time_tv;
         TextView size_tv;
+        TextView videolen_tv;
         private OnItemClickListener mListener;
         private OnItemLongClickListener itemLongClickListener;
         public ViewHolder(View view, OnItemClickListener listener, OnItemLongClickListener longClickListener) {
@@ -75,6 +77,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
             items_tv = (TextView) view.findViewById(R.id.item_tv);
             items_img=(ImageView) view.findViewById(R.id.item_icon);
             time_tv=view.findViewById(R.id.time);
+            videolen_tv=view.findViewById(R.id.video_len);
             size_tv=view.findViewById(R.id.size);
 
         }
@@ -105,13 +108,13 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
     }
     public void update(List<Items> il){
         this.itemslist=il;
-        notifyItemInserted(0);
+        //notifyItemInserted(0);
         notifyDataSetChanged();
     }
     public  void clearAll(){
         itemslist.clear();
         //添加动画
-        notifyItemInserted(0);
+        //notifyItemInserted(0);
         notifyDataSetChanged();
     }
     public Items getItem(int position){

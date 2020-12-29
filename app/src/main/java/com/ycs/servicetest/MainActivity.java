@@ -72,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(MainActivity.this,FloatActivity.class);
-
                 startActivity(intent);
 
             }
@@ -80,9 +79,17 @@ public class MainActivity extends AppCompatActivity {
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LoadingUtil.Loading_show(MainActivity.this);
+                //
                 Intent i=new Intent(MainActivity.this, VideoActivity.class);
                 startActivity(i);
+            }
+        });
+        iv.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Intent i=new Intent(MainActivity.this, TestVideoActivity.class);
+                startActivity(i);
+                return false;
             }
         });
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -145,7 +152,13 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
+        btn.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                startActivity(new Intent(MainActivity.this,TestVideoActivity2.class));
+                return false;
+            }
+        });
 
 
     }

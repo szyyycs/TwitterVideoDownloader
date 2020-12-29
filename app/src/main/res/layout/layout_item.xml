@@ -48,12 +48,23 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/size"
+        android:id="@+id/video_len"
+        android:text="总时长1m23s"
+        android:layout_marginLeft="@dimen/dp_10"
+        android:layout_marginBottom="@dimen/dp_10"
+        android:layout_alignParentBottom="true"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:textSize="13sp"
         android:id="@+id/time"
         android:text="2020-11-11 20:00:00"
         android:layout_alignParentBottom="true"
-        android:layout_toRightOf="@+id/size"
-        android:layout_marginLeft="@dimen/dp_20"
+        android:layout_toRightOf="@+id/video_len"
+        android:layout_marginLeft="@dimen/dp_10"
         android:layout_marginBottom="@dimen/dp_10"
         />
+
 </RelativeLayout>

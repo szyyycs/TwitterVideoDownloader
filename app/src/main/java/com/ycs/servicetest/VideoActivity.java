@@ -33,6 +33,11 @@ import android.widget.VideoView;
 //import com.geccocrawler.gecco.annotation.RequestParameter;
 //import com.geccocrawler.gecco.annotation.Text;
 
+import com.shuyu.gsyvideoplayer.GSYBaseActivityDetail;
+import com.shuyu.gsyvideoplayer.builder.GSYVideoOptionBuilder;
+import com.shuyu.gsyvideoplayer.utils.OrientationUtils;
+import com.shuyu.gsyvideoplayer.video.base.GSYBaseVideoPlayer;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,17 +62,40 @@ public class VideoActivity extends AppCompatActivity {
 //    private TextView tv;
 //    private TextView tvWeb;
     private ItemAdapter adapter;
-    private String url;
+
     private Boolean canChange=false;
     private CustomLinearLayoutManager layoutManager ;
     private RecyclerView recyclerView;
     private ArrayList<Items> itemsList=new ArrayList<>();
     private ArrayList<String> srcList=new ArrayList<>();
     private VideoView vv;
+    private MyVideoPlayer detailPlayer;
+    private boolean isPlay;
+    private boolean isPause;
+    private OrientationUtils orientationUtils;
+    private String url;
+
     private ImageView iv;
     private ImageView blank;
+    public static final int SEARCH_VIDEO=1;
     private RelativeLayout title;
     static final String TAG="yangchaosheng";
+    private Handler handler=new Handler(){
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case SEARCH_VIDEO:
+                    sort(itemsList);
+                    sortSrcList(srcList);
+                    adapter.update(itemsList);
+                    LoadingUtil.Loading_close();
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
     private RelativeLayout r;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +103,7 @@ public class VideoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video);
         getSupportActionBar().hide();
+        LoadingUtil.Loading_show(this);
         iv=findViewById(R.id.back);
         title=findViewById(R.id.title);
         iv.setOnClickListener(new View.OnClickListener() {
@@ -83,52 +112,100 @@ public class VideoActivity extends AppCompatActivity {
                 finish();
             }
         });
-        vv=findViewById(R.id.videoview);
+        detailPlayer = (MyVideoPlayer) findViewById(R.id.detail_player);
+       //vv=findViewById(R.id.videoview);
         blank=findViewById(R.id.blank);
-        MediaController mediaController = new MediaController(this);
-        vv.setMediaController(mediaController);
+        //MediaController mediaController = new MediaController(this);
+        //vv.setMediaController(mediaController);
+        //detailPlayer.setVisibility(View.INVISIBLE);
+        detailPlayer.getTitleTextView().setVisibility(View.GONE);
+        detailPlayer.getBackButton().setVisibility(View.GONE);
         r=findViewById(R.id.r);
-        mediaController.setMediaPlayer(vv);
+        //mediaController.setMediaPlayer(vv);
         recyclerView=findViewById(R.id.recyclerview);
         layoutManager = new CustomLinearLayoutManager(this);
         layoutManager.setScrollEnabled(true);
         recyclerView.setLayoutManager(layoutManager);
         adapter=new ItemAdapter(itemsList);
         recyclerView.setAdapter(adapter);
-        File f=new File(Environment.getExternalStorageDirectory() +"/savedPic/");
+        final File f=new File(Environment.getExternalStorageDirectory() +"/savedPic/");
         if(f.list()==null){
             Toast.makeText(this, "文件夹下什么文件都没有噢", Toast.LENGTH_SHORT).show();
             LoadingUtil.Loading_close();
             blank.setVisibility(View.VISIBLE);
             return;
         }
-        for(String s:f.list()){
-           // Log.e("www",s.substring(s.length()-4,s.length()));
-            if(!s.substring(s.length()-4,s.length()).equals(".mp4")){
-                continue;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for(final String s:f.list()){
+                    // Log.e("www",s.substring(s.length()-4,s.length()));
+                    if(!s.substring(s.length()-4,s.length()).equals(".mp4")){
+                        continue;
+                    }
+
+                    final Items i=new Items();
+                    File file=new File(Environment.getExternalStorageDirectory() +"/savedPic/",s);
+                    double d=(new BigDecimal(file.length() / (1024*1024.0))
+                            .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
+                    String len=d+"MB";
+                    String time=s.substring(0,4)+"."+s.substring(4,6)+"."+s.substring(6,8)+" "+s.substring(8,10)+":"+s.substring(10,12);
+                    MediaPlayer mediaPlayer = new MediaPlayer();
+                    try {
+                        mediaPlayer.setDataSource(file.getPath());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        mediaPlayer.prepare();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    long timee = mediaPlayer.getDuration()/1000;//获得了视频的时长（以毫秒为单位）
+                    String tt;
+                    if(timee/60!=0){
+                        if(timee%60<10){
+                            tt=timee/60+":0"+timee%60;
+                        }else{
+                            tt=timee/60+":"+timee%60;
+                        }
+                    }else{
+                        if(timee%60<10){
+                            tt="00:0"+timee%60;
+                        }else{
+                            tt="00:"+timee%60;
+                        }
+
+                    }
+                    i.setVideo_len(tt);
+                    i.setSize(len);
+                    i.setText(s);
+                    i.setTime(time);
+                    srcList.add(Environment.getExternalStorageDirectory() +"/savedPic/"+s);
+                    Bitmap b = ThumbnailUtils.createVideoThumbnail(Environment.getExternalStorageDirectory() +"/savedPic/"+s
+                            , MediaStore.Images.Thumbnails.MINI_KIND);
+                    //Bitmap b= WebUtil.createVideoThumbnail(Environment.getExternalStorageDirectory() +"/savedPic/"+s);
+                    i.setSrc(b);
+                    itemsList.add(i);
+                }
+                handler.sendEmptyMessage(SEARCH_VIDEO);
             }
+        }).start();
 
-            Items i=new Items();
-            File file=new File(Environment.getExternalStorageDirectory() +"/savedPic/",s);
-            double d=(new BigDecimal(file.length() / (1024*1024.0))
-                    .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
-            String len=d+"MB";
-            String time=s.substring(0,4)+"."+s.substring(4,6)+"."+s.substring(6,8)+" "+s.substring(8,10)+":"+s.substring(10,12);
-            i.setSize(len);
-            i.setText(s);
-            i.setTime(time);
-            srcList.add(Environment.getExternalStorageDirectory() +"/savedPic/"+s);
-            Bitmap b = ThumbnailUtils.createVideoThumbnail(Environment.getExternalStorageDirectory() +"/savedPic/"+s, MediaStore.Images.Thumbnails.MINI_KIND);
-            //Bitmap b= WebUtil.createVideoThumbnail(Environment.getExternalStorageDirectory() +"/savedPic/"+s);
-            i.setSrc(b);
-            itemsList.add(i);
-
-
-        }
-        sort(itemsList);
-        sortSrcList(srcList);
+//        sort(itemsList);
+//        sortSrcList(srcList);
         //sort(srcList);
-        adapter.update(itemsList);
+//        vv.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+//            @Override
+//            public void onCompletion(MediaPlayer mp) {
+//                if(canChange){
+//                    reChangeList();
+//                    canChange=false;
+//                }
+//
+//                //Toast.makeText(VideoActivity.this, "变回来啦", Toast.LENGTH_SHORT).show();
+//            }
+//        });
         adapter.setOnItemClickListener(new ItemAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int postion) {
@@ -136,6 +213,7 @@ public class VideoActivity extends AppCompatActivity {
                     changList();
                     title.setVisibility(View.GONE);
                     canChange=true;
+
                     vv.setVideoPath(srcList.get(postion));
                 }else{
                     vv.setVideoPath(srcList.get(postion));
@@ -148,7 +226,22 @@ public class VideoActivity extends AppCompatActivity {
 
             }
         });
-        LoadingUtil.Loading_close();
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(canChange){
+            //Toast.makeText(this, "111", Toast.LENGTH_SHORT).show();
+
+            reChangeList();
+            canChange=false;
+            return;
+        }else{
+            super.onBackPressed();
+            //Toast.makeText(this, "222", Toast.LENGTH_SHORT).show();
+            finish();
+        }
     }
 
     @Override
@@ -160,15 +253,51 @@ public class VideoActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        vv.start();
+        vv.resume();
     }
 
+    public void reChangeList(){
+        final int screenHeight = getWindowManager().getDefaultDisplay().getHeight(); // 屏幕高（像素，如：800p）
+        //int height =vv.getMeasuredHeight();
+       // final int i=getResources().getDimensionPixelSize(R.dimen.dp_300);
+        AnimatorSet animatorSet = new AnimatorSet();
+        ViewGroup.LayoutParams params = recyclerView.getLayoutParams();
+        params.height=screenHeight;
+        recyclerView.setLayoutParams(params);
+        title.setVisibility(View.VISIBLE);
+       // ViewWrapper wrapper = new ViewWrapper(recyclerView);
+        ObjectAnimator animator4 = ObjectAnimator.ofFloat(recyclerView, "translationY", 0);
+        animatorSet.play(animator4);
+        animatorSet.setDuration(500).start();
+        animatorSet.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                vv.pause();
+               // vv.start();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+    }
     public void changList(){
         final int screenHeight = getWindowManager().getDefaultDisplay().getHeight(); // 屏幕高（像素，如：800p）
         //int height =vv.getMeasuredHeight();
         final int i=getResources().getDimensionPixelSize(R.dimen.dp_300);
         AnimatorSet animatorSet = new AnimatorSet();
-        ViewWrapper wrapper = new ViewWrapper(recyclerView);
+        //ViewWrapper wrapper = new ViewWrapper(recyclerView);
         ObjectAnimator animator4 = ObjectAnimator.ofFloat(recyclerView, "translationY", getResources().getDimensionPixelSize(R.dimen.dp_300));
         animatorSet.play(animator4);
         animatorSet.setDuration(500).start();

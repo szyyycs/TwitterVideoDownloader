@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -128,13 +129,32 @@ public class FloatWindowService extends Service {
                 }
             });
             view.setOnClickListener(new View.OnClickListener() {
+                private int i=0;
                 @Override
                 public void onClick(View v) {
+                    i=0;
                     if(flag){
                         flag=false;
                         tv.setVisibility(View.VISIBLE);
                         tv.setText(sp.getString("text",""));
-                        tv.setScrollY(Y);
+
+                        tv.setOnTouchListener(new View.OnTouchListener() {
+                            @Override
+                            public boolean onTouch(View v, MotionEvent event) {
+                                if(event.getAction()==MotionEvent.ACTION_UP&&i==0){
+                                    Log.e("抬起","嘿嘿");
+                                    new Handler().postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            tv.scrollTo(0,Y);
+                                            i=1;
+                                        }
+                                    },200);
+
+                                }
+                                return false;
+                            }
+                        });
                         tv.scrollTo(0,Y);
 //                        line.setVisibility(View.VISIBLE);
                         layoutParams.x = windowManager.getDefaultDisplay().getWidth();
@@ -143,7 +163,7 @@ public class FloatWindowService extends Service {
                     }else{
                         flag=true;
                         windowManager.removeView(view);
-                        Y=tv.getScrollY();
+                        //Y=tv.getScrollY();
                         Log.e("滚动数", Y+"" );
                        // line.setVisibility(View.INVISIBLE);
                         tv.setVisibility(View.GONE);

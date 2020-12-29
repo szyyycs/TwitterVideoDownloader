@@ -38,6 +38,16 @@
             android:name=".FloatWindowService"
             android:exported="false" />
         <activity android:name=".FloatActivity"/>
+        <activity android:name=".TestVideoActivity2"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
+            android:screenOrientation="portrait"
+            />
+        <activity
+            android:name=".TestVideoActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
+            android:screenOrientation="portrait"
+            />
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

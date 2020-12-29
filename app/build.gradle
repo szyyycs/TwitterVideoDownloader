@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "com.ycs.servicetest"
-        minSdkVersion 16
+        minSdkVersion 26
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -41,6 +41,7 @@ dependencies {
     implementation 'com.mindorks.android:prdownloader:0.5.0'
     implementation 'de.hdodenhof:circleimageview:3.0.0'
 
+    implementation 'com.shuyu:GSYVideoPlayer:8.0.0'
 }
 repositories {
     mavenCentral()
