@@ -2,12 +2,17 @@ package com.ycs.servicetest;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
@@ -21,6 +26,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -34,7 +40,10 @@ import android.widget.VideoView;
 //import com.geccocrawler.gecco.annotation.Text;
 
 import com.shuyu.gsyvideoplayer.GSYBaseActivityDetail;
+import com.shuyu.gsyvideoplayer.GSYVideoManager;
 import com.shuyu.gsyvideoplayer.builder.GSYVideoOptionBuilder;
+import com.shuyu.gsyvideoplayer.listener.GSYSampleCallBack;
+import com.shuyu.gsyvideoplayer.listener.LockClickListener;
 import com.shuyu.gsyvideoplayer.utils.OrientationUtils;
 import com.shuyu.gsyvideoplayer.video.base.GSYBaseVideoPlayer;
 
@@ -46,10 +55,16 @@ import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Wrapper;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -67,29 +82,33 @@ public class VideoActivity extends AppCompatActivity {
     private CustomLinearLayoutManager layoutManager ;
     private RecyclerView recyclerView;
     private ArrayList<Items> itemsList=new ArrayList<>();
-    private ArrayList<String> srcList=new ArrayList<>();
-    private VideoView vv;
+    //private ArrayList<String> srcList=new ArrayList<>();
+    //private VideoView vv;
     private MyVideoPlayer detailPlayer;
     private boolean isPlay;
     private boolean isPause;
+    private RelativeLayout blank;
     private OrientationUtils orientationUtils;
-    private String url;
-
+    //private String url=Environment.getExternalStorageDirectory() +"/.123/";
+    private String url=Environment.getExternalStorageDirectory() +"/.savedPic/";
+    private boolean isFullScreen=false;
     private ImageView iv;
-    private ImageView blank;
+    //private ImageView blank;
     public static final int SEARCH_VIDEO=1;
+    public static final int SEARCH_ONE_VIDEO=2;
     private RelativeLayout title;
-    static final String TAG="yangchaosheng";
+    static final String TAG="yyy";
     private Handler handler=new Handler(){
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             switch (msg.what){
                 case SEARCH_VIDEO:
-                    sort(itemsList);
-                    sortSrcList(srcList);
                     adapter.update(itemsList);
                     LoadingUtil.Loading_close();
+                    break;
+                case SEARCH_ONE_VIDEO:
+                    adapter.updateOne(itemsList);
                     break;
                 default:
                     break;
@@ -99,7 +118,6 @@ public class VideoActivity extends AppCompatActivity {
     private RelativeLayout r;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video);
         getSupportActionBar().hide();
@@ -112,56 +130,173 @@ public class VideoActivity extends AppCompatActivity {
                 finish();
             }
         });
-        detailPlayer = (MyVideoPlayer) findViewById(R.id.detail_player);
+        detailPlayer =findViewById(R.id.detail_player);
+
+        detailPlayer.getTitleTextView().setVisibility(View.GONE);
+        detailPlayer.getBackButton().setVisibility(View.GONE);
+        orientationUtils=new OrientationUtils(this,detailPlayer);
+        orientationUtils.setEnable(false);
+        GSYVideoOptionBuilder gsyVideoOption=new GSYVideoOptionBuilder();
+        gsyVideoOption
+                .setIsTouchWiget(true)
+                .setRotateViewAuto(true)
+                .setLockLand(false)
+                .setAutoFullWithSize(false)
+                .setShowFullAnimation(false)
+                .setNeedLockFull(true)
+                //.setUrl(url)
+                .setOnlyRotateLand(true)
+                //.setRotateWithSystem(true)
+                .setCacheWithPlay(true)
+                .setVideoTitle("这里是一个竖直方向的视频")
+                .setSeekRatio(1)
+                .setVideoAllCallBack(new GSYSampleCallBack(){
+                    @Override
+                    public void onPrepared(String url, Object... objects) {
+                        super.onPrepared(url, objects);
+                        orientationUtils.setEnable(detailPlayer.isRotateWithSystem());
+                        isPlay=true;
+                    }
+
+                    @Override
+                    public void onAutoComplete(String url, Object... objects) {
+                        super.onAutoComplete(url, objects);
+                        if(isFullScreen){
+                            if (orientationUtils != null) {
+                                orientationUtils.backToProtVideo();
+                            }
+                            if (GSYVideoManager.backFromWindowFull(VideoActivity.this)) {
+                                isFullScreen=false;
+                                return;
+                            }
+                        }else{
+                            if(canChange){
+                                reChangeList();
+                                canChange=false;
+                            }
+                        }
+
+                    }
+
+                    @Override
+                    public void onPlayError(String url, Object... objects) {
+                        super.onPlayError(url, objects);
+                        Toast.makeText(VideoActivity.this, "播放错误", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onQuitFullscreen(String url, Object... objects) {
+                        super.onQuitFullscreen(url, objects);
+                        if(orientationUtils!=null){
+                            orientationUtils.backToProtVideo();
+                        }
+                        isFullScreen=false;
+                    }
+                })
+                .setLockClickListener(new LockClickListener() {
+                    @Override
+                    public void onClick(View view, boolean lock) {
+                        if(orientationUtils!=null){
+                            orientationUtils.setEnable(!lock);
+                        }
+                    }
+                })
+                .build(detailPlayer);
+        detailPlayer.getFullscreenButton().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isFullScreen=true;
+                 //orientationUtils.resolveByClick();
+                detailPlayer.startWindowFullscreen(VideoActivity.this,false,true);
+//                detailPlayer.getTitleTextView().setVisibility(View.GONE);
+//                detailPlayer.getBackButton().setVisibility(View.GONE);
+            }
+        });
+        detailPlayer.getFullscreenButton().setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                isFullScreen=true;
+                orientationUtils.resolveByClick();
+                detailPlayer.startWindowFullscreen(VideoActivity.this,false,true);
+                return false;
+            }
+        });
        //vv=findViewById(R.id.videoview);
-        blank=findViewById(R.id.blank);
+        blank=findViewById(R.id.blank_layout);
         //MediaController mediaController = new MediaController(this);
         //vv.setMediaController(mediaController);
         //detailPlayer.setVisibility(View.INVISIBLE);
-        detailPlayer.getTitleTextView().setVisibility(View.GONE);
-        detailPlayer.getBackButton().setVisibility(View.GONE);
         r=findViewById(R.id.r);
         //mediaController.setMediaPlayer(vv);
         recyclerView=findViewById(R.id.recyclerview);
         layoutManager = new CustomLinearLayoutManager(this);
         layoutManager.setScrollEnabled(true);
         recyclerView.setLayoutManager(layoutManager);
+        itemsList.clear();
+
         adapter=new ItemAdapter(itemsList);
         recyclerView.setAdapter(adapter);
-        final File f=new File(Environment.getExternalStorageDirectory() +"/savedPic/");
-        if(f.list()==null){
-            Toast.makeText(this, "文件夹下什么文件都没有噢", Toast.LENGTH_SHORT).show();
+        File f=new File(url);
+        if(!f.exists()){
+            f.mkdirs();
+            Log.e(TAG, "不存在" );
+
+        }
+        if(f.list()==null||f.list().length==0){
+            if(f.list()==null){
+                //getPermission();
+                Log.e(TAG, "不存在" );
+            }
+            //Toast.makeText(this, "文件夹下什么文件都没有噢", Toast.LENGTH_SHORT).show();
             LoadingUtil.Loading_close();
-            blank.setVisibility(View.VISIBLE);
+            setBlankUI();
             return;
         }
         new Thread(new Runnable() {
             @Override
             public void run() {
                 for(final String s:f.list()){
-                    // Log.e("www",s.substring(s.length()-4,s.length()));
                     if(!s.substring(s.length()-4,s.length()).equals(".mp4")){
                         continue;
                     }
-
+                    String uu=url+s;
+                    Log.e("yyy",uu);
                     final Items i=new Items();
-                    File file=new File(Environment.getExternalStorageDirectory() +"/savedPic/",s);
+                    File file=new File(uu);
                     double d=(new BigDecimal(file.length() / (1024*1024.0))
                             .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
                     String len=d+"MB";
-                    String time=s.substring(0,4)+"."+s.substring(4,6)+"."+s.substring(6,8)+" "+s.substring(8,10)+":"+s.substring(10,12);
-                    MediaPlayer mediaPlayer = new MediaPlayer();
+                    //
+                    BasicFileAttributes attr = null;
+                    Instant instant=null;
+                    String time=null;
                     try {
-                        mediaPlayer.setDataSource(file.getPath());
+                        Path path =  file.toPath();
+                        attr = Files.readAttributes(path, BasicFileAttributes.class);
+                         instant= attr.creationTime().toInstant();
+                        String temp=instant.toString().replace("T"," ").replace("Z","").replace("-","/");
+                        time=temp.substring(0,temp.length()-3);
+                    } catch (IOException e) {
+                        long timeee=file.lastModified();
+                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                        time=formatter.format(timeee);
+                    }
+                    // 创建时间
+                    //String time=s.substring(0,4)+"."+s.substring(4,6)+"."+s.substring(6,8)+" "+s.substring(8,10)+":"+s.substring(10,12);
+                    MediaPlayer mediaPlayer = new MediaPlayer();
+
+                    try {
+                        mediaPlayer.setDataSource(uu);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     try {
                         mediaPlayer.prepare();
                     } catch (IOException e) {
-                        e.printStackTrace();
                     }
-                    long timee = mediaPlayer.getDuration()/1000;//获得了视频的时长（以毫秒为单位）
+                    long timee =  mediaPlayer.getDuration()/1000;//获得了视频的时长（以毫秒为单位）
+                    mediaPlayer.release();
+                    mediaPlayer=null;
                     String tt;
                     if(timee/60!=0){
                         if(timee%60<10){
@@ -181,49 +316,66 @@ public class VideoActivity extends AppCompatActivity {
                     i.setSize(len);
                     i.setText(s);
                     i.setTime(time);
-                    srcList.add(Environment.getExternalStorageDirectory() +"/savedPic/"+s);
-                    Bitmap b = ThumbnailUtils.createVideoThumbnail(Environment.getExternalStorageDirectory() +"/savedPic/"+s
-                            , MediaStore.Images.Thumbnails.MINI_KIND);
+                    i.setUrl(uu);
+                    Bitmap b = ThumbnailUtils.createVideoThumbnail(uu, MediaStore.Images.Thumbnails.MINI_KIND);
                     //Bitmap b= WebUtil.createVideoThumbnail(Environment.getExternalStorageDirectory() +"/savedPic/"+s);
                     i.setSrc(b);
                     itemsList.add(i);
+                    handler.sendEmptyMessage(SEARCH_ONE_VIDEO);
                 }
+                //sort(itemsList);
                 handler.sendEmptyMessage(SEARCH_VIDEO);
             }
         }).start();
-
-//        sort(itemsList);
-//        sortSrcList(srcList);
-        //sort(srcList);
-//        vv.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-//            @Override
-//            public void onCompletion(MediaPlayer mp) {
-//                if(canChange){
-//                    reChangeList();
-//                    canChange=false;
-//                }
-//
-//                //Toast.makeText(VideoActivity.this, "变回来啦", Toast.LENGTH_SHORT).show();
-//            }
-//        });
         adapter.setOnItemClickListener(new ItemAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int postion) {
                 if(!canChange){
-                    changList();
+                    isPlay=true;
                     title.setVisibility(View.GONE);
                     canChange=true;
 
-                    vv.setVideoPath(srcList.get(postion));
+                    detailPlayer.setUp(itemsList.get(postion).getUrl(),true,itemsList.get(postion).getText());
+                    changList();
+//                    vv.setVideoPath(srcList.get(postion));
                 }else{
-                    vv.setVideoPath(srcList.get(postion));
+
+                    isPlay=true;
+                    detailPlayer.getCurrentPlayer().release();
+                    detailPlayer.setUp(itemsList.get(postion).getUrl(),true,itemsList.get(postion).getText());
+                    detailPlayer.startPlay();
                 }
             }
         });
         adapter.setOnItemLongClickListener(new ItemAdapter.OnItemLongClickListener() {
             @Override
             public void onItemLongClick(View view, int postion) {
+                new IosAlertDialog(VideoActivity.this).builder()
+                        .setTitle("提示")
+                        .setMsg("确认删除"+itemsList.get(postion).getText()+"吗？")
+                        .setNegativeButton("取消", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
 
+                            }
+                        })
+                        .setPositiveButton("确认", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                File f=new File(itemsList.get(postion).getUrl());
+                                if(f.exists()){
+                                    f.delete();
+                                }
+                                Toast.makeText(VideoActivity.this, "文件"+itemsList.get(postion).getText()+"删除成功！", Toast.LENGTH_SHORT).show();
+                                itemsList.remove(postion);
+                                adapter.update(itemsList);
+                                if(itemsList.size()==0){
+                                    setBlankUI();
+                                }
+
+                            }
+                        })
+                        .show();
             }
         });
 
@@ -231,8 +383,19 @@ public class VideoActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        if (orientationUtils != null) {
+            orientationUtils.backToProtVideo();
+        }
+        if (GSYVideoManager.backFromWindowFull(this)) {
+            isFullScreen=false;
+            Log.e(TAG, "退出全屏" );
+            return;
+        }
         if(canChange){
-            //Toast.makeText(this, "111", Toast.LENGTH_SHORT).show();
+            if (isPlay) {
+                detailPlayer.getCurrentPlayer().release();
+                isPlay=false;
+            }
 
             reChangeList();
             canChange=false;
@@ -242,20 +405,34 @@ public class VideoActivity extends AppCompatActivity {
             //Toast.makeText(this, "222", Toast.LENGTH_SHORT).show();
             finish();
         }
+        super.onBackPressed();
+
     }
+
 
     @Override
     protected void onPause() {
+        detailPlayer.getCurrentPlayer().onVideoPause();
         super.onPause();
-        vv.pause();
+        isPause = true;
     }
 
     @Override
     protected void onResume() {
+        detailPlayer.getCurrentPlayer().onVideoResume(false);
         super.onResume();
-        vv.resume();
+        isPause = false;
     }
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (isPlay) {
+            detailPlayer.getCurrentPlayer().release();
+        }
+        itemsList.clear();
+        if (orientationUtils != null)
+            orientationUtils.releaseListener();
+    }
     public void reChangeList(){
         final int screenHeight = getWindowManager().getDefaultDisplay().getHeight(); // 屏幕高（像素，如：800p）
         //int height =vv.getMeasuredHeight();
@@ -277,8 +454,13 @@ public class VideoActivity extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                vv.pause();
-               // vv.start();
+                detailPlayer.getCurrentPlayer().onVideoPause();
+                isPause = true;
+                if (isPlay) {
+                    isPlay=false;
+                    detailPlayer.getCurrentPlayer().release();
+                }
+
             }
 
             @Override
@@ -291,6 +473,11 @@ public class VideoActivity extends AppCompatActivity {
 
             }
         });
+    }
+    public void setBlankUI(){
+        //detailPlayer.setVisibility(View.GONE);
+       // recyclerView.setVisibility(View.INVISIBLE);
+        blank.setVisibility(View.VISIBLE);
     }
     public void changList(){
         final int screenHeight = getWindowManager().getDefaultDisplay().getHeight(); // 屏幕高（像素，如：800p）
@@ -312,7 +499,8 @@ public class VideoActivity extends AppCompatActivity {
                 ViewGroup.LayoutParams params = recyclerView.getLayoutParams();
                 params.height=screenHeight-i;
                 recyclerView.setLayoutParams(params);
-                vv.start();
+                detailPlayer.startPlay();
+                //vv.start();
             }
 
             @Override
@@ -326,6 +514,14 @@ public class VideoActivity extends AppCompatActivity {
             }
         });
 
+    }
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        //如果旋转了就全屏
+        if (isPlay && !isPause) {
+            detailPlayer.onConfigurationChanged(this, newConfig, orientationUtils, true, true);
+        }
     }
     private static class ViewWrapper {
         private View mTarget;
@@ -404,7 +600,7 @@ public class VideoActivity extends AppCompatActivity {
                     con.setReadTimeout(5000);
                     con.setDoInput(true);
                     double length=con.getContentLength();
-                    String filename = Environment.getExternalStorageDirectory() +"/savedPic/";
+                    String filename = Environment.getExternalStorageDirectory() +"/.savedPic/";
                     File file = new File(filename);
                     if(!file.exists()){
                         file.mkdirs();
@@ -479,16 +675,20 @@ public class VideoActivity extends AppCompatActivity {
     }
     public void sortSrcList(ArrayList<String> stus){
         Collections.sort(stus, new Comparator<String>() {
-
             @Override
             public int compare(String o1, String o2) {
-                // 升序
-                //return o1.getAge()-o2.getAge();
                 return o2.compareTo(o1);
-                // 降序
-                // return o2.getAge()-o1.getAge();
-                // return o2.getAge().compareTo(o1.getAge());
             }
         });
+    }
+    void getPermission()
+    {
+        int permissionCheck1 = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE);
+        int permissionCheck2 = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permissionCheck1 != PackageManager.PERMISSION_GRANTED || permissionCheck2 != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
+                    124);
+        }
     }
 }

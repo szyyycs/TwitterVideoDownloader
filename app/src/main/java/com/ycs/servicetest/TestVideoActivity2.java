@@ -8,6 +8,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -68,13 +69,23 @@ public class TestVideoActivity2 extends AppCompatActivity {
                         super.onPrepared(url, objects);
                         orientationUtils.setEnable(detailPlayer.isRotateWithSystem());
                         isPlay=true;
+                    }
 
+                    @Override
+                    public void onClickStartIcon(String url, Object... objects) {
+                        super.onClickStartIcon(url, objects);
+
+                    }
+
+                    @Override
+                    public void onClickStartError(String url, Object... objects) {
+                        super.onClickStartError(url, objects);
+                        Toast.makeText(TestVideoActivity2.this, "播放错误", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onComplete(String url, Object... objects) {
                         super.onComplete(url, objects);
-
                     }
 
                     @Override
@@ -82,7 +93,6 @@ public class TestVideoActivity2 extends AppCompatActivity {
                         super.onQuitFullscreen(url, objects);
                         if(orientationUtils!=null){
                             orientationUtils.backToProtVideo();
-
                         }
                     }
                 })

@@ -77,7 +77,7 @@ public class IosAlertDialog {
                 , LayoutParams.WRAP_CONTENT));*/
         Window dialogWindow = dialog.getWindow();
         WindowManager.LayoutParams lp = dialogWindow.getAttributes();
-        lp.width = (int) (display.getWidth() * 0.7);
+        lp.width = (int) (display.getWidth() * 0.86);
 
         return this;
     }
@@ -218,6 +218,7 @@ public class IosAlertDialog {
 
     public void show() {
         setLayout();
+
         dialog.show();
     }
     public IosAlertDialog setWindow(){

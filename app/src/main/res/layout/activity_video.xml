@@ -6,37 +6,35 @@
     android:layout_height="match_parent"
     tools:context=".VideoActivity"
     >
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_centerHorizontal="true"
-        android:background="#fff"
-        android:id="@+id/title"
-        >
-        <ImageView
-            android:id="@+id/back"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:src="@mipmap/back"
-            android:layout_centerVertical="true"
 
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_centerInParent="true"
-            android:text="我的下载"
-            android:textColor="#444"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            />
-        <TextView
+        <RelativeLayout
+            android:id="@+id/title"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#eee"
-            />
-    </RelativeLayout>
+            android:layout_height="40dp"
+            android:layout_centerHorizontal="true"
+            android:background="#fff"
+
+            >
+            <ImageView
+                android:id="@+id/back"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:src="@mipmap/back"
+                android:layout_centerVertical="true"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_centerInParent="true"
+                android:text="我的下载"
+                android:textColor="#444"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                />
+
+        </RelativeLayout>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_300"
@@ -66,13 +64,39 @@
         android:scrollbars="vertical"
         android:layout_below="@+id/title"
         />
-    <ImageView
-        android:layout_width="@dimen/dp_150"
-        android:layout_height="@dimen/dp_150"
-        android:src="@mipmap/blank"
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/blank_layout"
         android:visibility="gone"
-        android:id="@+id/blank"
         android:layout_centerInParent="true"
+        >
+
+        <ImageView
+            android:layout_width="@dimen/dp_150"
+            android:layout_height="@dimen/dp_150"
+            android:src="@mipmap/blank"
+            android:visibility="visible"
+            android:id="@+id/blank"
+           android:layout_centerHorizontal="true"
+
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/blank"
+            android:textSize="20sp"
+            android:textColor="#999"
+            android:maxEms="10"
+            android:gravity="center"
+            android:layout_marginTop="@dimen/dp_20"
+            android:text="一个视频文件都没有呢，快去下载一个吧！"
+            />
+    </RelativeLayout>
+
+    <androidx.constraintlayout.widget.Group
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
 
         />
 </RelativeLayout>

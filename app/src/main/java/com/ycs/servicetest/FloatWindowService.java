@@ -188,7 +188,7 @@ public class FloatWindowService extends Service {
 //            layoutParams.height = 200;
             layoutParams.gravity = Gravity.LEFT;
             layoutParams.x = windowManager.getDefaultDisplay().getWidth();
-            layoutParams.y = 0;
+            layoutParams.y = -300;
             layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
             layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
 

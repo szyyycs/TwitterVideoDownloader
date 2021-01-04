@@ -69,12 +69,12 @@
 
         <TextView
             android:id="@+id/switchSize"
-            android:layout_width="@dimen/dp_90"
+            android:layout_width="@dimen/dp_35"
             android:layout_height="match_parent"
             android:layout_marginRight="16dp"
             android:gravity="center"
             android:minEms="2"
-            android:text="播放速度：1.0"
+            android:text="倍速"
             android:textColor="#ffffff" />
 
         <ImageView

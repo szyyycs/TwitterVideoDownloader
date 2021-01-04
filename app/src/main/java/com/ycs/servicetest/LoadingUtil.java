@@ -14,7 +14,7 @@ import com.wang.avi.AVLoadingIndicatorView;
 
 public class LoadingUtil {
     private static Dialog dialog;
-    public static void Loading_show(Context context) {
+    public static void init(Context context){
         if(dialog==null||!dialog.isShowing()){
             AVLoadingIndicatorView view = new AVLoadingIndicatorView(context);
             view.setIndicator("PacmanIndicator");
@@ -34,14 +34,16 @@ public class LoadingUtil {
             dialog = new Dialog(context);
             Window window = dialog.getWindow();
             WindowManager.LayoutParams lp = window.getAttributes();
-            lp.alpha = 0.7f;
+            lp.alpha = 1f;
             window.setAttributes(lp);
             dialog.setCancelable(false);
             dialog.setContentView(ll,new LinearLayout.LayoutParams(400,400));// 设置布局
-            dialog.show();
+
         }
-
-
+    }
+    public static void Loading_show(Context context) {
+        init(context);
+        dialog.show();
     }
 
     public static void Loading_close() {

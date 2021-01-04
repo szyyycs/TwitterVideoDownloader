@@ -1,9 +1,14 @@
 package com.ycs.servicetest;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.method.ScrollingMovementMethod;
 import android.view.KeyEvent;
 import android.view.View;
@@ -15,6 +20,8 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 public class FloatActivity extends AppCompatActivity {
     private Button btn;
@@ -34,6 +41,12 @@ public class FloatActivity extends AppCompatActivity {
         tv=findViewById(R.id.tv);
         ed=findViewById(R.id.ed);
         tvv=findViewById(R.id.tvv);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(this)) {
+                Toast.makeText(this, "当前无权限，请授权", Toast.LENGTH_SHORT);
+                startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName())), 0);
+            }
+        }
         sp=getSharedPreferences("data", Context.MODE_PRIVATE);
         SharedPreferences.Editor e = sp.edit();
         if(sp.getString("text",null)==null){
@@ -111,6 +124,20 @@ public class FloatActivity extends AppCompatActivity {
             Intent i=new Intent(FloatActivity.this,FloatWindowService.class);
             startService(i);
             isFloatWindowsshow=true;
+        }
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 0) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (!Settings.canDrawOverlays(this)) {
+                    Toast.makeText(this, "授权失败", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "授权成功", Toast.LENGTH_SHORT).show();
+                    //startService(new Intent(MainActivity.this, MainService.class));
+                }
+            }
         }
     }
     @Override

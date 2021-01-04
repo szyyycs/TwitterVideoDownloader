@@ -111,6 +111,11 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         //notifyItemInserted(0);
         notifyDataSetChanged();
     }
+    public void updateOne(List<Items> il){
+        this.itemslist=il;
+        notifyItemInserted(il.size()-1);
+        notifyDataSetChanged();
+    }
     public  void clearAll(){
         itemslist.clear();
         //添加动画

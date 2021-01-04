@@ -16,6 +16,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/app_icon"
         android:supportsRtl="true"
+        android:testOnly="false"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
         <activity android:name=".TestActivity"></activity>
@@ -25,7 +26,10 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".VideoActivity" />
+        <activity android:name=".VideoActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
+            android:screenOrientation="portrait"
+            />
 
         <service
             android:name=".MainService"
@@ -48,18 +52,17 @@
             android:screenOrientation="portrait"
             />
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:launchMode="singleTask"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <receiver
-            android:name=".DialogReceiver"
-            ></receiver>
-
+        <activity android:name=".Test"/>
+        <receiver android:name=".DialogReceiver" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.ycs.servicetest.provider"

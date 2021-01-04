@@ -29,16 +29,19 @@
         android:layout_marginRight="15dp"
         android:layout_marginTop="15dp"
         android:gravity="center"
+        android:visibility="gone"
         android:text="蓝牙灯是否红黄闪动"
         android:textColor="#333333"
         android:textSize="15sp" />
     <EditText
         android:id="@+id/ed_input"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/dp_80"
+        android:maxLines="3"
+
         android:layout_marginLeft="15dp"
         android:layout_marginRight="15dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="10dp"
         android:gravity="center"
         android:hint="请输入链接"
 
@@ -64,7 +67,7 @@
         <Button
             android:id="@+id/btn_neg"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_height="@dimen/dp_42"
             android:layout_weight="1"
             android:background="@drawable/iosdialog_left_selector"
             android:gravity="center"
@@ -74,13 +77,13 @@
         <ImageView
             android:id="@+id/img_line"
             android:layout_width="0.5dp"
-            android:layout_height="40dp"
+            android:layout_height="@dimen/dp_42"
             android:background="#c6c6c6" />
 
         <Button
             android:id="@+id/btn_pos"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_height="@dimen/dp_42"
             android:layout_weight="1"
             android:background="@drawable/iosdialog_right_selector"
             android:gravity="center"

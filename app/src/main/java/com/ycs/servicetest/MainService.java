@@ -29,6 +29,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
@@ -176,12 +177,14 @@ public class MainService extends Service {
         notification = builder.build();
         if (Build.VERSION.SDK_INT < 29) {
             views.setTextViewText(R.id.input, new ClipBoardUtil(MainService.this).paste());
-
             notification.bigContentView = views;
         } else {
             notification.contentView = views;
         }
-
+        Intent ii=new Intent(MainService.this,MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pii=PendingIntent.getActivity(this,2,ii,PendingIntent.FLAG_UPDATE_CURRENT);
+        views.setOnClickPendingIntent(R.id.small_icon,pii);
         views.setOnClickPendingIntent(R.id.input, pi);
         notification.contentIntent = pi;
         notification.iconLevel = 1000;
@@ -195,7 +198,6 @@ public class MainService extends Service {
                     views.setTextViewText(R.id.input, new ClipBoardUtil(MainService.this).paste());
                     NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                     nm.notify(110, notification);
-                    //Toast.makeText(MainService.this, msg, Toast.LENGTH_SHORT).show();
                     if (isHttpUrl(msg)&&WebUtil.isNetworkConnected(MainService.this)) {
                         if(PRDownloader.getStatus(downloadId)== Status.RUNNING&&PRDownloader.getStatus(downloadId)== Status.PAUSED){
                             Toast.makeText(MainService.this, "正在下载中，请等会再下载", Toast.LENGTH_SHORT).show();
@@ -208,10 +210,8 @@ public class MainService extends Service {
                 }
             });
         } else {
-            //String msg = new ClipBoardUtil(MainService.this).paste();
-//                    views.setTextViewText(R.id.input,"点击此处输入链接");
-            //NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             nm.notify(110, notification);
+
         }
 
         return super.onStartCommand(intent, flags, startId);
@@ -230,14 +230,10 @@ public class MainService extends Service {
 
     public static void updateNotification(Context context, String msg) {
         views.setTextViewText(R.id.input, msg);
-
-//        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         nm.notify(110, notification);
     }
     public static void updateTitle( String msg) {
         views.setTextViewText(R.id.title, msg);
-
-//        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         nm.notify(110, notification);
     }
     static int progress=0;

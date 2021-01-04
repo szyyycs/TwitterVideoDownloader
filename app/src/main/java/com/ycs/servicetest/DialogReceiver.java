@@ -24,29 +24,21 @@ import com.downloader.Status;
 import java.lang.reflect.Method;
 
 import static com.ycs.servicetest.WebUtil.downloadId;
+import static com.ycs.servicetest.WebUtil.isAnalyse;
 import static com.ycs.servicetest.WebUtil.isHttpUrl;
 
 
 public class DialogReceiver extends BroadcastReceiver {
-
+    private static final int GOTO_DOWNLOAD=1;
      private Context context;
+
      private Handler handler=new Handler(){
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
-            if(msg.what==1){
-                if(Build.VERSION.SDK_INT < 29) {
-                    //Toast.makeText(context, msg.obj.toString(), Toast.LENGTH_SHORT).show();
-                    MainService.updateNotification(context,msg.obj.toString());
-                }else{
-                    //Toast.makeText(context, msg.obj.toString(), Toast.LENGTH_SHORT).show();
-                    MainService.updateNotification(context,msg.obj.toString());
-                }
-//                Intent intent=new Intent(context,TestActivity.class);
-//                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
-//                intent.putExtra("url",msg.obj.toString());
-//                context.startActivity(intent);
-//
+            if(msg.what==GOTO_DOWNLOAD){
+                isAnalyse=true;
+                MainService.updateNotification(context,"链接正在解析中...");
                 Intent i=new Intent(context,WebService.class);
                 i.putExtra("url",msg.obj.toString());
                 context.startService(i);
@@ -69,6 +61,8 @@ public class DialogReceiver extends BroadcastReceiver {
             if (Build.VERSION.SDK_INT < 29) {
                 MainService.updateTitle(context.getResources().getString(R.string.app_name));
             }
+        }else if(isAnalyse){
+            Toast.makeText(context, "正在解析链接中，请稍后再粘贴下载", Toast.LENGTH_SHORT).show();
         }else{
             collapseStatusBar(context);
             final IosAlertDialog dialog=new IosAlertDialog(context).builder();
@@ -85,10 +79,9 @@ public class DialogReceiver extends BroadcastReceiver {
                         public void onClick(View v) {
                             if(isHttpUrl(dialog.getEditText())){
                                 Message ms=new Message();
-                                ms.what=1;
+                                ms.what=GOTO_DOWNLOAD;
                                 ms.obj=dialog.getEditText();
                                 handler.sendMessage(ms);
-                                Log.d("yangchaosheng", dialog.getEditText());
                             }else if(WebUtil.isNetworkConnected(context)){
                                 Toast.makeText(context, "网络未打开", Toast.LENGTH_SHORT).show();
                             }else {

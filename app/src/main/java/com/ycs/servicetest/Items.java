@@ -9,6 +9,15 @@ public class Items {
     private String size;
     private String time;
     private String video_len;
+    private String url;
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
 
     public String getVideo_len() {
         return video_len;
