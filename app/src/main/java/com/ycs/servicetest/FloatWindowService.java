@@ -16,6 +16,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -60,7 +61,6 @@ public class FloatWindowService extends Service {
         if (Settings.canDrawOverlays(this)) {
             // 获取WindowManager服务
             windowManager = (WindowManager) getApplicationContext().getSystemService(WINDOW_SERVICE);
-
             // 新建悬浮窗控件
             LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
             view = (RelativeLayout) inflater.inflate(R.layout.float_window, null);
@@ -128,57 +128,58 @@ public class FloatWindowService extends Service {
                     }
                 }
             });
+//            view.setOnClickListener(new View.OnClickListener() {
+//                private int i=0;
+//                @Override
+//                public void onClick(View v) {
+//                    i=0;
+//                    if(flag){
+//                        flag=false;
+//                        tv.setVisibility(View.VISIBLE);
+//                        tv.setText(sp.getString("text",""));
+//
+//                        tv.setOnTouchListener(new View.OnTouchListener() {
+//                            @Override
+//                            public boolean onTouch(View v, MotionEvent event) {
+//                                if(event.getAction()==MotionEvent.ACTION_UP&&i==0){
+//                                    new Handler().postDelayed(new Runnable() {
+//                                        @Override
+//                                        public void run() {
+//                                            tv.scrollTo(0,Y);
+//                                            i=1;
+//                                        }
+//                                    },200);
+//
+//                                }
+//                                return false;
+//                            }
+//                        });
+//                        tv.scrollTo(0,Y);
+////                        line.setVisibility(View.VISIBLE);
+//                        layoutParams.x = windowManager.getDefaultDisplay().getWidth();
+//                        layoutParams.width= WindowManager.LayoutParams.MATCH_PARENT;
+//                        windowManager.updateViewLayout(view, layoutParams);
+//                    }else{
+//                        flag=true;
+//                        windowManager.removeView(view);
+//                        //Y=tv.getScrollY();
+//                        Log.e("滚动数", Y+"" );
+//                       // line.setVisibility(View.INVISIBLE);
+//                        tv.setVisibility(View.GONE);
+//                        layoutParams.x = windowManager.getDefaultDisplay().getWidth();
+////                        windowManager.updateViewLayout(view, layoutParams);
+//                        layoutParams.width= (int) getResources().getDimension(R.dimen.dp_20);
+//                        windowManager.addView(view, layoutParams);
+//
+//                    }
+//
+//                }
+//            });
             view.setOnClickListener(new View.OnClickListener() {
-                private int i=0;
                 @Override
                 public void onClick(View v) {
-                    i=0;
-                    if(flag){
-                        flag=false;
-                        tv.setVisibility(View.VISIBLE);
-                        tv.setText(sp.getString("text",""));
-
-                        tv.setOnTouchListener(new View.OnTouchListener() {
-                            @Override
-                            public boolean onTouch(View v, MotionEvent event) {
-                                if(event.getAction()==MotionEvent.ACTION_UP&&i==0){
-                                    new Handler().postDelayed(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            tv.scrollTo(0,Y);
-                                            i=1;
-                                        }
-                                    },200);
-
-                                }
-                                return false;
-                            }
-                        });
-                        tv.scrollTo(0,Y);
-//                        line.setVisibility(View.VISIBLE);
-                        layoutParams.x = windowManager.getDefaultDisplay().getWidth();
-                        layoutParams.width= WindowManager.LayoutParams.MATCH_PARENT;
-                        windowManager.updateViewLayout(view, layoutParams);
-                    }else{
-                        flag=true;
-                        windowManager.removeView(view);
-                        //Y=tv.getScrollY();
-                        Log.e("滚动数", Y+"" );
-                       // line.setVisibility(View.INVISIBLE);
-                        tv.setVisibility(View.GONE);
-                        layoutParams.x = windowManager.getDefaultDisplay().getWidth();
-//                        windowManager.updateViewLayout(view, layoutParams);
-                        layoutParams.width= (int) getResources().getDimension(R.dimen.dp_20);
-                        windowManager.addView(view, layoutParams);
-                    }
-
-                }
-            });
-            view.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
                     sendBroadcast(new Intent(FloatWindowService.this,DialogReceiver.class));
-                    return false;
+
                 }
             });
             // 设置LayoutParam

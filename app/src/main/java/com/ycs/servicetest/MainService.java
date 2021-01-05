@@ -71,6 +71,16 @@ public class MainService extends Service {
 //            handler.sendMessage(message);
 //        }
 //    };
+//    Runnable logr=new Runnable() {
+//        @Override
+//        public void run() {
+//            String newStr=new ClipBoardUtil(MainService.this).paste();
+//            Log.e("yyy", "获取粘贴板内容\n"+newStr );
+//            handler.postDelayed(this,2000);
+//        }
+//    };
+//    Handler handler=new Handler(){
+//    };
 //    Handler handler = new Handler() {
 //        @Override
 //        public void handleMessage(Message msg) {
@@ -139,6 +149,7 @@ public class MainService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //showFloatingWindow();
+        //handler.post(logr);
         String CHANNEL_ONE_ID = "com.ycs.cn";
         String CHANNEL_ONE_NAME = "Channel One";
         NotificationChannel notificationChannel = null;
@@ -200,10 +211,12 @@ public class MainService extends Service {
                     nm.notify(110, notification);
                     if (isHttpUrl(msg)&&WebUtil.isNetworkConnected(MainService.this)) {
                         if(PRDownloader.getStatus(downloadId)== Status.RUNNING&&PRDownloader.getStatus(downloadId)== Status.PAUSED){
-                            Toast.makeText(MainService.this, "正在下载中，请等会再下载", Toast.LENGTH_SHORT).show();
+                            WebUtil.downLoadList.add(msg);
+                            Toast.makeText(MainService.this, "已加入下载队列", Toast.LENGTH_SHORT).show();
                             return;
                         }else if(WebUtil.isAnalyse){
-                            Toast.makeText(MainService.this, "正在解析链接中，请等会再下载", Toast.LENGTH_SHORT).show();
+                            WebUtil.downLoadList.add(msg);
+                            Toast.makeText(MainService.this, "已加入下载队列", Toast.LENGTH_SHORT).show();
                             return;
                         }
                         Intent i = new Intent(MainService.this, WebService.class);
@@ -251,6 +264,7 @@ public class MainService extends Service {
         if(percent==100){
             Log.e("yyu","成功");
             views.setViewVisibility(R.id.input, View.VISIBLE);
+            views.setTextViewText(R.id.input,"下载已完成");
             views.setViewVisibility(R.id.pb, View.GONE);
             views.setViewVisibility(R.id.progress_num,View.GONE);
         }else {
@@ -269,7 +283,6 @@ public class MainService extends Service {
         views.setViewVisibility(R.id.input, View.VISIBLE);
         views.setViewVisibility(R.id.pb, View.GONE);
         views.setViewVisibility(R.id.progress_num,View.GONE);
-
         views.setTextViewText(R.id.input,msg);
         nm.notify(110, notification);
     }

@@ -155,7 +155,7 @@ public class WebUtil {
     }
     public static void predownload(String url,Context context, Handler handler){
         Long id = getTweetId(url);
-        final String fname = String.valueOf(id);
+        //final String fname = String.valueOf(id);
         TwitterApiClient twitterApiClient = TwitterCore.getInstance().getApiClient();
         StatusesService statusesService = twitterApiClient.getStatusesService();
         Call<Tweet> tweetCall = statusesService.show(id, null, null, null);
@@ -167,19 +167,23 @@ public class WebUtil {
                     MainService.updateNotification(context,"链接中未找到文件，下载失败");
                     Toast.makeText(context, "链接未找到文件", Toast.LENGTH_SHORT).show();
                 } else if (result.data.extendedEntities != null) {
-                    //Log.e(TAG, "text里的内容——"+result.data.text);
+                    Log.e(TAG, result.data.extendedEntities.media.get(0).type);
+
                     String text=result.data.text;
+                    if(text.contains("http")){
+                        text=text.substring(0,text.indexOf("http"));
+                    }
                     if (!(result.data.extendedEntities.media.get(0).type).equals("video") &&
                             !(result.data.extendedEntities.media.get(0).type).equals("animated_gif")) {
                         MainService.updateNotification(context,"链接中未找到视频，下载失败");
                         Toast.makeText(context, "链接未找到视频", Toast.LENGTH_SHORT).show();
                     } else {
-                        String filename = fname;
+                        //String filename = fname;
                         String url;
-                        if ((result.data.extendedEntities.media.get(0).type).equals("video") ||
-                                (result.data.extendedEntities.media.get(0).type).equals("animated_gif")) {
-                            filename = filename + ".mp4";
-                        }
+//                        if ((result.data.extendedEntities.media.get(0).type).equals("video") ||
+//                                (result.data.extendedEntities.media.get(0).type).equals("animated_gif")) {
+//                            filename = filename + ".mp4";
+//                        }
                         int i = 0;
                         url = result.data.extendedEntities.media.get(0).videoInfo.variants.get(i).url;
                         Log.e(TAG,"收到链接啦"+url);
@@ -202,7 +206,7 @@ public class WebUtil {
             public void failure(TwitterException exception) {
                 isAnalyse=false;
                 MainService.updateNotification(context,"网络连接失败");
-                Log.e(TAG, "failure: "+exception.getMessage() );
+                Log.e(TAG, "失败惹 "+exception.getMessage() );
                 if(exception.getMessage().contains("404")){
                     Toast.makeText(context, "链接失效", Toast.LENGTH_SHORT).show();
                 }else{

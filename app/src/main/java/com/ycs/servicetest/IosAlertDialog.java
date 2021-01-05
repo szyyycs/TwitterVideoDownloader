@@ -71,14 +71,12 @@ public class IosAlertDialog {
         // 定义Dialog布局和参数
         dialog = new Dialog(context, R.style.AlertDialogStyle);
         dialog.setContentView(view);
-
         // 调整dialog背景大小
        /* lLayout_bg.setLayoutParams(new FrameLayout.LayoutParams((int) (display.getWidth() * 0.8)
                 , LayoutParams.WRAP_CONTENT));*/
         Window dialogWindow = dialog.getWindow();
         WindowManager.LayoutParams lp = dialogWindow.getAttributes();
         lp.width = (int) (display.getWidth() * 0.86);
-
         return this;
     }
 
@@ -91,7 +89,12 @@ public class IosAlertDialog {
         }
         return this;
     }
-
+    public String getHint(){
+        return editText.getHint().toString();
+    }
+    public Window getWindows(){
+        return dialog.getWindow();
+    }
     public IosAlertDialog setMsg(String msg) {
         showMsg = true;
         if ("".equals(msg)) {

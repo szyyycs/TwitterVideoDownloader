@@ -30,7 +30,7 @@ public class FloatActivity extends AppCompatActivity {
     private ImageView line;
     private TextView tvv;
     private Boolean isTextview=true;
-    public static boolean isFloatWindowsshow=false;
+    public boolean isFloatWindowsshow=false;
     private SharedPreferences sp;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

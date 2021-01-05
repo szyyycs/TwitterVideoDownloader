@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private RelativeLayout floatWindow;
     private Button btn;
     private EditText etInput;
-
+    private Boolean isFloatWindowsshow=false;
     private String[] permissions = {Manifest.permission.SYSTEM_ALERT_WINDOW,Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.SYSTEM_ALERT_WINDOW};
     private ImageView iv;
@@ -82,15 +82,15 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(i);
             }
         });
-        iv.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                Intent i=new Intent(MainActivity.this, Test.class);
-                startActivity(i);
-                return false;
-            }
-        });
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//        iv.setOnLongClickListener(new View.OnLongClickListener() {
+//            @Override
+//            public boolean onLongClick(View v) {
+//                Intent i=new Intent(MainActivity.this, Test.class);
+//                startActivity(i);
+//                return false;
+//            }
+//        });
+////        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //            if (!Settings.canDrawOverlays(this)) {
 //                Toast.makeText(this, "当前无权限，请授权", Toast.LENGTH_SHORT);
 //                startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName())), 0);
@@ -156,11 +156,22 @@ public class MainActivity extends AppCompatActivity {
         btn.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                Intent intent = new Intent(MainActivity.this, FloatActivity.class);
-                startActivity(intent);
+//                Intent intent = new Intent(MainActivity.this, FloatActivity.class);
+//                startActivity(intent);
+                /**
+                 *
+                 * 把onclicklistener注释取消，下面注释去掉
+                 *
+                 * */
+                if(!isFloatWindowsshow){
+                    Intent i=new Intent(MainActivity.this,FloatWindowService.class);
+                    startService(i);
+                    isFloatWindowsshow=true;
+                }
                 return false;
             }
         });
+
     }
 
     @Override

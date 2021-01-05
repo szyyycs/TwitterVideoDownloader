@@ -29,7 +29,7 @@ import static com.ycs.servicetest.WebUtil.isHttpUrl;
 
 
 public class DialogReceiver extends BroadcastReceiver {
-    private static final int GOTO_DOWNLOAD=1;
+     private static final int GOTO_DOWNLOAD=1;
      private Context context;
 
      private Handler handler=new Handler(){
@@ -48,6 +48,7 @@ public class DialogReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, Intent intent) {
+        final String[] paste = {"请输入下载链接"};
         this.context=context;
         if(PRDownloader.getStatus(downloadId)== Status.RUNNING){
             PRDownloader.pause(downloadId);
@@ -65,13 +66,9 @@ public class DialogReceiver extends BroadcastReceiver {
             Toast.makeText(context, "正在解析链接中，请稍后再粘贴下载", Toast.LENGTH_SHORT).show();
         }else{
             collapseStatusBar(context);
-            String paste=new ClipBoardUtil(context).paste();
-            if(paste==null||paste.isEmpty()){
-                paste="请输入下载链接";
-            }
             final IosAlertDialog dialog=new IosAlertDialog(context).builder();
             dialog.setTitle("提示")
-                    .setEditText(paste)
+                    .setEditText(paste[0])
                     .setNegativeButton("取消", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -82,13 +79,15 @@ public class DialogReceiver extends BroadcastReceiver {
                     .setPositiveButton("开始下载", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            if(isHttpUrl(dialog.getEditText())){
+                            String text=dialog.getEditText();
+                            if(text.isEmpty()){
+                                text=dialog.getHint();
+                            }
+                            if(isHttpUrl(text)){
                                 Message ms=new Message();
                                 ms.what=GOTO_DOWNLOAD;
-                                ms.obj=dialog.getEditText();
+                                ms.obj=text;
                                 handler.sendMessage(ms);
-                            }else if(WebUtil.isNetworkConnected(context)){
-                                Toast.makeText(context, "网络未打开", Toast.LENGTH_SHORT).show();
                             }else {
                                 Toast.makeText(context, "您粘贴的不是网址噢", Toast.LENGTH_SHORT).show();
                             }
@@ -98,6 +97,21 @@ public class DialogReceiver extends BroadcastReceiver {
                     .setWindow()
                     .setEnter()
                     .show();
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    dialog.getWindows().getDecorView().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            paste[0] =new ClipBoardUtil(context).paste();
+                            if(paste[0] ==null|| paste[0].isEmpty()){
+                                paste[0] ="请输入下载链接";
+                            }
+                            dialog.setEditText(paste[0]);
+                        }
+                    });
+                }
+            });
 
         }
 

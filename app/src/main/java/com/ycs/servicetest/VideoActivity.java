@@ -342,14 +342,13 @@ public class VideoActivity extends AppCompatActivity {
                     title.setVisibility(View.GONE);
                     canChange=true;
 
-                    detailPlayer.setUp(itemsList.get(postion).getUrl(),true,itemsList.get(postion).getText());
+                    detailPlayer.setUp(itemsList.get(postion).getUrl(),true,itemsList.get(postion).getTwittertext());
                     changList();
 //                    vv.setVideoPath(srcList.get(postion));
                 }else{
-
                     isPlay=true;
                     detailPlayer.getCurrentPlayer().release();
-                    detailPlayer.setUp(itemsList.get(postion).getUrl(),true,itemsList.get(postion).getText());
+                    detailPlayer.setUp(itemsList.get(postion).getUrl(),true,itemsList.get(postion).getTwittertext());
                     detailPlayer.startPlay();
                 }
             }

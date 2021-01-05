@@ -20,6 +20,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import static com.ycs.servicetest.MainActivity.TAG;
@@ -27,11 +28,12 @@ import static com.ycs.servicetest.MainActivity.TAG;
 public class WebService extends Service  {
     private String url;
     private Object object = new Object();
+    private static final int STOPSELF=1;
     private Handler handler=new Handler(){
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
-            if(msg.what==1){
+            if(msg.what==STOPSELF){
                 stopSelf();
             }else if(msg.what==2){
 
