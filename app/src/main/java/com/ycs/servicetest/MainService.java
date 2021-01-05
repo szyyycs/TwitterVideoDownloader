@@ -202,6 +202,9 @@ public class MainService extends Service {
                         if(PRDownloader.getStatus(downloadId)== Status.RUNNING&&PRDownloader.getStatus(downloadId)== Status.PAUSED){
                             Toast.makeText(MainService.this, "正在下载中，请等会再下载", Toast.LENGTH_SHORT).show();
                             return;
+                        }else if(WebUtil.isAnalyse){
+                            Toast.makeText(MainService.this, "正在解析链接中，请等会再下载", Toast.LENGTH_SHORT).show();
+                            return;
                         }
                         Intent i = new Intent(MainService.this, WebService.class);
                         i.putExtra("url",msg);
@@ -237,18 +240,27 @@ public class MainService extends Service {
         nm.notify(110, notification);
     }
     static int progress=0;
-    public synchronized static void updateProgress(Context context, int percent) {
+    public synchronized static void updateProgress(Context context, int percent,String now) {
         if(progress==percent){
             return;
         }
         progress=percent;
+        if(percent%2==1){
+            return;
+        }
         if(percent==100){
             Log.e("yyu","成功");
             views.setViewVisibility(R.id.input, View.VISIBLE);
             views.setViewVisibility(R.id.pb, View.GONE);
+            views.setViewVisibility(R.id.progress_num,View.GONE);
         }else {
+            views.setViewVisibility(R.id.progress_num,View.VISIBLE);
+            views.setTextViewText(R.id.progress_num,now);
             views.setViewVisibility(R.id.input, View.GONE);
             views.setViewVisibility(R.id.pb, View.VISIBLE);
+            if(percent>50){
+                views.setTextColor(R.id.progress_num,context.getColor(R.color.colorwhite));
+            }
             views.setProgressBar(R.id.pb,100,percent,false);
         }
         nm.notify(110, notification);
@@ -256,6 +268,8 @@ public class MainService extends Service {
     public synchronized static void update(String msg){
         views.setViewVisibility(R.id.input, View.VISIBLE);
         views.setViewVisibility(R.id.pb, View.GONE);
+        views.setViewVisibility(R.id.progress_num,View.GONE);
+
         views.setTextViewText(R.id.input,msg);
         nm.notify(110, notification);
     }

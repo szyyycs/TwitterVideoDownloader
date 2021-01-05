@@ -11,6 +11,16 @@ public class Items {
     private String video_len;
     private String url;
 
+    public String getTwittertext() {
+        return twittertext;
+    }
+
+    public void setTwittertext(String twittertext) {
+        this.twittertext = twittertext;
+    }
+
+    private String twittertext;
+
     public String getUrl() {
         return url;
     }

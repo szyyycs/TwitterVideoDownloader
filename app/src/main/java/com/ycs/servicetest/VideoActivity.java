@@ -1,6 +1,7 @@
 package com.ycs.servicetest;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -11,6 +12,8 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -97,6 +100,7 @@ public class VideoActivity extends AppCompatActivity {
     public static final int SEARCH_VIDEO=1;
     public static final int SEARCH_ONE_VIDEO=2;
     private RelativeLayout title;
+    private SharedPreferences sp;
     static final String TAG="yyy";
     private Handler handler=new Handler(){
         @Override
@@ -130,8 +134,8 @@ public class VideoActivity extends AppCompatActivity {
                 finish();
             }
         });
+        sp=getSharedPreferences("text", Context.MODE_PRIVATE);
         detailPlayer =findViewById(R.id.detail_player);
-
         detailPlayer.getTitleTextView().setVisibility(View.GONE);
         detailPlayer.getBackButton().setVisibility(View.GONE);
         orientationUtils=new OrientationUtils(this,detailPlayer);
@@ -253,6 +257,7 @@ public class VideoActivity extends AppCompatActivity {
             return;
         }
         new Thread(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void run() {
                 for(final String s:f.list()){
@@ -260,6 +265,7 @@ public class VideoActivity extends AppCompatActivity {
                         continue;
                     }
                     String uu=url+s;
+                    String text=sp.getString(s,"");
                     Log.e("yyy",uu);
                     final Items i=new Items();
                     File file=new File(uu);
@@ -317,6 +323,7 @@ public class VideoActivity extends AppCompatActivity {
                     i.setText(s);
                     i.setTime(time);
                     i.setUrl(uu);
+                    i.setTwittertext(text);
                     Bitmap b = ThumbnailUtils.createVideoThumbnail(uu, MediaStore.Images.Thumbnails.MINI_KIND);
                     //Bitmap b= WebUtil.createVideoThumbnail(Environment.getExternalStorageDirectory() +"/savedPic/"+s);
                     i.setSrc(b);
@@ -584,81 +591,81 @@ public class VideoActivity extends AppCompatActivity {
         return bmp;
     }
 
-    public void downloadPicture(final String uurl){
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                URL url = null;
-                HttpURLConnection con = null;
-                try {
-
-                    url = new URL(uurl);
-                    con = (HttpURLConnection) url.openConnection();
-                    con.setRequestMethod("GET");
-                    con.setReadTimeout(5000);
-                    con.setDoInput(true);
-                    double length=con.getContentLength();
-                    String filename = Environment.getExternalStorageDirectory() +"/.savedPic/";
-                    File file = new File(filename);
-                    if(!file.exists()){
-                        file.mkdirs();
-                    }
-                    File f = new File(file,String.valueOf(System.currentTimeMillis()+".jpg"));
-                    final String fname=f.getName();
-                    Uri uri = null;
-                    if(Build.VERSION.SDK_INT>= 24){
-                        uri = FileProvider.getUriForFile(VideoActivity.this, "com.ycs.servicetest.provider", f);
-                    }else{
-                        uri= Uri.fromFile(f);
-                    }
-                    OutputStream fos= (OutputStream) getContentResolver().openOutputStream(uri);
-//                    FileOutputStream fos = new FileOutputStream(file);
-                    InputStream in = con.getInputStream();
-                    byte ch[] = new byte[2 * 1024];
-                    int len=0;
-                    long haswrite=0L;
-                    int percent=0;
-                    if (fos!= null){
-                        while ((len = in.read(ch)) != -1){
-                            fos.write(ch,0,len);
-                            haswrite += len;
-                            //BidDecimal精确数
-                            double d = (new BigDecimal(haswrite / length)
-                                    .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
-                            percent = (int) (d * 100);
-                            Log.e("yyy", "进度"+percent);
-                            MainService.updateProgress(VideoActivity.this,percent);
-
-                        }
-//                        if(percent==100){
-//                            Looper.prepare();
-//                            mhandler.post(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    Toast.makeText(VideoActivity.this, fname+"下载成功", Toast.LENGTH_SHORT).show();
-//                                }
-//                            });
+//    public void downloadPicture(final String uurl){
+//
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//                URL url = null;
+//                HttpURLConnection con = null;
+//                try {
+//
+//                    url = new URL(uurl);
+//                    con = (HttpURLConnection) url.openConnection();
+//                    con.setRequestMethod("GET");
+//                    con.setReadTimeout(5000);
+//                    con.setDoInput(true);
+//                    double length=con.getContentLength();
+//                    String filename = Environment.getExternalStorageDirectory() +"/.savedPic/";
+//                    File file = new File(filename);
+//                    if(!file.exists()){
+//                        file.mkdirs();
+//                    }
+//                    File f = new File(file,String.valueOf(System.currentTimeMillis()+".jpg"));
+//                    final String fname=f.getName();
+//                    Uri uri = null;
+//                    if(Build.VERSION.SDK_INT>= 24){
+//                        uri = FileProvider.getUriForFile(VideoActivity.this, "com.ycs.servicetest.provider", f);
+//                    }else{
+//                        uri= Uri.fromFile(f);
+//                    }
+//                    OutputStream fos= (OutputStream) getContentResolver().openOutputStream(uri);
+////                    FileOutputStream fos = new FileOutputStream(file);
+//                    InputStream in = con.getInputStream();
+//                    byte ch[] = new byte[2 * 1024];
+//                    int len=0;
+//                    long haswrite=0L;
+//                    int percent=0;
+//                    if (fos!= null){
+//                        while ((len = in.read(ch)) != -1){
+//                            fos.write(ch,0,len);
+//                            haswrite += len;
+//                            //BidDecimal精确数
+//                            double d = (new BigDecimal(haswrite / length)
+//                                    .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
+//                            percent = (int) (d * 100);
+//                            Log.e("yyy", "进度"+percent);
+//                            MainService.updateProgress(VideoActivity.this,percent);
 //
 //                        }
-                        in.close();
-                        fos.close();
-
-                    }else{
-                        Log.e("yyy", "fou为空" );
-                    }
-
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                    Log.e("yyy","失败"+e.getMessage());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Log.e("yyy","失败"+e.getMessage());
-                }
-            }
-        }).start();
-    }
+////                        if(percent==100){
+////                            Looper.prepare();
+////                            mhandler.post(new Runnable() {
+////                                @Override
+////                                public void run() {
+////                                    Toast.makeText(VideoActivity.this, fname+"下载成功", Toast.LENGTH_SHORT).show();
+////                                }
+////                            });
+////
+////                        }
+//                        in.close();
+//                        fos.close();
+//
+//                    }else{
+//                        Log.e("yyy", "fou为空" );
+//                    }
+//
+//                } catch (MalformedURLException e) {
+//                    e.printStackTrace();
+//                    Log.e("yyy","失败"+e.getMessage());
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                    Log.e("yyy","失败"+e.getMessage());
+//                }
+//            }
+//        }).start();
+//    }
     public void sort(ArrayList<Items> stus){
         Collections.sort(stus, new Comparator<Items>() {
 

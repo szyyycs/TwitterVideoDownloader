@@ -142,7 +142,6 @@ public class FloatWindowService extends Service {
                             @Override
                             public boolean onTouch(View v, MotionEvent event) {
                                 if(event.getAction()==MotionEvent.ACTION_UP&&i==0){
-                                    Log.e("抬起","嘿嘿");
                                     new Handler().postDelayed(new Runnable() {
                                         @Override
                                         public void run() {
@@ -173,6 +172,13 @@ public class FloatWindowService extends Service {
                         windowManager.addView(view, layoutParams);
                     }
 
+                }
+            });
+            view.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    sendBroadcast(new Intent(FloatWindowService.this,DialogReceiver.class));
+                    return false;
                 }
             });
             // 设置LayoutParam

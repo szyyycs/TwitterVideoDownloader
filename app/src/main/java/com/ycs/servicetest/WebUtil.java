@@ -2,6 +2,7 @@ package com.ycs.servicetest;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaScannerConnection;
@@ -105,47 +106,47 @@ public class WebUtil {
         }
         return false;
     }
-    public synchronized static void download(final String url, final String path, final String filename, final Context context){
-        int downloadId = PRDownloader.download(url,path,filename)
-                .build()
-                .setOnStartOrResumeListener(new OnStartOrResumeListener() {
-                    @Override
-                    public void onStartOrResume() {
-                        Toast.makeText(context, filename+"开始下载", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .setOnPauseListener(new OnPauseListener() {
-                    @Override
-                    public void onPause() {
-
-                    }
-                })
-
-                .setOnProgressListener(new OnProgressListener() {
-                    @Override
-                    public void onProgress(Progress progress) {
-                        double d=(new BigDecimal(progress.currentBytes / (double)progress.totalBytes)
-                                .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
-                        Log.e("yyuu",filename+":"+(int)(d*100));
-                        MainService.updateProgress(context,(int)(d*100));
-                    }
-                })
-                .start(new OnDownloadListener() {
-                    @Override
-                    public void onDownloadComplete() {
-                        Toast.makeText(context, filename+"下载成功", Toast.LENGTH_SHORT).show();
-
-                        Log.e("yyy",filename+"下载成功");
-                    }
-
-                    @Override
-                    public void onError(Error error) {
-                        download(url, path,filename.substring(0,filename.length()-4)+"重试"+".jpg",context);
-                        Toast.makeText(context, filename+"重试", Toast.LENGTH_SHORT).show();
-                        Log.e("yyy",filename+"重试");
-                    }
-                });
-    }
+//    public synchronized static void download(final String url, final String path, final String filename, final Context context){
+//        int downloadId = PRDownloader.download(url,path,filename)
+//                .build()
+//                .setOnStartOrResumeListener(new OnStartOrResumeListener() {
+//                    @Override
+//                    public void onStartOrResume() {
+//                        Toast.makeText(context, filename+"开始下载", Toast.LENGTH_SHORT).show();
+//                    }
+//                })
+//                .setOnPauseListener(new OnPauseListener() {
+//                    @Override
+//                    public void onPause() {
+//
+//                    }
+//                })
+//
+//                .setOnProgressListener(new OnProgressListener() {
+//                    @Override
+//                    public void onProgress(Progress progress) {
+//                        double d=(new BigDecimal(progress.currentBytes / (double)progress.totalBytes)
+//                                .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
+//                        Log.e("yyuu",filename+":"+(int)(d*100));
+//                        MainService.updateProgress(context,(int)(d*100));
+//                    }
+//                })
+//                .start(new OnDownloadListener() {
+//                    @Override
+//                    public void onDownloadComplete() {
+//                        Toast.makeText(context, filename+"下载成功", Toast.LENGTH_SHORT).show();
+//
+//                        Log.e("yyy",filename+"下载成功");
+//                    }
+//
+//                    @Override
+//                    public void onError(Error error) {
+//                        download(url, path,filename.substring(0,filename.length()-4)+"重试"+".jpg",context);
+//                        Toast.makeText(context, filename+"重试", Toast.LENGTH_SHORT).show();
+//                        Log.e("yyy",filename+"重试");
+//                    }
+//                });
+//    }
     public static void init(Context context){
         TwitterConfig config = new TwitterConfig.Builder(context)
                 .twitterAuthConfig(new TwitterAuthConfig(Constant.TWITTER_KEY, Constant.TWITTER_SECRET))
@@ -166,6 +167,8 @@ public class WebUtil {
                     MainService.updateNotification(context,"链接中未找到文件，下载失败");
                     Toast.makeText(context, "链接未找到文件", Toast.LENGTH_SHORT).show();
                 } else if (result.data.extendedEntities != null) {
+                    //Log.e(TAG, "text里的内容——"+result.data.text);
+                    String text=result.data.text;
                     if (!(result.data.extendedEntities.media.get(0).type).equals("video") &&
                             !(result.data.extendedEntities.media.get(0).type).equals("animated_gif")) {
                         MainService.updateNotification(context,"链接中未找到视频，下载失败");
@@ -187,10 +190,10 @@ public class WebUtil {
                                     i += 1;
                                 }
                             } catch (IndexOutOfBoundsException e) {
-                                downloadVideo(url,context,handler);
+                                downloadVideo(url,context,handler,text);
                             }
                         }
-                        downloadVideo(url,context,handler);
+                        downloadVideo(url,context,handler,text);
                     }
                 }
 
@@ -199,23 +202,32 @@ public class WebUtil {
             public void failure(TwitterException exception) {
                 isAnalyse=false;
                 MainService.updateNotification(context,"网络连接失败");
-                Toast.makeText(context, "连接失败，联网了吗？开VPN了吗？", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "failure: "+exception.getMessage() );
+                if(exception.getMessage().contains("404")){
+                    Toast.makeText(context, "链接失效", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(context, "连接失败，联网了吗？开VPN了吗？", Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
     }
-    private static void downloadVideo(String url, Context context, Handler handler) {
+    private static void downloadVideo(String url, Context context, Handler handler,String text) {
         if(!isDownloading){
+            String filename=WebUtil.genearteFileName();
+            SharedPreferences sp=context.getSharedPreferences("text", Context.MODE_PRIVATE);
+            SharedPreferences.Editor e = sp.edit();
+            e.putString(filename,text);
+            e.commit();
             download(handler,url,
                     Environment.getExternalStorageDirectory() +"/.savedPic/",
-                    WebUtil.genearteFileName(),context);
+                    filename,context);
         }else{
             downLoadList.add(url);
         }
 
     }
     private static Long getTweetId(String s) {
-        Log.d("TAG", "link is :" + s);
-
         try {
             String[] split = s.split("\\/");
             String id = split[5].split("\\?")[0];
@@ -254,8 +266,12 @@ public class WebUtil {
                         }
                         double d=(new BigDecimal(progress.currentBytes / (double)progress.totalBytes)
                                 .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
-
-                        MainService.updateProgress(context,(int)(d*100));
+                        double sum=(new BigDecimal(progress.totalBytes / (1024*1024.0))
+                                .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
+                        double currentBytes=(new BigDecimal(progress.currentBytes / (1024*1024.0))
+                                .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
+                        String progressStr=currentBytes+"MB/"+sum+"MB";
+                        MainService.updateProgress(context,(int)(d*100),progressStr);
                     }
                 })
                 .start(new OnDownloadListener() {
@@ -265,6 +281,13 @@ public class WebUtil {
                         Toast.makeText(context, filename+"下载成功", Toast.LENGTH_SHORT).show();
                         Log.e("yyy",filename+"下载成功");
                         Uri uri = null;
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                MainService.update(filename+"下载完成");
+                            }
+                        },1000);
+
                         File f=new File(new File(path),filename);
                         if(Build.VERSION.SDK_INT>= 24){
                             uri = FileProvider.getUriForFile(context, "com.ycs.codecreate.provider", f);
@@ -272,7 +295,7 @@ public class WebUtil {
                             uri=Uri.fromFile(f);
                         }
                         context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,uri));
-                        MainService.update(filename+"下载完成");
+
                         if(downLoadList.contains(url)){
                             downLoadList.remove(url);
                         }

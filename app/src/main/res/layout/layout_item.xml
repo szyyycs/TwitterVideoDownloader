@@ -27,8 +27,21 @@
         android:textColor="#111"
         android:paddingLeft="@dimen/dp_10"
         android:paddingTop="@dimen/dp_5"
-        android:paddingBottom="@dimen/dp_5"
+        android:paddingBottom="@dimen/dp_2"
         android:textSize="15sp"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/text"
+        android:layout_below="@+id/item_tv"
+        android:layout_toRightOf="@+id/item_icon"
+        android:text="EEEE\n2222"
+        android:gravity="left"
+        android:textColor="#333"
+        android:paddingLeft="@dimen/dp_10"
+        android:maxLines="2"
+
         />
     <TextView
         android:id="@+id/size"

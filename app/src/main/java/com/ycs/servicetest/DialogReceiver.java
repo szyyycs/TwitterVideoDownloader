@@ -57,7 +57,7 @@ public class DialogReceiver extends BroadcastReceiver {
             }
         }else if(PRDownloader.getStatus(downloadId)== Status.PAUSED){
             PRDownloader.resume(downloadId);
-            Toast.makeText(context, "下载已重新开始", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "下载已继续", Toast.LENGTH_SHORT).show();
             if (Build.VERSION.SDK_INT < 29) {
                 MainService.updateTitle(context.getResources().getString(R.string.app_name));
             }
@@ -65,15 +65,20 @@ public class DialogReceiver extends BroadcastReceiver {
             Toast.makeText(context, "正在解析链接中，请稍后再粘贴下载", Toast.LENGTH_SHORT).show();
         }else{
             collapseStatusBar(context);
+            String paste=new ClipBoardUtil(context).paste();
+            if(paste==null||paste.isEmpty()){
+                paste="请输入下载链接";
+            }
             final IosAlertDialog dialog=new IosAlertDialog(context).builder();
             dialog.setTitle("提示")
-                    .setEditText("请输入下载链接")
+                    .setEditText(paste)
                     .setNegativeButton("取消", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
 
                         }
                     })
+
                     .setPositiveButton("开始下载", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {

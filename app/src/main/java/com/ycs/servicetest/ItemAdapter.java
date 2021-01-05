@@ -1,5 +1,6 @@
 package com.ycs.servicetest;
 
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
@@ -49,6 +50,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         holder.items_img.setImageBitmap(items.getSrc());
         holder.size_tv.setText(items.getSize());
         holder.time_tv.setText(items.getTime());
+        holder.text_tv.setText(items.getTwittertext());
         holder.videolen_tv.setText(items.getVideo_len());
     }
 
@@ -65,6 +67,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         TextView time_tv;
         TextView size_tv;
         TextView videolen_tv;
+        TextView text_tv;
         private OnItemClickListener mListener;
         private OnItemLongClickListener itemLongClickListener;
         public ViewHolder(View view, OnItemClickListener listener, OnItemLongClickListener longClickListener) {
@@ -74,6 +77,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
             //给item设置点击事件
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
+            text_tv=view.findViewById(R.id.text);
             items_tv = (TextView) view.findViewById(R.id.item_tv);
             items_img=(ImageView) view.findViewById(R.id.item_icon);
             time_tv=view.findViewById(R.id.time);
