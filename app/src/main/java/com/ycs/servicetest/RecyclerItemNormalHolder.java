@@ -30,37 +30,37 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder{
         this.context = context;
         gsyVideoPlayer=v.findViewById(R.id.video_item_player);
         imageView = new ImageView(context);
+
         gsyVideoOptionBuilder = new GSYVideoOptionBuilder();
     }
 
-    public void onBind(final int position, VideoModel videoModel) {
+    public void onBind(final int position, Items items) {
+            imageView.setImageBitmap(items.getSrc());
+//        String url;
+//        String title;
+//        if (position % 2 == 0) {
+//            url = Environment.getExternalStorageDirectory() +"/123/VID_20210105_192402.mp4";
+//            title = "这是title";
+//        } else {
+//            url = Environment.getExternalStorageDirectory() +"/123/VID_20210105_192402.mp4";
+//            title = "哦？Title？";
+//
+//        }
 
-        String url;
-        String title;
-        if (position % 2 == 0) {
-            url = Environment.getExternalStorageDirectory() +"/123/VID_20210105_192402.mp4";
-            title = "这是title";
-        } else {
-            url = Environment.getExternalStorageDirectory() +"/123/VID_20210105_192402.mp4";
-            title = "哦？Title？";
-
-        }
-
-        Map<String, String> header = new HashMap<>();
-        header.put("ee", "33");
+//        Map<String, String> header = new HashMap<>();
+//        header.put("ee", "33");
 
         //防止错位，离开释放
         //gsyVideoPlayer.initUIState();
         gsyVideoOptionBuilder
                 .setIsTouchWiget(false)
-                //.setThumbImageView(imageView)
-                .setUrl(url)
-                .setVideoTitle(title)
-                .setCacheWithPlay(false)
+                .setThumbImageView(imageView)
+//                .setUrl(url)
+                //.setVideoTitle(title)
+                .setCacheWithPlay(true)
                 .setRotateViewAuto(true)
                 .setLockLand(true)
                 .setPlayTag(TAG)
-                .setMapHeadData(header)
                 .setShowFullAnimation(true)
                 .setNeedLockFull(true)
                 .setPlayPosition(position)
@@ -73,6 +73,12 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder{
                             GSYVideoManager.instance().setNeedMute(true);
                         }
 
+                    }
+
+                    @Override
+                    public void onAutoComplete(String url, Object... objects) {
+                        super.onAutoComplete(url, objects);
+                        gsyVideoPlayer.restart();
                     }
 
                     @Override
@@ -101,7 +107,7 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder{
         gsyVideoPlayer.getFullscreenButton().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                resolveFullBtn(gsyVideoPlayer);
+                //resolveFullBtn(gsyVideoPlayer);
             }
         });
 

@@ -1,6 +1,7 @@
 package com.ycs.servicetest;
 
 import android.os.Bundle;
+import android.os.Environment;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,7 +17,7 @@ public class tiktok extends AppCompatActivity {
 
     ViewPager2 viewPager2;
 
-    List<VideoModel> dataList = new ArrayList<>();
+    List<Items> dataList = new ArrayList<>();
 
     ViewPagerAdapter viewPagerAdapter;
 
@@ -25,6 +26,7 @@ public class tiktok extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.tiktok_activity);
         getSupportActionBar().hide();
+
         viewPager2=findViewById(R.id.view_pager2);
         resolveData();
         viewPagerAdapter = new ViewPagerAdapter(this, dataList);
@@ -81,9 +83,12 @@ public class tiktok extends AppCompatActivity {
 
     private void resolveData() {
         for (int i = 0; i < 19; i++) {
-            VideoModel videoModel = new VideoModel();
-            dataList.add(videoModel);
+            Items items = new Items();
+            items.setUrl(Environment.getExternalStorageDirectory() +"/123/VID_20210105_192402.mp4");
+            items.setText("jjhhdd");
+            dataList.add(items);
         }
+//        dataList=itemList;
         if (viewPagerAdapter != null)
             viewPagerAdapter.notifyDataSetChanged();
     }
@@ -92,6 +97,7 @@ public class tiktok extends AppCompatActivity {
         RecyclerView.ViewHolder viewHolder = ((RecyclerView) viewPager2.getChildAt(0)).findViewHolderForAdapterPosition(position);
         if (viewHolder != null) {
             RecyclerItemNormalHolder recyclerItemNormalHolder = (RecyclerItemNormalHolder) viewHolder;
+            recyclerItemNormalHolder.getPlayer().setUp(dataList.get(position).getUrl(),true,dataList.get(position).getTwittertext());
             recyclerItemNormalHolder.getPlayer().startPlayLogic();
         }
     }

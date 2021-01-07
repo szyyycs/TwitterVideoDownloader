@@ -29,7 +29,9 @@
             android:id="@+id/thumbImage"
             android:scaleType="centerCrop"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            />
 
     </RelativeLayout>
 
@@ -80,6 +82,7 @@
             android:layout_height="fill_parent"
             android:paddingRight="16dp"
             android:scaleType="center"
+            android:visibility="gone"
             android:src="@drawable/video_enlarge" />
     </LinearLayout>
 
@@ -130,7 +133,7 @@
         android:layout_height="28dp"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:visibility="invisible" />
+        android:visibility="gone" />
 
     <moe.codeest.enviews.ENPlayView
         android:id="@+id/start"
@@ -138,7 +141,9 @@
         android:layout_height="60dp"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:layout_gravity="center_vertical" />
+        android:layout_gravity="center_vertical"
+        android:visibility="gone"
+        />
 
 
     <ImageView

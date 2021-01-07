@@ -13,6 +13,7 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -311,10 +312,12 @@ public class VideoActivity extends AppCompatActivity {
         detailPlayer.getFullscreenButton().setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                isFullScreen=true;
-                orientationUtils.resolveByClick();
-                detailPlayer.startWindowFullscreen(VideoActivity.this,false,true);
-                return false;
+//                isFullScreen=true;
+//                orientationUtils.resolveByClick();
+//                detailPlayer.startWindowFullscreen(VideoActivity.this,false,true);
+//                return false;
+                startActivity(new Intent(VideoActivity.this,tiktok.class));
+                return true;
             }
         });
        //vv=findViewById(R.id.videoview);

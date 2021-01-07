@@ -13,10 +13,10 @@ import java.util.List;
 public class ViewPagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final static String TAG = "RecyclerBaseAdapter";
 
-    private List<VideoModel> itemDataList = null;
+    private List<Items> itemDataList = null;
     private Context context = null;
 
-    public ViewPagerAdapter(Context context, List<VideoModel> itemDataList) {
+    public ViewPagerAdapter(Context context, List<Items> itemDataList) {
         this.itemDataList = itemDataList;
         this.context = context;
     }
@@ -49,7 +49,7 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         return 1;
     }
 
-    public void setListData(List<VideoModel> data) {
+    public void setListData(List<Items> data) {
         itemDataList = data;
         notifyDataSetChanged();
     }

@@ -19,6 +19,8 @@ import com.shuyu.gsyvideoplayer.utils.GSYVideoType;
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer;
 import com.shuyu.gsyvideoplayer.video.base.GSYBaseVideoPlayer;
 
+import moe.codeest.enviews.ENDownloadView;
+
 public class SampleCoverVideo extends StandardGSYVideoPlayer {
     ImageView mCoverImage;
 
@@ -61,15 +63,6 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
         mDefaultRes = res;
         Bitmap b = ThumbnailUtils.createVideoThumbnail(url, MediaStore.Images.Thumbnails.MINI_KIND);
         mCoverImage.setImageBitmap(b);
-//        Glide.with(getContext().getApplicationContext())
-//                .setDefaultRequestOptions(
-//                        new RequestOptions()
-//                                .frame(1000000)
-//                                .centerCrop()
-//                                .error(res)
-//                                .placeholder(res))
-//                .load(url)
-//                .into(mCoverImage);
     }
 
     public void loadCoverImageBy(int id, int res) {
@@ -153,7 +146,123 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
         }
 
     }
+    public void restart(){
+        mStartButton.setVisibility(INVISIBLE);
+        setViewShowState(mLockScreen, GONE);
+        hideAllWidget();
+        //setSeekOnStart(2000);
+        startPlay();
 
+    }
+    public void startPlay() {
+        getStartButton().performClick();
+        postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                hideAllWidget();
+            }
+        }, 400);
+    }
+    @Override
+    protected void changeUiToPlayingShow() {
+        Debuger.printfLog("changeUiToPlayingShow");
+        setViewShowState(mTopContainer, INVISIBLE);
+        setViewShowState(mBottomContainer, INVISIBLE);
+        setViewShowState(mStartButton, INVISIBLE);
+        setViewShowState(mLoadingProgressBar, INVISIBLE);
+        setViewShowState(mThumbImageViewLayout, INVISIBLE);
+        setViewShowState(mBottomProgressBar, VISIBLE);
+        setViewShowState(mLockScreen, (mIfCurrentIsFullscreen && mNeedLockFull) ? VISIBLE : GONE);
+        if (mLoadingProgressBar instanceof ENDownloadView) {
+            ((ENDownloadView) mLoadingProgressBar).reset();
+        }
+        updateStartImage();
+    }
+
+    @Override
+    protected void onClickUiToggle() {
+        if (mIfCurrentIsFullscreen && mLockCurScreen && mNeedLockFull) {
+            setViewShowState(mLockScreen, VISIBLE);
+            return;
+        }
+        if (mCurrentState == CURRENT_STATE_PREPAREING) {
+            if (mBottomContainer != null) {
+                if (mBottomContainer.getVisibility() == View.VISIBLE) {
+                    changeUiToPrepareingClear();
+                } else {
+                    changeUiToPreparingShow();
+                }
+            }
+        } else if (mCurrentState == CURRENT_STATE_PLAYING) {
+            if (mBottomContainer != null) {
+                if (mBottomContainer.getVisibility() == View.VISIBLE) {
+                    changeUiToPlayingClear();
+                } else {
+                    changeUiToPlayingPause();
+                }
+            }
+        } else if (mCurrentState == CURRENT_STATE_PAUSE) {
+            if (mBottomContainer != null) {
+                if (mBottomContainer.getVisibility() == View.VISIBLE) {
+                    changeUiToPauseClear();
+                } else {
+                    changeUiToPauseShow();
+                }
+            }
+        } else if (mCurrentState == CURRENT_STATE_AUTO_COMPLETE) {
+            if (mBottomContainer != null) {
+                if (mBottomContainer.getVisibility() == View.VISIBLE) {
+                    changeUiToCompleteClear();
+                } else {
+                    changeUiToCompleteShow();
+                }
+            }
+        } else if (mCurrentState == CURRENT_STATE_PLAYING_BUFFERING_START) {
+            if (mBottomContainer != null) {
+                if (mBottomContainer.getVisibility() == View.VISIBLE) {
+                    changeUiToPlayingBufferingClear();
+                } else {
+                    changeUiToPlayingBufferingShow();
+                }
+            }
+        }
+    }
+
+    protected void changeUiToPlayingPause() {
+        Debuger.printfLog("changeUiToPlayingShow");
+
+        setViewShowState(mTopContainer, VISIBLE);
+        setViewShowState(mBottomContainer, VISIBLE);
+        setViewShowState(mStartButton, VISIBLE);
+        setViewShowState(mLoadingProgressBar, INVISIBLE);
+        setViewShowState(mThumbImageViewLayout, INVISIBLE);
+        setViewShowState(mBottomProgressBar, INVISIBLE);
+        setViewShowState(mLockScreen, (mIfCurrentIsFullscreen && mNeedLockFull) ? VISIBLE : GONE);
+
+        if (mLoadingProgressBar instanceof ENDownloadView) {
+            ((ENDownloadView) mLoadingProgressBar).reset();
+        }
+        updateStartImage();
+    }
+    @Override
+    protected void changeUiToNormal() {
+        Debuger.printfLog("changeUiToNormal");
+
+        setViewShowState(mTopContainer, VISIBLE);
+        setViewShowState(mBottomContainer, INVISIBLE);
+        setViewShowState(mStartButton, INVISIBLE);
+
+        setViewShowState(mLoadingProgressBar, INVISIBLE);
+        setViewShowState(mThumbImageViewLayout, VISIBLE);
+        setViewShowState(mBottomProgressBar, INVISIBLE);
+        setViewShowState(mLockScreen, (mIfCurrentIsFullscreen && mNeedLockFull) ? VISIBLE : GONE);
+
+        updateStartImage();
+        if (mLoadingProgressBar instanceof ENDownloadView) {
+            ((ENDownloadView) mLoadingProgressBar).reset();
+        }
+        byStartedClick = false;
+    }
 
     /******************* 下方两个重载方法，在播放开始前不屏蔽封面，不需要可屏蔽 ********************/
     @Override
@@ -186,22 +295,17 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
 
     protected boolean byStartedClick;
 
-    @Override
-    protected void onClickUiToggle() {
-        if (mIfCurrentIsFullscreen && mLockCurScreen && mNeedLockFull) {
-            setViewShowState(mLockScreen, VISIBLE);
-            return;
-        }
-        byStartedClick = true;
-        super.onClickUiToggle();
+//    @Override
+//    protected void onClickUiToggle() {
+//        if (mIfCurrentIsFullscreen && mLockCurScreen && mNeedLockFull) {
+//            setViewShowState(mLockScreen, VISIBLE);
+//            return;
+//        }
+//        byStartedClick = true;
+//        super.onClickUiToggle();
+//
+//    }
 
-    }
-
-    @Override
-    protected void changeUiToNormal() {
-        super.changeUiToNormal();
-        byStartedClick = false;
-    }
 
     @Override
     protected void changeUiToPreparingShow() {
@@ -209,6 +313,7 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
         Debuger.printfLog("Sample changeUiToPreparingShow");
         setViewShowState(mBottomContainer, INVISIBLE);
         setViewShowState(mStartButton, INVISIBLE);
+        setViewShowState(mLoadingProgressBar, INVISIBLE);
     }
 
     @Override
@@ -221,15 +326,15 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
         }
     }
 
-    @Override
-    protected void changeUiToPlayingShow() {
-        super.changeUiToPlayingShow();
-        Debuger.printfLog("Sample changeUiToPlayingShow");
-        if (!byStartedClick) {
-            setViewShowState(mBottomContainer, INVISIBLE);
-            setViewShowState(mStartButton, INVISIBLE);
-        }
-    }
+//    @Override
+//    protected void changeUiToPlayingShow() {
+//        super.changeUiToPlayingShow();
+//        Debuger.printfLog("Sample changeUiToPlayingShow");
+//        if (!byStartedClick) {
+//            setViewShowState(mBottomContainer, INVISIBLE);
+//            setViewShowState(mStartButton, INVISIBLE);
+//        }
+//    }
 
     @Override
     public void startAfterPrepared() {
@@ -237,6 +342,7 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
         Debuger.printfLog("Sample startAfterPrepared");
         setViewShowState(mBottomContainer, INVISIBLE);
         setViewShowState(mStartButton, INVISIBLE);
+
         setViewShowState(mBottomProgressBar, VISIBLE);
     }
 
