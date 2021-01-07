@@ -19,7 +19,7 @@ public class LoadingUtil {
             AVLoadingIndicatorView view = new AVLoadingIndicatorView(context);
             view.setIndicator("PacmanIndicator");
 
-            view.setIndicatorColor(Color.parseColor("#0b989d"));
+            view.setIndicatorColor(Color.parseColor("#bbbbbb"));
             LinearLayout ll = new LinearLayout(context);
 
             ll.setOrientation(LinearLayout.VERTICAL);

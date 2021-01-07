@@ -10,7 +10,6 @@
 <ImageView
     android:layout_width="@dimen/dp_100"
     android:layout_height="@dimen/dp_100"
-    android:src="@mipmap/app_icon"
     android:id="@+id/item_icon"
     android:scaleType="centerCrop"
     android:background="#eee"
@@ -52,7 +51,7 @@
         android:textSize="13sp"
         android:text="20MB"
         android:layout_below="@+id/text"
-        android:layout_marginTop="@dimen/dp_10"
+        android:layout_marginTop="@dimen/dp_8"
         android:layout_toRightOf="@+id/item_icon"
         android:layout_marginLeft="@dimen/dp_10"
 
@@ -63,9 +62,10 @@
         android:layout_toRightOf="@+id/size"
         android:id="@+id/video_len"
         android:text="31:20"
+        android:textSize="13sp"
         android:layout_marginLeft="@dimen/dp_10"
         android:layout_below="@+id/text"
-        android:layout_marginTop="@dimen/dp_10"
+        android:layout_marginTop="@dimen/dp_8"
         />
     <TextView
         android:layout_width="wrap_content"
@@ -74,7 +74,7 @@
         android:id="@+id/time"
         android:text="2020/11/11 20:00:00"
         android:layout_below="@+id/text"
-        android:layout_marginTop="@dimen/dp_10"
+        android:layout_marginTop="@dimen/dp_8"
         android:layout_toRightOf="@+id/video_len"
         android:layout_marginLeft="@dimen/dp_10"
 

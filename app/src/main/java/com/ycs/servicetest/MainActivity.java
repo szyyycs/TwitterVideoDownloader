@@ -12,10 +12,12 @@ import android.Manifest;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
@@ -34,8 +36,11 @@ import com.downloader.PRDownloader;
 
 import java.util.List;
 
+import static com.ycs.servicetest.WebUtil.analyzeList;
 import static com.ycs.servicetest.WebUtil.isAnalyse;
+import static com.ycs.servicetest.WebUtil.isDownloading;
 import static com.ycs.servicetest.WebUtil.isHttpUrl;
+import static com.ycs.servicetest.WebUtil.predownload;
 
 public class MainActivity extends AppCompatActivity {
     final static String TAG="yyy";
@@ -77,19 +82,50 @@ public class MainActivity extends AppCompatActivity {
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //
                 Intent i=new Intent(MainActivity.this, VideoActivity.class);
                 startActivity(i);
             }
         });
-//        iv.setOnLongClickListener(new View.OnLongClickListener() {
-//            @Override
-//            public boolean onLongClick(View v) {
-//                Intent i=new Intent(MainActivity.this, Test.class);
-//                startActivity(i);
-//                return false;
-//            }
-//        });
+        tv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i=new Intent(MainActivity.this, tiktok.class);
+                startActivity(i);
+            }
+        });
+        iv.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                IosAlertDialog dialog=new IosAlertDialog(MainActivity.this).builder();
+                SharedPreferences ssp=getSharedPreferences("url",Context.MODE_PRIVATE);
+                String url=ssp.getString("url","");
+                if(url.equals("")){
+                    url= Environment.getExternalStorageDirectory() +"/.savedPic/";
+                }
+                dialog.setEditText(url)
+                        .setTitle("设置你的下载路径")
+                        .setPositiveButton("确定", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                if(!dialog.getEditText().isEmpty()){
+                                    SharedPreferences.Editor e=ssp.edit();
+                                    e.putString("url",Environment.getExternalStorageDirectory() +"/"+dialog.getEditText()+"/");
+                                    e.commit();
+                                }
+
+                            }
+                        })
+                        .setNegativeButton("取消", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+
+                            }
+                        })
+                        .show();
+
+                return true;
+            }
+        });
 ////        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //            if (!Settings.canDrawOverlays(this)) {
 //                Toast.makeText(this, "当前无权限，请授权", Toast.LENGTH_SHORT);
@@ -137,9 +173,13 @@ public class MainActivity extends AppCompatActivity {
                 if(text.isEmpty()){
                     text=etInput.getHint().toString();
                 }
-                if(isHttpUrl(text)){
-                    if(isAnalyse){
-                        Toast.makeText(MainActivity.this, "现在在分析链接啦，等会再下载", Toast.LENGTH_SHORT).show();
+                if(isHttpUrl(text)&&text.contains("twitter")){
+                    if(isAnalyse||isDownloading){
+                        if(!analyzeList.contains(text)){
+                            WebUtil.analyzeList.add(text);
+                            Log.e(TAG, "analyzeList的值："+analyzeList.toString() );
+                        }
+                        Toast.makeText(MainActivity.this, "已加入下载列表", Toast.LENGTH_SHORT).show();
                     }else{
                         Message ms=new Message();
                         ms.what=GOTO_DOWNLOAD;
@@ -168,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
                     startService(i);
                     isFloatWindowsshow=true;
                 }
-                return false;
+                return true;
             }
         });
 

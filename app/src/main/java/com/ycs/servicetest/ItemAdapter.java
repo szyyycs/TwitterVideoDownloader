@@ -47,7 +47,9 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ItemAdapter.ViewHolder holder, int position) {
         final Items items = itemslist.get(position);
         holder.items_tv.setText(items.getText());
-        holder.items_img.setImageBitmap(items.getSrc());
+        if(items.getSrc()!=null){
+            holder.items_img.setImageBitmap(items.getSrc());
+        }
         holder.size_tv.setText(items.getSize());
         holder.time_tv.setText(items.getTime());
         holder.text_tv.setText(items.getTwittertext());
@@ -124,6 +126,9 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         this.itemslist=il;
         notifyItemInserted(il.size()-1);
         notifyDataSetChanged();
+    }
+    public void updateOnepic(int position){
+        notifyItemChanged(position);
     }
     public  void clearAll(){
         itemslist.clear();

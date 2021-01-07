@@ -44,8 +44,11 @@ import com.downloader.Status;
 import java.util.Timer;
 
 
+import static com.ycs.servicetest.WebUtil.analyzeList;
 import static com.ycs.servicetest.WebUtil.downloadId;
+import static com.ycs.servicetest.WebUtil.isDownloading;
 import static com.ycs.servicetest.WebUtil.isHttpUrl;
+import static com.ycs.servicetest.WebUtil.predownload;
 
 
 public class MainService extends Service {
@@ -209,13 +212,12 @@ public class MainService extends Service {
                     views.setTextViewText(R.id.input, new ClipBoardUtil(MainService.this).paste());
                     NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                     nm.notify(110, notification);
-                    if (isHttpUrl(msg)&&WebUtil.isNetworkConnected(MainService.this)) {
-                        if(PRDownloader.getStatus(downloadId)== Status.RUNNING&&PRDownloader.getStatus(downloadId)== Status.PAUSED){
-                            WebUtil.downLoadList.add(msg);
-                            Toast.makeText(MainService.this, "已加入下载队列", Toast.LENGTH_SHORT).show();
-                            return;
-                        }else if(WebUtil.isAnalyse){
-                            WebUtil.downLoadList.add(msg);
+                    if (isHttpUrl(msg)&&msg.contains("twitter")) {
+                        if(isDownloading||WebUtil.isAnalyse){
+                            if(!analyzeList.contains(msg)){
+                                WebUtil.analyzeList.add(msg);
+                                Log.e("yyy", "analyzeList的值："+analyzeList.toString() );
+                            }
                             Toast.makeText(MainService.this, "已加入下载队列", Toast.LENGTH_SHORT).show();
                             return;
                         }

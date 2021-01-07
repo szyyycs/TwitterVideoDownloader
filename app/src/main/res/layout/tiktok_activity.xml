@@ -5,11 +5,10 @@
     android:background="#333333"
     android:orientation="vertical">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_tiktok"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/view_pager2"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="none" />
+        android:layout_height="match_parent" />
 
 
 

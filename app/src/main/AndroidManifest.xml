@@ -51,7 +51,7 @@
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:screenOrientation="portrait"
             />
-
+        <activity android:name=".tiktok"/>
         <activity android:name=".MainActivity"
             android:launchMode="singleTask"
             >

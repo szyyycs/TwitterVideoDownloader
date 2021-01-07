@@ -50,6 +50,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,7 +66,9 @@ public class WebUtil {
     public static int downloadId;
     public static final int STOP_SERVICE=1;
     public static boolean isAnalyse=false;
-    public static ArrayList<String> downLoadList=new ArrayList<>();
+    //public static ArrayList<String> downLoadList=new ArrayList<>();
+    public static HashMap<String,String> downloadMap=new HashMap<>();
+    public static ArrayList<String> analyzeList=new ArrayList<>();
     public static Boolean isDownloading=false;
     public static Boolean isWeb(final String s) {
 
@@ -153,8 +156,8 @@ public class WebUtil {
                 .build();
         Twitter.initialize(config);
     }
-    public static void predownload(String url,Context context, Handler handler){
-        Long id = getTweetId(url);
+    public static void predownload(String murl,Context context, Handler handler){
+        Long id = getTweetId(murl);
         //final String fname = String.valueOf(id);
         TwitterApiClient twitterApiClient = TwitterCore.getInstance().getApiClient();
         StatusesService statusesService = twitterApiClient.getStatusesService();
@@ -173,6 +176,7 @@ public class WebUtil {
                     if(text.contains("http")){
                         text=text.substring(0,text.indexOf("http"));
                     }
+                    text=text.replace("\n\n","\n");
                     if (!(result.data.extendedEntities.media.get(0).type).equals("video") &&
                             !(result.data.extendedEntities.media.get(0).type).equals("animated_gif")) {
                         MainService.updateNotification(context,"链接中未找到视频，下载失败");
@@ -198,6 +202,17 @@ public class WebUtil {
                             }
                         }
                         downloadVideo(url,context,handler,text);
+                        if(analyzeList.contains(murl)){
+                            analyzeList.remove(murl);
+
+                        }
+                        if(analyzeList.size()==0){
+                            WebUtil.isAnalyse=false;
+
+                        }else{
+                            WebUtil.isAnalyse=true;
+                            predownload(analyzeList.get(0),context,handler);
+                        }
                     }
                 }
 
@@ -227,7 +242,12 @@ public class WebUtil {
                     Environment.getExternalStorageDirectory() +"/.savedPic/",
                     filename,context);
         }else{
-            downLoadList.add(url);
+            //downLoadList.add(url);
+            if(!downloadMap.containsKey(url)){
+                downloadMap.put(url,text);
+
+            }
+            Log.e(TAG, "downloadMap的值: " +downloadMap.toString());
         }
 
     }
@@ -248,7 +268,7 @@ public class WebUtil {
                 .setOnStartOrResumeListener(new OnStartOrResumeListener() {
                     @Override
                     public void onStartOrResume() {
-
+                        isDownloading=true;
                     }
                 })
                 .setOnPauseListener(new OnPauseListener() {
@@ -300,14 +320,24 @@ public class WebUtil {
                         }
                         context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,uri));
 
-                        if(downLoadList.contains(url)){
-                            downLoadList.remove(url);
+                        if(downloadMap.containsKey(url)){
+                            downloadMap.remove(url);
                         }
-                        if(downLoadList.size()==0){
-                            handler.sendEmptyMessage(STOP_SERVICE);
+                        if(downloadMap.size()==0){
+                            if(analyzeList.size()==0){
+                                handler.sendEmptyMessage(STOP_SERVICE);
+                            }else {
+                                predownload(analyzeList.get(0),context,handler);
+                            }
                         }else{
-                            download(handler,downLoadList.get(0),
-                                    Environment.getExternalStorageDirectory() +"/.savedPic/", genearteFileName(),context);
+                            WebUtil.isAnalyse=true;
+                            for(String key:downloadMap.keySet()){
+                                downloadVideo(key,context,handler,downloadMap.get(key));
+                                break;
+                            }
+
+
+
                         }
 
                     }
@@ -317,14 +347,16 @@ public class WebUtil {
                         isDownloading=false;
                         Toast.makeText(context, "下载失败！"+error.toString(), Toast.LENGTH_SHORT).show();
                         MainService.update(filename+"下载失败，请重试");
-                        if(downLoadList.contains(url)){
-                            downLoadList.remove(url);
+                        if(downloadMap.containsKey(url)){
+                            downloadMap.remove(url);
                         }
-                        if(downLoadList.size()==0){
+                        if(downloadMap.size()==0){
                             handler.sendEmptyMessage(STOP_SERVICE);
                         }else{
-                            download(handler,downLoadList.get(0),
-                                    Environment.getExternalStorageDirectory() +"/.savedPic/", genearteFileName(),context);
+                            for(String key:downloadMap.keySet()){
+                                downloadVideo(key,context,handler,downloadMap.get(key));
+                                break;
+                            }
                         }
 
                     }

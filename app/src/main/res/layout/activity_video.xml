@@ -10,7 +10,7 @@
         <RelativeLayout
             android:id="@+id/title"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="45dp"
             android:layout_centerHorizontal="true"
             android:background="#fff"
 
@@ -28,10 +28,27 @@
                 android:layout_centerInParent="true"
                 android:text="我的下载"
                 android:textColor="#444"
-                android:textSize="20sp"
+                android:textSize="22sp"
                 android:textStyle="bold"
                 android:gravity="center"
                 />
+            <RelativeLayout
+                android:layout_width="@dimen/dp_40"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:id="@+id/sort"
+                >
+                <ImageView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_centerInParent="true"
+                    android:src="@mipmap/sortt"
+
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="@dimen/dp_10"
+
+                    />
+            </RelativeLayout>
 
         </RelativeLayout>
 

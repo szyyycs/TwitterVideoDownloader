@@ -32,6 +32,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.RelativeLayout;
@@ -42,6 +43,8 @@ import android.widget.VideoView;
 //import com.geccocrawler.gecco.annotation.RequestParameter;
 //import com.geccocrawler.gecco.annotation.Text;
 
+import com.lxj.xpopup.XPopup;
+import com.lxj.xpopup.interfaces.OnSelectListener;
 import com.shuyu.gsyvideoplayer.GSYBaseActivityDetail;
 import com.shuyu.gsyvideoplayer.GSYVideoManager;
 import com.shuyu.gsyvideoplayer.builder.GSYVideoOptionBuilder;
@@ -80,7 +83,7 @@ public class VideoActivity extends AppCompatActivity {
 //    private TextView tv;
 //    private TextView tvWeb;
     private ItemAdapter adapter;
-
+    private Boolean isScaning=false;
     private Boolean canChange=false;
     private CustomLinearLayoutManager layoutManager ;
     private RecyclerView recyclerView;
@@ -88,19 +91,25 @@ public class VideoActivity extends AppCompatActivity {
     //private ArrayList<String> srcList=new ArrayList<>();
     //private VideoView vv;
     private MyVideoPlayer detailPlayer;
-    private boolean isPlay;
+    private boolean isPlay=false;
     private boolean isPause;
     private RelativeLayout blank;
     private OrientationUtils orientationUtils;
-    //private String url=Environment.getExternalStorageDirectory() +"/.123/";
+    //private String url=Environment.getExternalStorageDirectory() +"/123/";
+    //private String url=Environment.getExternalStorageDirectory() +"/DCIM/Camera/";
     private String url=Environment.getExternalStorageDirectory() +"/.savedPic/";
     private boolean isFullScreen=false;
     private ImageView iv;
     //private ImageView blank;
     public static final int SEARCH_VIDEO=1;
     public static final int SEARCH_ONE_VIDEO=2;
+    public static final int SCANING_ONE_PIC=3;
+    public static final int AFTER_SORT_SCAN=4;
+    public static final int UPDATE_ALL=5;
     private RelativeLayout title;
+    private RelativeLayout sortImage;
     private SharedPreferences sp;
+    int i[]={0,0};
     static final String TAG="yyy";
     private Handler handler=new Handler(){
         @Override
@@ -109,10 +118,21 @@ public class VideoActivity extends AppCompatActivity {
             switch (msg.what){
                 case SEARCH_VIDEO:
                     adapter.update(itemsList);
+                    Toast.makeText(VideoActivity.this, "共找到"+itemsList.size()+"个视频", Toast.LENGTH_SHORT).show();
                     LoadingUtil.Loading_close();
+                    loadPic();
                     break;
                 case SEARCH_ONE_VIDEO:
                     adapter.updateOne(itemsList);
+                    break;
+                case SCANING_ONE_PIC:
+                    adapter.updateOnepic((Integer) msg.obj);
+                    break;
+                case AFTER_SORT_SCAN:
+                    loadPicAfterSort();
+                    break;
+                case UPDATE_ALL:
+                    adapter.update(itemsList);
                     break;
                 default:
                     break;
@@ -120,11 +140,16 @@ public class VideoActivity extends AppCompatActivity {
         }
     };
     private RelativeLayout r;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video);
         getSupportActionBar().hide();
+        SharedPreferences spp=getSharedPreferences("url",Context.MODE_PRIVATE);
+        if(!spp.getString("url","").equals("")){
+            url=spp.getString("url","");
+        }
         LoadingUtil.Loading_show(this);
         iv=findViewById(R.id.back);
         title=findViewById(R.id.title);
@@ -134,6 +159,62 @@ public class VideoActivity extends AppCompatActivity {
                 finish();
             }
         });
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
+        sortImage=findViewById(R.id.sort);
+        sortImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Toast.makeText(VideoActivity.this, "点了", Toast.LENGTH_SHORT).show();
+                new XPopup.Builder(VideoActivity.this)
+                        .atView(sortImage)  // 依附于所点击的View，内部会自动判断在上方或者下方显示
+                        .asAttachList(new String[]{"按下载时间排序", "按视频时长排序","按描述排序"},
+                                new int[]{R.mipmap.downloadtime,R.mipmap.video,R.mipmap.miaoshu},
+                                new OnSelectListener() {
+                                    @Override
+                                    public void onSelect(int position, String text) {
+                                        if(position==0){
+                                            isScaning=false;
+                                            if(i[position]%2==0){
+                                                deSort(itemsList);
+                                            }else{
+                                                sort(itemsList);
+                                            }
+                                            i[position]++;
+                                            adapter.update(itemsList);
+                                            handler.sendEmptyMessage(AFTER_SORT_SCAN);
+                                        }else if(position==1){
+                                            isScaning=false;
+                                            if(i[position]%2==0){
+                                                desortByLarge(itemsList);
+                                            }else{
+                                                sortByLarge(itemsList);
+                                            }
+                                            i[position]++;
+                                            adapter.update(itemsList);
+                                            handler.sendEmptyMessage(AFTER_SORT_SCAN);
+                                        }else{
+                                            isScaning=false;
+                                            sortByComment(itemsList);
+                                            adapter.update(itemsList);
+                                            handler.sendEmptyMessage(AFTER_SORT_SCAN);
+                                        }
+
+                                    }
+                                })
+                        .show();
+
+
+            }
+        });
+
+//                        .asBottomList("选择排序规则", new String[]{"按下载时间排序", "按视频时长排序"},
+//                                new OnSelectListener() {
+//                                    @Override
+//                                    public void onSelect(int position, String text) {
+//                                        Toast.makeText(VideoActivity.this, "我点了"+text+"这个选项！", Toast.LENGTH_SHORT).show();
+//                                    }
+//                                })
+
         sp=getSharedPreferences("text", Context.MODE_PRIVATE);
         detailPlayer =findViewById(R.id.detail_player);
         detailPlayer.getTitleTextView().setVisibility(View.GONE);
@@ -163,28 +244,38 @@ public class VideoActivity extends AppCompatActivity {
                     }
 
                     @Override
+                    public void onClickStartThumb(String url, Object... objects) {
+                        super.onClickStartThumb(url, objects);
+                        //hideStatusBar();
+                    }
+
+                    @Override
                     public void onAutoComplete(String url, Object... objects) {
+
                         super.onAutoComplete(url, objects);
-                        if(isFullScreen){
-                            if (orientationUtils != null) {
-                                orientationUtils.backToProtVideo();
-                            }
-                            if (GSYVideoManager.backFromWindowFull(VideoActivity.this)) {
-                                isFullScreen=false;
-                                return;
-                            }
-                        }else{
-                            if(canChange){
-                                reChangeList();
-                                canChange=false;
-                            }
-                        }
+                        isPlay=true;
+                        detailPlayer.restart();
+//                        if(isFullScreen){
+//                            if (orientationUtils != null) {
+//                                orientationUtils.backToProtVideo();
+//                            }
+//                            if (GSYVideoManager.backFromWindowFull(VideoActivity.this)) {
+//                                isFullScreen=false;
+//                                return;
+//                            }
+//                        }else{
+//                            if(canChange){
+//                                reChangeList();
+//                                canChange=false;
+//                            }
+//                        }
 
                     }
 
                     @Override
                     public void onPlayError(String url, Object... objects) {
                         super.onPlayError(url, objects);
+                        isPlay=false;
                         Toast.makeText(VideoActivity.this, "播放错误", Toast.LENGTH_SHORT).show();
                     }
 
@@ -211,11 +302,12 @@ public class VideoActivity extends AppCompatActivity {
             public void onClick(View v) {
                 isFullScreen=true;
                  //orientationUtils.resolveByClick();
-                detailPlayer.startWindowFullscreen(VideoActivity.this,false,true);
+                detailPlayer.startWindowFullscreen(VideoActivity.this,false,false);
 //                detailPlayer.getTitleTextView().setVisibility(View.GONE);
 //                detailPlayer.getBackButton().setVisibility(View.GONE);
             }
         });
+
         detailPlayer.getFullscreenButton().setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -261,6 +353,9 @@ public class VideoActivity extends AppCompatActivity {
             @Override
             public void run() {
                 for(final String s:f.list()){
+                    if(!s.endsWith(".mp4")){
+                        continue;
+                    }
                     if(!s.substring(s.length()-4,s.length()).equals(".mp4")){
                         continue;
                     }
@@ -276,16 +371,20 @@ public class VideoActivity extends AppCompatActivity {
                     BasicFileAttributes attr = null;
                     Instant instant=null;
                     String time=null;
-                    try {
-                        Path path =  file.toPath();
-                        attr = Files.readAttributes(path, BasicFileAttributes.class);
-                         instant= attr.creationTime().toInstant();
-                        String temp=instant.toString().replace("T"," ").replace("Z","").replace("-","/");
-                        time=temp.substring(0,temp.length()-3);
-                    } catch (IOException e) {
-                        long timeee=file.lastModified();
-                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-                        time=formatter.format(timeee);
+                    if(s.length()==22&&s.startsWith("20")){
+                        time=s.substring(0,4)+"/"+s.substring(4,6)+"/"+s.substring(6,8)+" "+s.substring(8,10)+":"+s.substring(10,12);
+                    }else{
+                        try {
+                            Path path =  file.toPath();
+                            attr = Files.readAttributes(path, BasicFileAttributes.class);
+                            instant= attr.creationTime().toInstant();
+                            String temp=instant.toString().replace("T"," ").replace("Z","").replace("-","/");
+                            time=temp.substring(0,temp.length()-3);
+                        } catch (IOException e) {
+                            long timeee=file.lastModified();
+                            SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                            time=formatter.format(timeee);
+                        }
                     }
                     // 创建时间
                     //String time=s.substring(0,4)+"."+s.substring(4,6)+"."+s.substring(6,8)+" "+s.substring(8,10)+":"+s.substring(10,12);
@@ -324,13 +423,11 @@ public class VideoActivity extends AppCompatActivity {
                     i.setTime(time);
                     i.setUrl(uu);
                     i.setTwittertext(text);
-                    Bitmap b = ThumbnailUtils.createVideoThumbnail(uu, MediaStore.Images.Thumbnails.MINI_KIND);
-                    //Bitmap b= WebUtil.createVideoThumbnail(Environment.getExternalStorageDirectory() +"/savedPic/"+s);
-                    i.setSrc(b);
-                    itemsList.add(i);
+//
+                    itemsList.add(0,i);
                     handler.sendEmptyMessage(SEARCH_ONE_VIDEO);
                 }
-                //sort(itemsList);
+                sort(itemsList);
                 handler.sendEmptyMessage(SEARCH_VIDEO);
             }
         }).start();
@@ -350,6 +447,7 @@ public class VideoActivity extends AppCompatActivity {
                     detailPlayer.getCurrentPlayer().release();
                     detailPlayer.setUp(itemsList.get(postion).getUrl(),true,itemsList.get(postion).getTwittertext());
                     detailPlayer.startPlay();
+
                 }
             }
         });
@@ -402,7 +500,6 @@ public class VideoActivity extends AppCompatActivity {
                 detailPlayer.getCurrentPlayer().release();
                 isPlay=false;
             }
-
             reChangeList();
             canChange=false;
             return;
@@ -440,6 +537,7 @@ public class VideoActivity extends AppCompatActivity {
             orientationUtils.releaseListener();
     }
     public void reChangeList(){
+        showStatusBar();
         final int screenHeight = getWindowManager().getDefaultDisplay().getHeight(); // 屏幕高（像素，如：800p）
         //int height =vv.getMeasuredHeight();
        // final int i=getResources().getDimensionPixelSize(R.dimen.dp_300);
@@ -460,8 +558,10 @@ public class VideoActivity extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animator animation) {
+
                 detailPlayer.getCurrentPlayer().onVideoPause();
                 isPause = true;
+
                 if (isPlay) {
                     isPlay=false;
                     detailPlayer.getCurrentPlayer().release();
@@ -486,7 +586,7 @@ public class VideoActivity extends AppCompatActivity {
         blank.setVisibility(View.VISIBLE);
     }
     public void changList(){
-        final int screenHeight = getWindowManager().getDefaultDisplay().getHeight(); // 屏幕高（像素，如：800p）
+
         //int height =vv.getMeasuredHeight();
         final int i=getResources().getDimensionPixelSize(R.dimen.dp_300);
         AnimatorSet animatorSet = new AnimatorSet();
@@ -502,8 +602,10 @@ public class VideoActivity extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animator animation) {
+                hideStatusBar();
                 ViewGroup.LayoutParams params = recyclerView.getLayoutParams();
-                params.height=screenHeight-i;
+                int screenHeight = getWindowManager().getDefaultDisplay().getHeight(); // 屏幕高（像素，如：800p）
+                params.height=screenHeight-i+getResources().getDimensionPixelSize(R.dimen.dp_40);;
                 recyclerView.setLayoutParams(params);
                 detailPlayer.startPlay();
                 //vv.start();
@@ -666,6 +768,7 @@ public class VideoActivity extends AppCompatActivity {
 //        }).start();
 //    }
     public void sort(ArrayList<Items> stus){
+        isScaning=false;
         Collections.sort(stus, new Comparator<Items>() {
 
             @Override
@@ -678,6 +781,52 @@ public class VideoActivity extends AppCompatActivity {
                 // return o2.getAge().compareTo(o1.getAge());
             }
         });
+
+    }
+
+    public void deSort(ArrayList<Items> stus){
+        isScaning=false;
+        Collections.sort(stus, new Comparator<Items>() {
+
+            @Override
+            public int compare(Items o1, Items o2) {
+                return o1.getTime().compareTo(o2.getTime());
+            }
+        });
+
+    }
+    public void sortByLarge(ArrayList<Items> stus){
+        isScaning=false;
+        Collections.sort(stus, new Comparator<Items>() {
+
+            @Override
+            public int compare(Items o1, Items o2) {
+                return o2.getVideo_len().compareTo(o1.getVideo_len());
+            }
+        });
+
+    }
+    public void sortByComment(ArrayList<Items> stus){
+        isScaning=false;
+        Collections.sort(stus, new Comparator<Items>() {
+
+            @Override
+            public int compare(Items o1, Items o2) {
+                return o2.getText().length()+"".compareTo(o1.getText().length()+"");
+            }
+        });
+
+    }
+    public void desortByLarge(ArrayList<Items> stus){
+        isScaning=false;
+        Collections.sort(stus, new Comparator<Items>() {
+
+            @Override
+            public int compare(Items o1, Items o2) {
+                return o1.getVideo_len().compareTo(o2.getVideo_len());
+            }
+        });
+
     }
     public void sortSrcList(ArrayList<String> stus){
         Collections.sort(stus, new Comparator<String>() {
@@ -697,4 +846,81 @@ public class VideoActivity extends AppCompatActivity {
                     124);
         }
     }
+    private void hideStatusBar() {
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        WindowManager.LayoutParams attrs = getWindow().getAttributes();
+        attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        getWindow().setAttributes(attrs);
+    }
+
+    //全屏并且状态栏透明显示
+    private void showStatusBar() {
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        WindowManager.LayoutParams attrs = getWindow().getAttributes();
+        attrs.flags &= ~WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        getWindow().setAttributes(attrs);
+    }
+    private void loadPic() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                isScaning = true;
+                for (int i = 0; i < itemsList.size(); i++) {
+                    if (isScaning) {
+                        Bitmap b = ThumbnailUtils.createVideoThumbnail(itemsList.get(i).getUrl(), MediaStore.Images.Thumbnails.MINI_KIND);
+                        if(isScaning){
+                            if(i<itemsList.size()){
+                                itemsList.get(i).setSrc(b);
+                                Message msg=new Message();
+                                msg.what=SCANING_ONE_PIC;
+                                msg.obj=i;
+                                handler.sendMessage(msg);
+                            }else{
+                                return;
+                            }
+                        } else{
+                            return;
+                        }
+
+                    } else {
+                        return;
+                    }
+                }
+            }
+        }).start();
+    }
+
+    private synchronized void loadPicAfterSort(){
+        new Thread(new Runnable(){
+            @Override
+            public void run() {
+                isScaning=true;
+                for(int i = 0; i < itemsList.size(); i++){
+                    if(isScaning){
+                        if(itemsList.get(i).getSrc()==null){
+                            Bitmap b = ThumbnailUtils.createVideoThumbnail(itemsList.get(i).getUrl(), MediaStore.Images.Thumbnails.MINI_KIND);
+                            if(isScaning){
+                                if(i<itemsList.size()){
+                                    itemsList.get(i).setSrc(b);
+                                Message msg=new Message();
+                                msg.what=SCANING_ONE_PIC;
+                                msg.obj=i;
+                                handler.sendMessage(msg);
+//                                    handler.sendEmptyMessage(UPDATE_ALL);
+                                }else{
+                                    return;
+                                }
+
+                            } else{
+                                return;
+                            }
+                        }
+                    }else{
+                        return;
+                    }
+                }
+            }
+        }).start();
+    }
+
 }
