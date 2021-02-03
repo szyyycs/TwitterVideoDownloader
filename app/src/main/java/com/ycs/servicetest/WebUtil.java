@@ -156,7 +156,7 @@ public class WebUtil {
                 .build();
         Twitter.initialize(config);
     }
-    public static void predownload(String murl,Context context, Handler handler){
+    public synchronized static void predownload(String murl,Context context, Handler handler){
         Long id = getTweetId(murl);
         //final String fname = String.valueOf(id);
         TwitterApiClient twitterApiClient = TwitterCore.getInstance().getApiClient();
@@ -176,7 +176,7 @@ public class WebUtil {
                     if(text.contains("http")){
                         text=text.substring(0,text.indexOf("http"));
                     }
-                    text=text.replace("\n\n","\n");
+                    text=text.replace("\n","  ");
                     if (!(result.data.extendedEntities.media.get(0).type).equals("video") &&
                             !(result.data.extendedEntities.media.get(0).type).equals("animated_gif")) {
                         MainService.updateNotification(context,"链接中未找到视频，下载失败");

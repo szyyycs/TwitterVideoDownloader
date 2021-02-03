@@ -30,9 +30,11 @@ import android.os.Looper;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.util.LruCache;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.MediaController;
@@ -108,9 +110,11 @@ public class VideoActivity extends AppCompatActivity {
     public static final int AFTER_SORT_SCAN=4;
     public static final int UPDATE_ALL=5;
     private RelativeLayout title;
+    private LruCache<String, Bitmap> mMemoryCache;
     private RelativeLayout sortImage;
     private SharedPreferences sp;
-    int i[]={0,0};
+    private int position=0;
+    int i[]={0,0,0};
     static final String TAG="yyy";
     private Handler handler=new Handler(){
         @Override
@@ -147,10 +151,20 @@ public class VideoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video);
         getSupportActionBar().hide();
+        setStatusBarColor();
         SharedPreferences spp=getSharedPreferences("url",Context.MODE_PRIVATE);
         if(!spp.getString("url","").equals("")){
             url=spp.getString("url","");
         }
+        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+        // Use 1/8th of the available memory for this memory cache.
+        final int cacheSize = maxMemory / 8;
+        mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+            @Override
+            protected int sizeOf(String key, Bitmap bitmap) {
+                return bitmap.getByteCount() / 1024;
+            }
+        };
         LoadingUtil.Loading_show(this);
         iv=findViewById(R.id.back);
         title=findViewById(R.id.title);
@@ -193,9 +207,15 @@ public class VideoActivity extends AppCompatActivity {
                                             i[position]++;
                                             adapter.update(itemsList);
                                             handler.sendEmptyMessage(AFTER_SORT_SCAN);
-                                        }else{
+                                        }else if(position==2){
                                             isScaning=false;
-                                            sortByComment(itemsList);
+                                            if(i[position]%2==0){
+                                                deSortByComment(itemsList);
+                                            }else{
+                                                sortByComment(itemsList);
+                                            }
+                                            i[position]++;
+                                            //sortByComment(itemsList);
                                             adapter.update(itemsList);
                                             handler.sendEmptyMessage(AFTER_SORT_SCAN);
                                         }
@@ -256,21 +276,6 @@ public class VideoActivity extends AppCompatActivity {
                         super.onAutoComplete(url, objects);
                         isPlay=true;
                         detailPlayer.restart();
-//                        if(isFullScreen){
-//                            if (orientationUtils != null) {
-//                                orientationUtils.backToProtVideo();
-//                            }
-//                            if (GSYVideoManager.backFromWindowFull(VideoActivity.this)) {
-//                                isFullScreen=false;
-//                                return;
-//                            }
-//                        }else{
-//                            if(canChange){
-//                                reChangeList();
-//                                canChange=false;
-//                            }
-//                        }
-
                     }
 
                     @Override
@@ -303,6 +308,7 @@ public class VideoActivity extends AppCompatActivity {
             public void onClick(View v) {
                 isFullScreen=true;
                  //orientationUtils.resolveByClick();
+
                 detailPlayer.startWindowFullscreen(VideoActivity.this,false,false);
 //                detailPlayer.getTitleTextView().setVisibility(View.GONE);
 //                detailPlayer.getBackButton().setVisibility(View.GONE);
@@ -316,7 +322,17 @@ public class VideoActivity extends AppCompatActivity {
 //                orientationUtils.resolveByClick();
 //                detailPlayer.startWindowFullscreen(VideoActivity.this,false,true);
 //                return false;
-                startActivity(new Intent(VideoActivity.this,tiktok.class));
+                Intent intent = new Intent();
+                ArrayList<VideoModel> vm=new ArrayList<>();
+                for(Items ii:itemsList){
+                    VideoModel vvv=new VideoModel();
+                    vvv.setUrl(ii.getUrl());
+                    vm.add(vvv);
+                }
+                intent.putExtra("list", vm);
+                intent.putExtra("i",position);
+                intent.setClass(VideoActivity.this, tiktok.class);
+                startActivity(intent);
                 return true;
             }
         });
@@ -364,7 +380,13 @@ public class VideoActivity extends AppCompatActivity {
                     }
                     String uu=url+s;
                     String text=sp.getString(s,"");
-                    Log.e("yyy",uu);
+//                    String t=text.replace("\n","  ");
+//                    if(!t.equals(text)){
+//                        SharedPreferences.Editor e=sp.edit();
+//                        e.putString(s,t);
+//                        e.commit();
+//                    }
+                    Log.e("yyy",s);
                     final Items i=new Items();
                     File file=new File(uu);
                     double d=(new BigDecimal(file.length() / (1024*1024.0))
@@ -374,19 +396,22 @@ public class VideoActivity extends AppCompatActivity {
                     BasicFileAttributes attr = null;
                     Instant instant=null;
                     String time=null;
-                    if(s.length()==22&&s.startsWith("20")){
+                    if((s.length()==22||s.length()==21)&&s.startsWith("20")){
                         time=s.substring(0,4)+"/"+s.substring(4,6)+"/"+s.substring(6,8)+" "+s.substring(8,10)+":"+s.substring(10,12);
                     }else{
                         try {
                             Path path =  file.toPath();
                             attr = Files.readAttributes(path, BasicFileAttributes.class);
                             instant= attr.creationTime().toInstant();
+                            Log.e(TAG, "createTime: "+instant );
                             String temp=instant.toString().replace("T"," ").replace("Z","").replace("-","/");
                             time=temp.substring(0,temp.length()-3);
+                            //Log.e(TAG, "createTime: "+time );
                         } catch (IOException e) {
                             long timeee=file.lastModified();
                             SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
                             time=formatter.format(timeee);
+                            Log.e(TAG, "modifiedTime: "+time );
                         }
                     }
                     // 创建时间
@@ -426,7 +451,6 @@ public class VideoActivity extends AppCompatActivity {
                     i.setTime(time);
                     i.setUrl(uu);
                     i.setTwittertext(text);
-//
                     itemsList.add(0,i);
                     handler.sendEmptyMessage(SEARCH_ONE_VIDEO);
                 }
@@ -437,11 +461,11 @@ public class VideoActivity extends AppCompatActivity {
         adapter.setOnItemClickListener(new ItemAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int postion) {
+                position=postion;
                 if(!canChange){
                     isPlay=true;
                     title.setVisibility(View.GONE);
                     canChange=true;
-
                     detailPlayer.setUp(itemsList.get(postion).getUrl(),true,itemsList.get(postion).getTwittertext());
                     changList();
 //                    vv.setVideoPath(srcList.get(postion));
@@ -591,10 +615,10 @@ public class VideoActivity extends AppCompatActivity {
     public void changList(){
 
         //int height =vv.getMeasuredHeight();
-        final int i=getResources().getDimensionPixelSize(R.dimen.dp_300);
+        final int i=getResources().getDimensionPixelSize(R.dimen.dp_400);
         AnimatorSet animatorSet = new AnimatorSet();
         //ViewWrapper wrapper = new ViewWrapper(recyclerView);
-        ObjectAnimator animator4 = ObjectAnimator.ofFloat(recyclerView, "translationY", getResources().getDimensionPixelSize(R.dimen.dp_300));
+        ObjectAnimator animator4 = ObjectAnimator.ofFloat(recyclerView, "translationY", getResources().getDimensionPixelSize(R.dimen.dp_400));
         animatorSet.play(animator4);
         animatorSet.setDuration(500).start();
         animatorSet.addListener(new Animator.AnimatorListener() {
@@ -812,10 +836,20 @@ public class VideoActivity extends AppCompatActivity {
     public void sortByComment(ArrayList<Items> stus){
         isScaning=false;
         Collections.sort(stus, new Comparator<Items>() {
+            @Override
+            public int compare(Items o1, Items o2) {
+                return  o2.getTwittertext().length()-o1.getTwittertext().length();
+            }
+        });
+
+    }
+    public void deSortByComment(ArrayList<Items> stus){
+        isScaning=false;
+        Collections.sort(stus, new Comparator<Items>() {
 
             @Override
             public int compare(Items o1, Items o2) {
-                return o2.getText().length()+"".compareTo(o1.getText().length()+"");
+                return o1.getTwittertext().length()-o2.getTwittertext().length();
             }
         });
 
@@ -870,20 +904,16 @@ public class VideoActivity extends AppCompatActivity {
                 isScaning = true;
                 for (int i = 0; i < itemsList.size(); i++) {
                     if (isScaning) {
-                        Bitmap b = ThumbnailUtils.createVideoThumbnail(itemsList.get(i).getUrl(), MediaStore.Images.Thumbnails.MINI_KIND);
-                        if(isScaning){
-                            if(i<itemsList.size()){
-                                itemsList.get(i).setSrc(b);
-                                Message msg=new Message();
-                                msg.what=SCANING_ONE_PIC;
-                                msg.obj=i;
-                                handler.sendMessage(msg);
-                            }else{
-                                return;
-                            }
-                        } else{
+                        if (i < itemsList.size()) {
+                            loadBitmap(itemsList.get(i).getUrl(), i);
+                            Message msg = new Message();
+                            msg.what = SCANING_ONE_PIC;
+                            msg.obj = i;
+                            handler.sendMessage(msg);
+                        } else {
                             return;
                         }
+
 
                     } else {
                         return;
@@ -892,7 +922,35 @@ public class VideoActivity extends AppCompatActivity {
             }
         }).start();
     }
+    public void addBitmapToMemoryCache(String key, Bitmap bitmap) {
 
+        if (getBitmapFromMemCache(key) == null) {
+            mMemoryCache.put(key, bitmap);
+        }
+    }
+    public synchronized void loadBitmap(String imageKey, int i) {
+        Bitmap bitmap = getBitmapFromMemCache(imageKey);
+        if (bitmap != null) {
+            Log.e(TAG, "读取" );
+            if (i < itemsList.size()) {
+                itemsList.get(i).setSrc(bitmap);
+            }else{
+                return;
+            }
+        } else {
+            Log.e(TAG, "生成" );
+            bitmap = ThumbnailUtils.createVideoThumbnail(itemsList.get(i).getUrl(), MediaStore.Images.Thumbnails.MINI_KIND);
+            if (i < itemsList.size()) {
+                itemsList.get(i).setSrc(bitmap);
+            }else{
+                return;
+            }
+            addBitmapToMemoryCache(itemsList.get(i).getUrl(),bitmap);
+        }
+    }
+    public Bitmap getBitmapFromMemCache(String key) {
+        return mMemoryCache.get(key);
+    }
     private synchronized void loadPicAfterSort(){
         new Thread(new Runnable(){
             @Override
@@ -901,14 +959,13 @@ public class VideoActivity extends AppCompatActivity {
                 for(int i = 0; i < itemsList.size(); i++){
                     if(isScaning){
                         if(itemsList.get(i).getSrc()==null){
-                            Bitmap b = ThumbnailUtils.createVideoThumbnail(itemsList.get(i).getUrl(), MediaStore.Images.Thumbnails.MINI_KIND);
                             if(isScaning){
                                 if(i<itemsList.size()){
-                                    itemsList.get(i).setSrc(b);
-                                Message msg=new Message();
-                                msg.what=SCANING_ONE_PIC;
-                                msg.obj=i;
-                                handler.sendMessage(msg);
+                                    loadBitmap(itemsList.get(i).getUrl(),i);
+                                    Message msg=new Message();
+                                    msg.what=SCANING_ONE_PIC;
+                                    msg.obj=i;
+                                    handler.sendMessage(msg);
 //                                    handler.sendEmptyMessage(UPDATE_ALL);
                                 }else{
                                     return;
@@ -925,5 +982,9 @@ public class VideoActivity extends AppCompatActivity {
             }
         }).start();
     }
-
+    public void setStatusBarColor(){
+        Window window = getWindow();
+        window.setStatusBarColor(ContextCompat.getColor(this,R.color.white));
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+    }
 }

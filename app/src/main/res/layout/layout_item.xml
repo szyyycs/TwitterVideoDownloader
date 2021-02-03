@@ -30,7 +30,7 @@
         />
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/dp_40"
         android:id="@+id/text"
         android:textSize="10sp"
 
@@ -38,7 +38,7 @@
         android:layout_toRightOf="@+id/item_icon"
         android:gravity="left"
         android:ellipsize="end"
-        android:text="今收到哈空间的好机\ff看哈哈哈哈哈哈哈哈哈回家看见了开卷考i和艰苦环境开会看见很快就会课件课件和客家话客家话空i哦i借记卡很快就会课件课件i偶哦iu偶哦i哦"
+        android:text="22"
         android:textColor="#666"
         android:paddingLeft="@dimen/dp_10"
         android:maxLines="3"
@@ -51,7 +51,7 @@
         android:textSize="13sp"
         android:text="20MB"
         android:layout_below="@+id/text"
-        android:layout_marginTop="@dimen/dp_8"
+        android:layout_marginTop="@dimen/dp_3"
         android:layout_toRightOf="@+id/item_icon"
         android:layout_marginLeft="@dimen/dp_10"
 
@@ -65,7 +65,7 @@
         android:textSize="13sp"
         android:layout_marginLeft="@dimen/dp_10"
         android:layout_below="@+id/text"
-        android:layout_marginTop="@dimen/dp_8"
+        android:layout_marginTop="@dimen/dp_3"
         />
     <TextView
         android:layout_width="wrap_content"
@@ -74,7 +74,7 @@
         android:id="@+id/time"
         android:text="2020/11/11 20:00:00"
         android:layout_below="@+id/text"
-        android:layout_marginTop="@dimen/dp_8"
+        android:layout_marginTop="@dimen/dp_3"
         android:layout_toRightOf="@+id/video_len"
         android:layout_marginLeft="@dimen/dp_10"
 

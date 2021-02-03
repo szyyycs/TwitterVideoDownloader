@@ -13,10 +13,10 @@ import java.util.List;
 public class ViewPagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final static String TAG = "RecyclerBaseAdapter";
 
-    private List<Items> itemDataList = null;
+    private List<VideoModel> itemDataList = null;
     private Context context = null;
 
-    public ViewPagerAdapter(Context context, List<Items> itemDataList) {
+    public ViewPagerAdapter(Context context, List<VideoModel> itemDataList) {
         this.itemDataList = itemDataList;
         this.context = context;
     }
@@ -27,6 +27,7 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                                                       int viewType) {
         View v = LayoutInflater.from(context).inflate(R.layout.layout_viewpager2_item, parent, false);
         final RecyclerView.ViewHolder holder = new RecyclerItemNormalHolder(context, v);
+        holder.setIsRecyclable(true);
         return holder;
 
     }
@@ -49,7 +50,7 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         return 1;
     }
 
-    public void setListData(List<Items> data) {
+    public void setListData(List<VideoModel> data) {
         itemDataList = data;
         notifyDataSetChanged();
     }

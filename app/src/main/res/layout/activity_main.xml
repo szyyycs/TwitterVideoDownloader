@@ -11,7 +11,7 @@
     android:layout_width="match_parent"
     android:layout_height="50dp"
     android:layout_centerHorizontal="true"
-    android:background="@color/colorBlue"
+    android:background="@color/colorIosBlue"
     >
 <ImageView
     android:id="@+id/download"

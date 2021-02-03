@@ -35,12 +35,18 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:visibility="invisible">
+        <moe.codeest.enviews.ENPlayView
+            android:id="@+id/start"
+            android:layout_width="33dp"
+            android:layout_height="33dp"
 
+            android:layout_marginLeft="15dp"
+            android:layout_gravity="center" />
         <TextView
             android:id="@+id/current"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
+            android:layout_marginLeft="12dp"
             android:text="00:00"
             android:textColor="#ffffff" />
 
@@ -111,13 +117,7 @@
         android:layout_centerVertical="true"
         android:visibility="invisible" />
 
-    <moe.codeest.enviews.ENPlayView
-        android:id="@+id/start"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:layout_gravity="center_vertical" />
+
 
 
     <ImageView

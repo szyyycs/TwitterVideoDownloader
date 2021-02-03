@@ -25,6 +25,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -72,13 +73,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
+        Window window = getWindow();
+        window.setStatusBarColor(ContextCompat.getColor(this,R.color.colorIosBlue));
         PRDownloader.initialize(getApplicationContext());
         iv=findViewById(R.id.download);
         TextView tv=findViewById(R.id.btn);
         btn=findViewById(R.id.confirm);
         etInput=findViewById(R.id.input);
         floatWindow=findViewById(R.id.floatWindow);
-
+        getPemission();
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -204,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
                  *
                  * */
                 if(!isFloatWindowsshow){
-                    Intent i=new Intent(MainActivity.this,FloatWindowService.class);
+                    Intent i=new Intent(MainActivity.this,DownLoadWindowService.class);
                     startService(i);
                     isFloatWindowsshow=true;
                 }
@@ -251,19 +254,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.canDrawOverlays(this)) {
-                Toast.makeText(this, "请允许悬浮窗权限", Toast.LENGTH_SHORT);
-                startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName())), 0);
-            }
-            if (ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED)
-            {
-                ActivityCompat.requestPermissions(this, permissions,111);
-            }
-        }
-
         handler.post(new Runnable() {
             @Override
             public void run() {
@@ -281,5 +271,32 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+    private void getPemission(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            if (!Settings.canDrawOverlays(this)) {
+//                Toast.makeText(this, "请允许悬浮窗权限", Toast.LENGTH_SHORT);
+                new IosAlertDialog(this)
+                        .builder()
+                        .setTitle("前往获取权限")
+                        .setPositiveButton("立即跳转", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                        Uri.parse("package:" + getPackageName())), 0);
+                            }
+                        })
+
+                        .show();
+
+            }
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED)
+            {
+                ActivityCompat.requestPermissions(this, permissions,111);
+            }
+        }
     }
 }

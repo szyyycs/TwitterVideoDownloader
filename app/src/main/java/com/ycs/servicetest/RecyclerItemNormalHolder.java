@@ -1,7 +1,12 @@
 package com.ycs.servicetest;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.media.ThumbnailUtils;
 import android.os.Environment;
+import android.provider.MediaStore;
+import android.util.Log;
+import android.util.LruCache;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -22,34 +27,50 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder{
     SampleCoverVideo gsyVideoPlayer;
 
     ImageView imageView;
-
+    private LruCache<String, Bitmap> mMemoryCache;
     GSYVideoOptionBuilder gsyVideoOptionBuilder;
 
     public RecyclerItemNormalHolder(Context context, View v) {
         super(v);
         this.context = context;
+//        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+//        // Use 1/8th of the available memory for this memory cache.
+//        final int cacheSize = maxMemory / 8;
+//        mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+//            @Override
+//            protected int sizeOf(String key, Bitmap bitmap) {
+//                return bitmap.getByteCount() / 1024;
+//            }
+//        };
         gsyVideoPlayer=v.findViewById(R.id.video_item_player);
         imageView = new ImageView(context);
-
         gsyVideoOptionBuilder = new GSYVideoOptionBuilder();
     }
+    public void addBitmapToMemoryCache(String key, Bitmap bitmap) {
+        if (getBitmapFromMemCache(key) == null) {
+            mMemoryCache.put(key, bitmap);
+        }
+    }
+    public synchronized void loadBitmap(String imageKey, ImageView imageView) {
+        Bitmap bitmap = getBitmapFromMemCache(imageKey);
+        if (bitmap != null) {
+            imageView.setImageBitmap(bitmap);
+        } else {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(imageKey, MediaStore.Images.Thumbnails.MINI_KIND);
+                    //imageView.setImageBitmap(bitmap);
+                    addBitmapToMemoryCache(imageKey,bitmap);
+                }
+            }).start();
+        }
+    }
 
-    public void onBind(final int position, Items items) {
-            imageView.setImageBitmap(items.getSrc());
-//        String url;
-//        String title;
-//        if (position % 2 == 0) {
-//            url = Environment.getExternalStorageDirectory() +"/123/VID_20210105_192402.mp4";
-//            title = "这是title";
-//        } else {
-//            url = Environment.getExternalStorageDirectory() +"/123/VID_20210105_192402.mp4";
-//            title = "哦？Title？";
-//
-//        }
-
+        public void onBind(final int position, VideoModel vm) {
+                //loadBitmap(vm.getUrl(),imageView);
 //        Map<String, String> header = new HashMap<>();
 //        header.put("ee", "33");
-
         //防止错位，离开释放
         //gsyVideoPlayer.initUIState();
         gsyVideoOptionBuilder
@@ -118,9 +139,11 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder{
      * 全屏幕按键处理
      */
     private void resolveFullBtn(final StandardGSYVideoPlayer standardGSYVideoPlayer) {
-        standardGSYVideoPlayer.startWindowFullscreen(context, true, true);
+        standardGSYVideoPlayer.startWindowFullscreen(context, false, false);
     }
-
+    public Bitmap getBitmapFromMemCache(String key) {
+        return mMemoryCache.get(key);
+    }
     public  SampleCoverVideo getPlayer() {
         return gsyVideoPlayer;
     }

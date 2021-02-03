@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+<ImageView
+    android:layout_width="@dimen/dp_39"
+    android:layout_height="@dimen/dp_40"
+    android:src="@mipmap/ddd"
+
+    android:id="@+id/civ"
+    android:scaleType="fitXY"
+    />
+</RelativeLayout>

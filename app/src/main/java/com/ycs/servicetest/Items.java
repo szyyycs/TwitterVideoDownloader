@@ -3,14 +3,16 @@ package com.ycs.servicetest;
 import android.graphics.Bitmap;
 import android.widget.ImageView;
 
-public class Items {
+import java.io.Serializable;
+
+public class Items implements Serializable {
     private String text;
     private Bitmap src;
     private String size;
     private String time;
     private String video_len;
     private String url;
-
+    private static final long serialVersionUID = 1L;
     public String getTwittertext() {
         return twittertext;
     }
