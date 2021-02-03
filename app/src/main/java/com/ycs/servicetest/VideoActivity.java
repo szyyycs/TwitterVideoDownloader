@@ -46,6 +46,7 @@ import android.widget.VideoView;
 //import com.geccocrawler.gecco.annotation.RequestParameter;
 //import com.geccocrawler.gecco.annotation.Text;
 
+import com.jakewharton.disklrucache.DiskLruCache;
 import com.lxj.xpopup.XPopup;
 import com.lxj.xpopup.interfaces.OnSelectListener;
 import com.shuyu.gsyvideoplayer.GSYBaseActivityDetail;
@@ -56,6 +57,7 @@ import com.shuyu.gsyvideoplayer.listener.LockClickListener;
 import com.shuyu.gsyvideoplayer.utils.OrientationUtils;
 import com.shuyu.gsyvideoplayer.video.base.GSYBaseVideoPlayer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,6 +69,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Wrapper;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -103,6 +107,7 @@ public class VideoActivity extends AppCompatActivity {
     private String url=Environment.getExternalStorageDirectory() +"/.savedPic/";
     private boolean isFullScreen=false;
     private ImageView iv;
+    private DiskLruCache mDiskCache;
     //private ImageView blank;
     public static final int SEARCH_VIDEO=1;
     public static final int SEARCH_ONE_VIDEO=2;
@@ -110,7 +115,7 @@ public class VideoActivity extends AppCompatActivity {
     public static final int AFTER_SORT_SCAN=4;
     public static final int UPDATE_ALL=5;
     private RelativeLayout title;
-    private LruCache<String, Bitmap> mMemoryCache;
+//    private LruCache<String, Bitmap> mMemoryCache;
     private RelativeLayout sortImage;
     private SharedPreferences sp;
     private int position=0;
@@ -156,15 +161,25 @@ public class VideoActivity extends AppCompatActivity {
         if(!spp.getString("url","").equals("")){
             url=spp.getString("url","");
         }
-        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-        // Use 1/8th of the available memory for this memory cache.
-        final int cacheSize = maxMemory / 8;
-        mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
-            @Override
-            protected int sizeOf(String key, Bitmap bitmap) {
-                return bitmap.getByteCount() / 1024;
-            }
-        };
+//        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+//        // Use 1/8th of the available memory for this memory cache.
+//        final int cacheSize = maxMemory / 8;
+        File ff=new File(url);
+        if (!ff.exists()) {
+            // 若文件夹不存在，建立文件夹
+            ff.mkdirs();
+        }
+        try {
+            mDiskCache = DiskLruCache.open(ff, 1, 1,   1024 * 1024 * 1024);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//        mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+//            @Override
+//            protected int sizeOf(String key, Bitmap bitmap) {
+//                return bitmap.getByteCount() / 1024;
+//            }
+//        };
         LoadingUtil.Loading_show(this);
         iv=findViewById(R.id.back);
         title=findViewById(R.id.title);
@@ -905,7 +920,11 @@ public class VideoActivity extends AppCompatActivity {
                 for (int i = 0; i < itemsList.size(); i++) {
                     if (isScaning) {
                         if (i < itemsList.size()) {
-                            loadBitmap(itemsList.get(i).getUrl(), i);
+                            try {
+                                loadBitmap(itemsList.get(i).getUrl(), i);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                             Message msg = new Message();
                             msg.what = SCANING_ONE_PIC;
                             msg.obj = i;
@@ -922,14 +941,81 @@ public class VideoActivity extends AppCompatActivity {
             }
         }).start();
     }
-    public void addBitmapToMemoryCache(String key, Bitmap bitmap) {
-
-        if (getBitmapFromMemCache(key) == null) {
-            mMemoryCache.put(key, bitmap);
+//    public void addBitmapToMemoryCache(String key,DiskLruCache mDiskCache, Bitmap bitmap) throws IOException {
+//
+////        if (getBitmapFromMemCache(key) == null) {
+////            mMemoryCache.put(key, bitmap);
+////        }
+//        DiskLruCache.Editor editor = mDiskCache.edit(key);
+//        OutputStream outputStream = editor.newOutputStream(0);// 0表示第一个缓存文件，不能超过valueCount
+//        outputStream.write(bitmap.);
+//        outputStream.close();
+//        editor.commit();
+//        mDiskCache.flush();
+//
+//
+//    }
+//public void getDiskCache(String key) throws IOException {
+//    File directory = VideoActivity.this.getCacheDir();
+//    DiskLruCache diskLruCache = DiskLruCache.open(directory, 1, 1, 1024 * 1024 * 10);
+//    String value = diskLruCache.get(key).getString(0);
+//    diskLruCache.close();
+//}
+    public static String hashKeyForDisk(String key) {
+        String cacheKey;
+        try {
+            final MessageDigest mDigest = MessageDigest.getInstance("MD5");//把uri编译为MD5,防止网址有非法字符
+            mDigest.update(key.getBytes());
+            cacheKey = bytesToHexString(mDigest.digest());
+        } catch (NoSuchAlgorithmException e) {
+            cacheKey = String.valueOf(key.hashCode());
         }
+        return cacheKey;
     }
-    public synchronized void loadBitmap(String imageKey, int i) {
-        Bitmap bitmap = getBitmapFromMemCache(imageKey);
+    private static String bytesToHexString(byte[] bytes) {
+        // http://stackoverflow.com/questions/332079
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < bytes.length; i++) {
+            String hex = Integer.toHexString(0xFF & bytes[i]);
+            if (hex.length() == 1) {
+                sb.append('0');
+            }
+            sb.append(hex);
+        }
+        return sb.toString();
+    }
+    private synchronized Bitmap getCache(String key) {
+//        Log.e(TAG, "get" );
+        key=hashKeyForDisk(key);
+        try {
+            DiskLruCache.Snapshot snapshot = mDiskCache.get(key);
+            if (snapshot != null) {
+                InputStream in = snapshot.getInputStream(0);
+                return BitmapFactory.decodeStream(in);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public synchronized void addDiskCache(String key, Bitmap bitmap) throws IOException {
+        //Log.e(TAG, "put" );
+        key=hashKeyForDisk(key);
+        DiskLruCache.Editor editor = mDiskCache.edit(key);
+        // index与valueCount对应，分别为0,1,2...valueCount-1
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        editor.newOutputStream(0).write( baos.toByteArray());
+        editor.commit();
+        baos.close();
+        //mDiskCache.close();
+}
+
+    public synchronized void loadBitmap(String imageKey, int i) throws IOException {
+
+//        Bitmap bitmap = getBitmapFromMemCache(imageKey);
+        Bitmap bitmap = getCache(imageKey);
         if (bitmap != null) {
             Log.e(TAG, "读取" );
             if (i < itemsList.size()) {
@@ -945,12 +1031,13 @@ public class VideoActivity extends AppCompatActivity {
             }else{
                 return;
             }
-            addBitmapToMemoryCache(itemsList.get(i).getUrl(),bitmap);
+            addDiskCache(itemsList.get(i).getUrl(),bitmap);
+            //addBitmapToMemoryCache(itemsList.get(i).getUrl(),bitmap);
         }
     }
-    public Bitmap getBitmapFromMemCache(String key) {
-        return mMemoryCache.get(key);
-    }
+//    public Bitmap getBitmapFromMemCache(String key) {
+//        return mMemoryCache.get(key);
+//    }
     private synchronized void loadPicAfterSort(){
         new Thread(new Runnable(){
             @Override
@@ -961,7 +1048,11 @@ public class VideoActivity extends AppCompatActivity {
                         if(itemsList.get(i).getSrc()==null){
                             if(isScaning){
                                 if(i<itemsList.size()){
-                                    loadBitmap(itemsList.get(i).getUrl(),i);
+                                    try {
+                                        loadBitmap(itemsList.get(i).getUrl(),i);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
                                     Message msg=new Message();
                                     msg.what=SCANING_ONE_PIC;
                                     msg.obj=i;
