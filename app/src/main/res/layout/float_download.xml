@@ -3,7 +3,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 <ImageView
-    android:layout_width="@dimen/dp_39"
+    android:layout_width="@dimen/dp_40"
     android:layout_height="@dimen/dp_40"
     android:src="@mipmap/ddd"
 
