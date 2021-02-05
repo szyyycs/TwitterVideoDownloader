@@ -32,12 +32,24 @@
                 android:textStyle="bold"
                 android:gravity="center"
                 />
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="20dp"
+                android:src="@mipmap/tiktok"
+                android:id="@+id/intoTiktok"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@+id/sort"
+                android:layout_marginRight="3dp"
+                android:scaleType="fitXY"
+                android:layout_marginTop="3dp"
+                />
             <RelativeLayout
                 android:layout_width="@dimen/dp_40"
                 android:layout_height="match_parent"
                 android:layout_alignParentRight="true"
                 android:id="@+id/sort"
                 >
+
                 <ImageView
                     android:layout_width="25dp"
                     android:layout_height="25dp"

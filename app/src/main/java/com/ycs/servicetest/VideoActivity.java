@@ -102,6 +102,7 @@ public class VideoActivity extends AppCompatActivity {
     private boolean isPlay=false;
     private boolean isPause;
     private RelativeLayout blank;
+    private ImageView iv_intotiktok;
     private OrientationUtils orientationUtils;
     //private String url=Environment.getExternalStorageDirectory() +"/123/";
     //private String url=Environment.getExternalStorageDirectory() +"/DCIM/Camera/";
@@ -188,6 +189,24 @@ public class VideoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 finish();
+            }
+        });
+        iv_intotiktok=findViewById(R.id.intoTiktok);
+        iv_intotiktok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                ArrayList<VideoModel> vm=new ArrayList<>();
+                for(Items ii:itemsList){
+                    VideoModel vvv=new VideoModel();
+                    vvv.setUrl(ii.getUrl());
+                    vm.add(vvv);
+                }
+                Collections.shuffle(vm);
+                intent.putExtra("list", vm);
+                intent.putExtra("i",position);
+                intent.setClass(VideoActivity.this, tiktok.class);
+                startActivity(intent);
             }
         });
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
