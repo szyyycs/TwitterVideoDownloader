@@ -1,6 +1,7 @@
 package com.ycs.servicetest;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
@@ -29,11 +30,9 @@ import java.util.Map;
 public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder{
     public final static String TAG = "yyy";
 
-    protected Context context = null;
+    protected Context context;
     private String url=Environment.getExternalStorageDirectory() +"/.savedPic/";
-    File ff=new File(url);
     private DiskLruCache mDiskCache;
-
     SampleCoverVideo gsyVideoPlayer;
 
     ImageView imageView;
@@ -44,7 +43,12 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder{
         super(v);
         this.context = context;
         gsyVideoPlayer=v.findViewById(R.id.video_item_player);
+        SharedPreferences spp=context.getSharedPreferences("url",Context.MODE_PRIVATE);
+        if(!spp.getString("url","").equals("")){
+            url=spp.getString("url","");
+        }
         imageView = new ImageView(context);
+        File ff=new File(url);
         try {
             mDiskCache= DiskLruCache.open(ff, 1, 1,   1024 * 1024 * 1024);
         } catch (IOException e) {
@@ -150,16 +154,20 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder{
     public  SampleCoverVideo getPlayer() {
         return gsyVideoPlayer;
     }
-    private synchronized Bitmap getCache(String key) {
+    private Bitmap getCache(String key) {
 //        Log.e(TAG, "get" );
         key=hashKeyForDisk(key);
+
         try {
             DiskLruCache.Snapshot snapshot = mDiskCache.get(key);
+
             if (snapshot != null) {
                 InputStream in = snapshot.getInputStream(0);
 
                 return BitmapFactory.decodeStream(in);
             }
+
+            //Log.e(TAG, "nullnulllllll " );
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
             e.printStackTrace();
