@@ -1,5 +1,7 @@
 package com.ycs.servicetest;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -10,8 +12,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.jakewharton.disklrucache.DiskLruCache;
 import com.shuyu.gsyvideoplayer.GSYVideoManager;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,8 +41,8 @@ public class tiktok extends AppCompatActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         dataList=(ArrayList<VideoModel>)getIntent().getSerializableExtra("list");
         posision=getIntent().getIntExtra("i",0);
-        Log.e("hhh", dataList.toString() );
-        Log.e("hhh",posision+"");
+
+
         viewPager2=findViewById(R.id.view_pager2);
         resolveData();
         viewPagerAdapter = new ViewPagerAdapter(this, dataList);
@@ -126,4 +134,5 @@ public class tiktok extends AppCompatActivity {
             recyclerItemNormalHolder.getPlayer().startPlayLogic();
         }
     }
+
 }

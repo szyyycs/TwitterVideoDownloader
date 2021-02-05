@@ -54,6 +54,7 @@ dependencies {
     implementation 'com.lxj:xpopup:2.2.10'
     //Twitter kit library
     implementation 'com.jakewharton:disklrucache:2.0.2'
+
     implementation('com.twitter.sdk.android:twitter:3.3.0@aar') {
         transitive = true
     }

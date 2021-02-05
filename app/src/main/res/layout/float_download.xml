@@ -6,7 +6,6 @@
     android:layout_width="@dimen/dp_40"
     android:layout_height="@dimen/dp_40"
     android:src="@mipmap/ddd"
-
     android:id="@+id/civ"
     android:scaleType="fitXY"
     />

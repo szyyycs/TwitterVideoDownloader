@@ -1,11 +1,14 @@
 package com.ycs.servicetest;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -31,6 +34,7 @@ public class DownLoadWindowService extends Service {
     private ImageView civ;
     private TextView y;
     private int Y=0;
+    private Handler handler=new Handler();
     private Boolean flag=true;
     private WindowManager windowManager;
     private WindowManager.LayoutParams layoutParams;
@@ -79,7 +83,7 @@ public class DownLoadWindowService extends Service {
             layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
             layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
             windowManager.addView(view, layoutParams);
-
+            setViewFade();
         }
     }
     private class FloatingOnTouchListener implements View.OnTouchListener {
@@ -93,6 +97,7 @@ public class DownLoadWindowService extends Service {
                     x = (int) event.getRawX();
                     yy= (int) event.getRawY();
                     y = (int) event.getRawY();
+                    view.setAlpha(1);
                     break;
                 case MotionEvent.ACTION_MOVE:
                     int nowX =(int) event.getRawX();
@@ -121,6 +126,7 @@ public class DownLoadWindowService extends Service {
                     }
 
                     layoutParams.y = layoutParams.y + mY;
+                    setViewFade();
                     // 更新悬浮窗控件布局
                     windowManager.updateViewLayout(view, layoutParams);
                     break;
@@ -138,4 +144,20 @@ public class DownLoadWindowService extends Service {
 
         }
     }
+    private void setViewFade(){
+        handler.removeCallbacks(runnable);
+        handler.postDelayed(runnable,2000);
+    }
+    private Runnable runnable=new Runnable() {
+        @Override
+        public void run() {
+            fade(view);
+        }
+    };
+    private void fade(View view){
+        ObjectAnimator animator = ObjectAnimator.ofFloat(view, "alpha",1,0.3f);
+        animator.setDuration(1000);
+        animator.start();
+    }
+
 }

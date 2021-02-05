@@ -85,6 +85,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+
 public class VideoActivity extends AppCompatActivity {
 //    private WebView webView;
 //    private TextView tv;
@@ -344,6 +345,7 @@ public class VideoActivity extends AppCompatActivity {
                     vvv.setUrl(ii.getUrl());
                     vm.add(vvv);
                 }
+                Collections.shuffle(vm);
                 intent.putExtra("list", vm);
                 intent.putExtra("i",position);
                 intent.setClass(VideoActivity.this, tiktok.class);
@@ -418,7 +420,7 @@ public class VideoActivity extends AppCompatActivity {
                             Path path =  file.toPath();
                             attr = Files.readAttributes(path, BasicFileAttributes.class);
                             instant= attr.creationTime().toInstant();
-                            Log.e(TAG, "createTime: "+instant );
+                            //Log.e(TAG, "createTime: "+instant );
                             String temp=instant.toString().replace("T"," ").replace("Z","").replace("-","/");
                             time=temp.substring(0,temp.length()-3);
                             //Log.e(TAG, "createTime: "+time );
@@ -922,6 +924,7 @@ public class VideoActivity extends AppCompatActivity {
                         if (i < itemsList.size()) {
                             try {
                                 loadBitmap(itemsList.get(i).getUrl(), i);
+
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -987,6 +990,7 @@ public class VideoActivity extends AppCompatActivity {
     private synchronized Bitmap getCache(String key) {
 //        Log.e(TAG, "get" );
         key=hashKeyForDisk(key);
+        Log.e(TAG, "imageKey: "+key );
         try {
             DiskLruCache.Snapshot snapshot = mDiskCache.get(key);
             if (snapshot != null) {
@@ -1015,6 +1019,7 @@ public class VideoActivity extends AppCompatActivity {
     public synchronized void loadBitmap(String imageKey, int i) throws IOException {
 
 //        Bitmap bitmap = getBitmapFromMemCache(imageKey);
+
         Bitmap bitmap = getCache(imageKey);
         if (bitmap != null) {
             Log.e(TAG, "读取" );
