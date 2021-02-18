@@ -90,6 +90,7 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder{
                     .setRotateViewAuto(true)
                     .setLockLand(true)
                     .setPlayTag(TAG)
+                    .setLooping(true)
                     .setShowFullAnimation(true)
                     .setNeedLockFull(true)
                     .setPlayPosition(position)

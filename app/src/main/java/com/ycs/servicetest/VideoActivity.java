@@ -120,6 +120,7 @@ public class VideoActivity extends AppCompatActivity {
 //    private LruCache<String, Bitmap> mMemoryCache;
     private RelativeLayout sortImage;
     private SharedPreferences sp;
+    private Boolean isNull=true;
     private int position=0;
     int i[]={0,0,0};
     static final String TAG="yyy";
@@ -195,6 +196,10 @@ public class VideoActivity extends AppCompatActivity {
         iv_intotiktok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(isNull){
+                    Toast.makeText(VideoActivity.this,"您视频列表为空，请下载视频后再进入抖音模式哦！",Toast.LENGTH_SHORT);
+                    return;
+                }
                 Intent intent = new Intent();
                 ArrayList<VideoModel> vm=new ArrayList<>();
                 for(Items ii:itemsList){
@@ -217,7 +222,7 @@ public class VideoActivity extends AppCompatActivity {
                 //Toast.makeText(VideoActivity.this, "点了", Toast.LENGTH_SHORT).show();
                 new XPopup.Builder(VideoActivity.this)
                         .atView(sortImage)  // 依附于所点击的View，内部会自动判断在上方或者下方显示
-                        .asAttachList(new String[]{"按下载时间排序", "按视频时长排序","按描述排序"},
+                        .asAttachList(new String[]{"按下载时间排序", "按视频时长排序","按描述长度排序"},
                                 new int[]{R.mipmap.downloadtime,R.mipmap.video,R.mipmap.miaoshu},
                                 new OnSelectListener() {
                                     @Override
@@ -285,6 +290,7 @@ public class VideoActivity extends AppCompatActivity {
                 .setAutoFullWithSize(false)
                 .setShowFullAnimation(false)
                 .setNeedLockFull(true)
+                .setLooping(true)
                 //.setUrl(url)
                 .setOnlyRotateLand(true)
                 //.setRotateWithSystem(true)
@@ -398,11 +404,14 @@ public class VideoActivity extends AppCompatActivity {
                 //getPermission();
                 Log.e(TAG, "不存在" );
             }
+
             //Toast.makeText(this, "文件夹下什么文件都没有噢", Toast.LENGTH_SHORT).show();
             LoadingUtil.Loading_close();
             setBlankUI();
+            isNull=true;
             return;
         }
+        isNull=false;
         new Thread(new Runnable() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
