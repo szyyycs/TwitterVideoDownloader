@@ -196,24 +196,27 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        btn.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-//                Intent intent = new Intent(MainActivity.this, FloatActivity.class);
-//                startActivity(intent);
-                /**
-                 *
-                 * 把onclicklistener注释取消，下面注释去掉
-                 *
-                 * */
-                if(!isFloatWindowsshow){
-                    Intent i=new Intent(MainActivity.this,DownLoadWindowService.class);
-                    startService(i);
-                    isFloatWindowsshow=true;
-                }
-                return true;
+//        btn.setOnLongClickListener(new View.OnLongClickListener() {
+//            @Override
+//            public boolean onLongClick(View v) {
+////                Intent intent = new Intent(MainActivity.this, FloatActivity.class);
+////                startActivity(intent);
+//                /**
+//                 *
+//                 * 把onclicklistener注释取消，下面注释去掉
+//                 *
+//                 * */
+//
+//                return true;
+//            }
+//        });
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+            if(!isFloatWindowsshow){
+                Intent i=new Intent(MainActivity.this,DownLoadWindowService.class);
+                startService(i);
+                isFloatWindowsshow=true;
             }
-        });
+        }
 
     }
 

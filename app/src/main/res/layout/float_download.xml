@@ -1,12 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
-<ImageView
-    android:layout_width="@dimen/dp_40"
-    android:layout_height="@dimen/dp_40"
-    android:src="@mipmap/ddd"
-    android:id="@+id/civ"
-    android:scaleType="fitXY"
-    />
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageView
+        android:layout_width="@dimen/dp_40"
+        android:layout_height="@dimen/dp_40"
+        android:src="@mipmap/ddd"
+        android:id="@+id/civ"
+
+        android:scaleType="fitXY"
+        />
+    <com.dinuscxj.progressbar.CircleProgressBar
+        android:layout_width="@dimen/dp_33"
+        android:layout_height="@dimen/dp_33"
+        android:layout_marginTop="@dimen/dp_4"
+        android:layout_marginLeft="@dimen/dp_4"
+        app:style="solid_line"
+        android:visibility="gone"
+        app:progress_text_color="#fff"
+        app:progress_stroke_width="@dimen/dp_4"
+        android:id="@+id/progress"
+        app:progress_start_color="@color/colorIosBlue"
+        app:progress_end_color="@color/Blue"
+        />
 </RelativeLayout>

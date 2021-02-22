@@ -193,6 +193,7 @@ public class VideoActivity extends AppCompatActivity {
             }
         });
         iv_intotiktok=findViewById(R.id.intoTiktok);
+
         iv_intotiktok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -214,6 +215,7 @@ public class VideoActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
         sortImage=findViewById(R.id.sort);
         sortImage.setOnClickListener(new View.OnClickListener() {

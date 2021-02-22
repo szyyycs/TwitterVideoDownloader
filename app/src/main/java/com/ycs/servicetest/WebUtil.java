@@ -296,6 +296,7 @@ public class WebUtil {
                                 .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
                         String progressStr=currentBytes+"MB/"+sum+"MB";
                         MainService.updateProgress(context,(int)(d*100),progressStr);
+                        DownLoadWindowService.updateProgress((int)(d*100));
                     }
                 })
                 .start(new OnDownloadListener() {
@@ -309,6 +310,7 @@ public class WebUtil {
                             @Override
                             public void run() {
                                 MainService.update(filename+"下载完成");
+                                DownLoadWindowService.recover();
                             }
                         },1000);
 
@@ -347,6 +349,7 @@ public class WebUtil {
                         isDownloading=false;
                         Toast.makeText(context, "下载失败！"+error.toString(), Toast.LENGTH_SHORT).show();
                         MainService.update(filename+"下载失败，请重试");
+                        DownLoadWindowService.recover();
                         if(downloadMap.containsKey(url)){
                             downloadMap.remove(url);
                         }

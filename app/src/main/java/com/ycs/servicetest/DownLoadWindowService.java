@@ -6,6 +6,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.Handler;
@@ -14,6 +15,7 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.CollapsibleActionView;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -26,18 +28,21 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import com.dinuscxj.progressbar.CircleProgressBar;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class DownLoadWindowService extends Service {
-    private RelativeLayout view;
+    private static RelativeLayout view;
     private RelativeLayout view2;
-    private ImageView civ;
+    private static ImageView civ;
     private TextView y;
     private int Y=0;
     private Handler handler=new Handler();
     private Boolean flag=true;
-    private WindowManager windowManager;
-    private WindowManager.LayoutParams layoutParams;
+    public static CircleProgressBar ircleProgressBar;
+    private static WindowManager windowManager;
+    private static WindowManager.LayoutParams layoutParams;
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -46,6 +51,7 @@ public class DownLoadWindowService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.e("yyy", "1112" );
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             showFloatingWindow();
         }
@@ -59,6 +65,9 @@ public class DownLoadWindowService extends Service {
             LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
             view = (RelativeLayout) inflater.inflate(R.layout.float_download, null);
             civ=view.findViewById(R.id.civ);
+            ircleProgressBar=view.findViewById(R.id.progress);
+            ircleProgressBar.setProgress(80);
+            ircleProgressBar.setVisibility(View.GONE);
             view.setOnTouchListener(new FloatingOnTouchListener());
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -98,6 +107,7 @@ public class DownLoadWindowService extends Service {
                     yy= (int) event.getRawY();
                     y = (int) event.getRawY();
                     view.setAlpha(1);
+                    handler.removeCallbacks(runnable);
                     break;
                 case MotionEvent.ACTION_MOVE:
                     int nowX =(int) event.getRawX();
@@ -154,10 +164,21 @@ public class DownLoadWindowService extends Service {
             fade(view);
         }
     };
+    public static void updateProgress(int progress){
+        ircleProgressBar.setVisibility(View.VISIBLE);
+        civ.setVisibility(View.GONE);
+        ircleProgressBar.setProgress(progress);
+        windowManager.updateViewLayout(view,layoutParams);
+    }
+    public static void recover(){
+        ircleProgressBar.setVisibility(View.GONE);
+        civ.setVisibility(View.VISIBLE);
+    }
     private void fade(View view){
         ObjectAnimator animator = ObjectAnimator.ofFloat(view, "alpha",1,0.3f);
         animator.setDuration(1000);
         animator.start();
     }
+
 
 }
