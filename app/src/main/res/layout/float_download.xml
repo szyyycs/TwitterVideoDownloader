@@ -1,16 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="@dimen/dp_40"
+
+    android:layout_height="@dimen/dp_40"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/right"
+        android:alpha="0.5"
+        android:background="@drawable/shape_ddd_nopading"
+        />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:id="@+id/left"
+        android:alpha="0.5"
+        android:background="@drawable/shape_ddd_nopadding_left"
+        />
     <ImageView
+
         android:layout_width="@dimen/dp_40"
         android:layout_height="@dimen/dp_40"
-        android:src="@mipmap/ddd"
+        android:src="@mipmap/down"
         android:id="@+id/civ"
-
-        android:scaleType="fitXY"
+        android:scaleType="fitCenter"
         />
+
     <com.dinuscxj.progressbar.CircleProgressBar
         android:layout_width="@dimen/dp_33"
         android:layout_height="@dimen/dp_33"

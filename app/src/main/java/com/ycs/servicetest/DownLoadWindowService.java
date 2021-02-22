@@ -51,7 +51,7 @@ public class DownLoadWindowService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.e("yyy", "1112" );
+        //Log.e("yyy", "1112" );
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             showFloatingWindow();
         }
@@ -89,8 +89,8 @@ public class DownLoadWindowService extends Service {
             //layoutParams.gravity = Gravity.RIGHT;
             layoutParams.x = windowManager.getDefaultDisplay().getWidth();
             layoutParams.y = -300;
-            layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
-            layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            layoutParams.width = getResources().getDimensionPixelSize(R.dimen.dp_40);
+            layoutParams.height = getResources().getDimensionPixelSize(R.dimen.dp_40);
             windowManager.addView(view, layoutParams);
             setViewFade();
         }
@@ -101,6 +101,8 @@ public class DownLoadWindowService extends Service {
         private int yy;
         @Override
         public boolean onTouch(View view, MotionEvent event) {
+            TextView tvRight=view.findViewById(R.id.right);
+            TextView tvLeft=view.findViewById(R.id.left);
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     x = (int) event.getRawX();
@@ -108,6 +110,8 @@ public class DownLoadWindowService extends Service {
                     y = (int) event.getRawY();
                     view.setAlpha(1);
                     handler.removeCallbacks(runnable);
+                    tvLeft.setVisibility(View.GONE);
+                    tvRight.setVisibility(View.GONE);
                     break;
                 case MotionEvent.ACTION_MOVE:
                     int nowX =(int) event.getRawX();
@@ -131,10 +135,11 @@ public class DownLoadWindowService extends Service {
                     x = X;
                     if(layoutParams.x + mX>0){
                         layoutParams.x = windowManager.getDefaultDisplay().getWidth();
+                        tvRight.setVisibility(View.VISIBLE);
                     }else{
                         layoutParams.x=-windowManager.getDefaultDisplay().getWidth();
+                        tvLeft.setVisibility(View.VISIBLE);
                     }
-
                     layoutParams.y = layoutParams.y + mY;
                     setViewFade();
                     // 更新悬浮窗控件布局

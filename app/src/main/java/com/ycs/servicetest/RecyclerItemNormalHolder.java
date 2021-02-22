@@ -100,7 +100,7 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder{
                             super.onPrepared(url, objects);
                             if (!gsyVideoPlayer.isIfCurrentIsFullscreen()) {
                                 //静音
-                                GSYVideoManager.instance().setNeedMute(true);
+                                GSYVideoManager.instance().setNeedMute(false);
                             }
 
                         }
@@ -115,7 +115,8 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder{
                         public void onQuitFullscreen(String url, Object... objects) {
                             super.onQuitFullscreen(url, objects);
                             //全屏不静音
-                            GSYVideoManager.instance().setNeedMute(true);
+                            GSYVideoManager.instance().setNeedMute(false);
+
                         }
 
                         @Override
@@ -132,7 +133,6 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder{
 
             //设置返回键
             gsyVideoPlayer.getBackButton().setVisibility(View.GONE);
-
             //设置全屏按键功能
             gsyVideoPlayer.getFullscreenButton().setOnClickListener(new View.OnClickListener() {
                 @Override
