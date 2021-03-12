@@ -279,24 +279,35 @@ public class WebUtil {
                 })
                 .setOnProgressListener(new OnProgressListener() {
                     private boolean is=true;
+                    private double sum=0;
+                    private double percent;
+                    private double currentBytes;
                     @Override
                     public void onProgress(Progress progress) {
                         if(is){
                             is=false;
-                            double d=(new BigDecimal(progress.totalBytes / (1024*1024.0))
+                            sum=(new BigDecimal(progress.totalBytes / (1024*1024.0))
                                     .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
-                            String len=d+"MB";
+                            String len=sum+"MB";
                             Toast.makeText(context, filename+"开始下载，共"+len, Toast.LENGTH_SHORT).show();
                         }
-                        double d=(new BigDecimal(progress.currentBytes / (double)progress.totalBytes)
+
+                        if(sum==0){
+                            sum=(new BigDecimal(progress.totalBytes / (1024*1024.0))
+                                    .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
+                        }
+                        currentBytes=(new BigDecimal(progress.currentBytes / (1024*1024.0))
                                 .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
-                        double sum=(new BigDecimal(progress.totalBytes / (1024*1024.0))
-                                .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
-                        double currentBytes=(new BigDecimal(progress.currentBytes / (1024*1024.0))
-                                .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
+                        if(sum!=0){
+                            percent=(new BigDecimal(currentBytes/sum)
+                                    .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
+                        }else{
+                            percent=0.5;
+                        }
+
                         String progressStr=currentBytes+"MB/"+sum+"MB";
-                        MainService.updateProgress(context,(int)(d*100),progressStr);
-                        DownLoadWindowService.updateProgress((int)(d*100));
+                        MainService.updateProgress(context,(int)(percent*100),progressStr);
+                        DownLoadWindowService.updateProgress((int)(percent*100));
                     }
                 })
                 .start(new OnDownloadListener() {

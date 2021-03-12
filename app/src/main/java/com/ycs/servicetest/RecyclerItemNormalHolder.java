@@ -34,7 +34,6 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder{
     private String url=Environment.getExternalStorageDirectory() +"/.savedPic/";
     private DiskLruCache mDiskCache;
     SampleCoverVideo gsyVideoPlayer;
-
     ImageView imageView;
 
     GSYVideoOptionBuilder gsyVideoOptionBuilder;
@@ -99,7 +98,7 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder{
                         public void onPrepared(String url, Object... objects) {
                             super.onPrepared(url, objects);
                             if (!gsyVideoPlayer.isIfCurrentIsFullscreen()) {
-                                //静音
+                                //非静音
                                 GSYVideoManager.instance().setNeedMute(false);
                             }
 
