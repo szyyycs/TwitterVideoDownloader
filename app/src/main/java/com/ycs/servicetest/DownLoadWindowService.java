@@ -98,7 +98,9 @@ public class DownLoadWindowService extends Service {
     private class FloatingOnTouchListener implements View.OnTouchListener {
         private int x;
         private int y;
+        private int xx;
         private int yy;
+        private boolean isLeft;
         @Override
         public boolean onTouch(View view, MotionEvent event) {
             TextView tvRight=view.findViewById(R.id.right);
@@ -106,10 +108,16 @@ public class DownLoadWindowService extends Service {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     x = (int) event.getRawX();
+                    xx=x;
                     yy= (int) event.getRawY();
                     y = (int) event.getRawY();
                     view.setAlpha(1);
                     handler.removeCallbacks(runnable);
+                    if(tvLeft.getVisibility()==View.VISIBLE){
+                        isLeft=true;
+                    }else {
+                        isLeft=false;
+                    }
                     tvLeft.setVisibility(View.GONE);
                     tvRight.setVisibility(View.GONE);
                     break;
@@ -132,7 +140,18 @@ public class DownLoadWindowService extends Service {
                     y = Y;
                     int X = (int) event.getRawX();
                     int mX = X - x;
+
                     x = X;
+                    if (Math.abs(X-xx) < 1.5&&Math.abs(Y-yy) < 1.5){
+                        sendBroadcast(new Intent(DownLoadWindowService.this,DialogReceiver.class));
+                        setViewFade();
+                        if(isLeft){
+                            tvLeft.setVisibility(View.VISIBLE);
+                        }else {
+                            tvRight.setVisibility(View.VISIBLE);
+                        }
+                        return true;
+                    }
                     if(layoutParams.x + mX>0){
                         layoutParams.x = windowManager.getDefaultDisplay().getWidth();
                         tvRight.setVisibility(View.VISIBLE);
@@ -144,7 +163,7 @@ public class DownLoadWindowService extends Service {
                     setViewFade();
                     // 更新悬浮窗控件布局
                     windowManager.updateViewLayout(view, layoutParams);
-                    break;
+                    return true;
 
                 default:
                     break;
