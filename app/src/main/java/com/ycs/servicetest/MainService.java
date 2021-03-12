@@ -182,7 +182,7 @@ public class MainService extends Service {
                 0))
                 .setContentTitle("提示")
 ////                .setLargeIcon(BitmapFactory.decodeResource(this.getResources(),R.drawable.large_icon))
-                .setSmallIcon(R.mipmap.app_icon)
+                .setSmallIcon(R.mipmap.downlo)
 //                        .setContentText("粘贴的内容是"+new ClipBoardUtil(MainService.this).paste())
                 .setWhen(System.currentTimeMillis());
         final Intent intentInput = new Intent(this, DialogReceiver.class);
