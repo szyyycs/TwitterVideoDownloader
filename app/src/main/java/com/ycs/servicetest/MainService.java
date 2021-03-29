@@ -1,54 +1,34 @@
 package com.ycs.servicetest;
 
 
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.PixelFormat;
-import android.opengl.Visibility;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
-import androidx.core.app.NotificationCompat;
-
-import com.downloader.PRDownloader;
-import com.downloader.Status;
 
 import java.util.Timer;
 
-
 import static com.ycs.servicetest.WebUtil.analyzeList;
-import static com.ycs.servicetest.WebUtil.downloadId;
 import static com.ycs.servicetest.WebUtil.isDownloading;
 import static com.ycs.servicetest.WebUtil.isHttpUrl;
-import static com.ycs.servicetest.WebUtil.predownload;
 
 
 public class MainService extends Service {
@@ -292,7 +272,10 @@ public class MainService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(dialogReceiver);
+        if(dialogReceiver!=null){
+            unregisterReceiver(dialogReceiver);
+        }
+
     }
 
     public static void setTextMarquee(TextView textView) {

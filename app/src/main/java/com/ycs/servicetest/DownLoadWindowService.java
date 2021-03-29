@@ -1,22 +1,13 @@
 package com.ycs.servicetest;
 
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.provider.Settings;
-import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
-import android.view.CollapsibleActionView;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,13 +15,10 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
 import com.dinuscxj.progressbar.CircleProgressBar;
-
-import de.hdodenhof.circleimageview.CircleImageView;
 
 public class DownLoadWindowService extends Service {
     private static RelativeLayout view;
@@ -57,6 +45,14 @@ public class DownLoadWindowService extends Service {
         }
         return super.onStartCommand(intent, flags, startId);
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopSelf();
+        windowManager.removeView(view);
+    }
+
     private void showFloatingWindow() {
         if (Settings.canDrawOverlays(this)) {
             // 获取WindowManager服务

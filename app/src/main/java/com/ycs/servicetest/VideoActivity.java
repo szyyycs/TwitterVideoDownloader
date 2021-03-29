@@ -1,13 +1,5 @@
 package com.ycs.servicetest;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
@@ -21,69 +13,59 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.util.LruCache;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.MediaController;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
-import android.widget.VideoView;
-//
-//import com.geccocrawler.gecco.annotation.Gecco;
-//import com.geccocrawler.gecco.annotation.RequestParameter;
-//import com.geccocrawler.gecco.annotation.Text;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.jakewharton.disklrucache.DiskLruCache;
 import com.lxj.xpopup.XPopup;
 import com.lxj.xpopup.interfaces.OnSelectListener;
-import com.shuyu.gsyvideoplayer.GSYBaseActivityDetail;
 import com.shuyu.gsyvideoplayer.GSYVideoManager;
 import com.shuyu.gsyvideoplayer.builder.GSYVideoOptionBuilder;
 import com.shuyu.gsyvideoplayer.listener.GSYSampleCallBack;
 import com.shuyu.gsyvideoplayer.listener.LockClickListener;
 import com.shuyu.gsyvideoplayer.utils.OrientationUtils;
-import com.shuyu.gsyvideoplayer.video.base.GSYBaseVideoPlayer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Wrapper;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+//
+//import com.geccocrawler.gecco.annotation.Gecco;
+//import com.geccocrawler.gecco.annotation.RequestParameter;
+//import com.geccocrawler.gecco.annotation.Text;
 
 
 public class VideoActivity extends AppCompatActivity {
@@ -130,6 +112,12 @@ public class VideoActivity extends AppCompatActivity {
             super.handleMessage(msg);
             switch (msg.what){
                 case SEARCH_VIDEO:
+                    if(itemsList.size()==0){
+                        isNull=true;
+                        setBlankUI();
+                        LoadingUtil.Loading_close();
+                        break;
+                    }
                     adapter.update(itemsList);
                     Toast.makeText(VideoActivity.this, "共找到"+itemsList.size()+"个视频", Toast.LENGTH_SHORT).show();
                     LoadingUtil.Loading_close();
@@ -198,7 +186,7 @@ public class VideoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(isNull){
-                    Toast.makeText(VideoActivity.this,"您视频列表为空，请下载视频后再进入抖音模式哦！",Toast.LENGTH_SHORT);
+                    Toast.makeText(VideoActivity.this,"您视频列表为空，请下载视频后再进入抖音模式哦！",Toast.LENGTH_SHORT).show();
                     return;
                 }
                 Intent intent = new Intent();

@@ -32,9 +32,22 @@
                 android:textStyle="bold"
                 android:gravity="center"
                 />
+
+            <com.wang.avi.AVLoadingIndicatorView
+                android:layout_width="@dimen/dp_29"
+                android:layout_height="@dimen/dp_24"
+                android:layout_marginTop="3dp"
+                android:layout_toLeftOf="@id/intoTiktok"
+                android:layout_marginRight="10dp"
+                app:indicatorName="PacmanIndicator"
+                app:indicatorColor="#aaa"
+                android:scaleType="fitXY"
+                android:visibility="invisible"
+                android:layout_centerVertical="true"
+                />
             <ImageView
-                android:layout_width="25dp"
-                android:layout_height="20dp"
+                android:layout_width="@dimen/dp_20"
+                android:layout_height="@dimen/dp_17"
                 android:src="@mipmap/tiktok"
                 android:id="@+id/intoTiktok"
                 android:layout_centerVertical="true"
@@ -51,8 +64,8 @@
                 >
 
                 <ImageView
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
+                    android:layout_width="@dimen/dp_20"
+                    android:layout_height="@dimen/dp_25"
                     android:layout_centerInParent="true"
                     android:src="@mipmap/sortt"
 

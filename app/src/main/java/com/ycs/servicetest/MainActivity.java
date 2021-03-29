@@ -1,15 +1,6 @@
 package com.ycs.servicetest;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
 import android.Manifest;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -33,15 +24,17 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.downloader.PRDownloader;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
-import java.util.List;
+import com.downloader.PRDownloader;
 
 import static com.ycs.servicetest.WebUtil.analyzeList;
 import static com.ycs.servicetest.WebUtil.isAnalyse;
 import static com.ycs.servicetest.WebUtil.isDownloading;
 import static com.ycs.servicetest.WebUtil.isHttpUrl;
-import static com.ycs.servicetest.WebUtil.predownload;
 
 public class MainActivity extends AppCompatActivity {
     final static String TAG="yyy";
@@ -196,20 +189,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-//        btn.setOnLongClickListener(new View.OnLongClickListener() {
-//            @Override
-//            public boolean onLongClick(View v) {
-////                Intent intent = new Intent(MainActivity.this, FloatActivity.class);
-////                startActivity(intent);
-//                /**
-//                 *
-//                 * 把onclicklistener注释取消，下面注释去掉
-//                 *
-//                 * */
-//
-//                return true;
-//            }
-//        });
+
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
             if(!isFloatWindowsshow){
                 Intent i=new Intent(MainActivity.this,DownLoadWindowService.class);
@@ -275,6 +255,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopService(new Intent(MainActivity.this,DownLoadWindowService.class));
+        stopService(new Intent(MainActivity.this,MainService.class));
+    }
+
     private void getPemission(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
