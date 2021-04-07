@@ -35,6 +35,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.jakewharton.disklrucache.DiskLruCache;
 import com.lxj.xpopup.XPopup;
 import com.lxj.xpopup.interfaces.OnSelectListener;
@@ -86,12 +88,14 @@ public class VideoActivity extends AppCompatActivity {
     private RelativeLayout blank;
     private ImageView iv_intotiktok;
     private OrientationUtils orientationUtils;
+    private View scan;
     //private String url=Environment.getExternalStorageDirectory() +"/123/";
     //private String url=Environment.getExternalStorageDirectory() +"/DCIM/Camera/";
     private String url=Environment.getExternalStorageDirectory() +"/.savedPic/";
     private boolean isFullScreen=false;
     private ImageView iv;
     private DiskLruCache mDiskCache;
+    private Boolean HaveList=false;
     //private ImageView blank;
     public static final int SEARCH_VIDEO=1;
     public static final int SEARCH_ONE_VIDEO=2;
@@ -116,6 +120,7 @@ public class VideoActivity extends AppCompatActivity {
                         isNull=true;
                         setBlankUI();
                         LoadingUtil.Loading_close();
+                        scan.setVisibility(View.INVISIBLE);
                         break;
                     }
                     adapter.update(itemsList);
@@ -155,6 +160,12 @@ public class VideoActivity extends AppCompatActivity {
 //        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
 //        // Use 1/8th of the available memory for this memory cache.
 //        final int cacheSize = maxMemory / 8;
+//        mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+//            @Override
+//            protected int sizeOf(String key, Bitmap bitmap) {
+//                return bitmap.getByteCount() / 1024;
+//            }
+//        };
         File ff=new File(url);
         if (!ff.exists()) {
             // 若文件夹不存在，建立文件夹
@@ -165,15 +176,12 @@ public class VideoActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-//        mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
-//            @Override
-//            protected int sizeOf(String key, Bitmap bitmap) {
-//                return bitmap.getByteCount() / 1024;
-//            }
-//        };
+
         LoadingUtil.Loading_show(this);
         iv=findViewById(R.id.back);
         title=findViewById(R.id.title);
+        scan=findViewById(R.id.scan);
+        scan.setVisibility(View.VISIBLE);
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -370,129 +378,19 @@ public class VideoActivity extends AppCompatActivity {
         });
        //vv=findViewById(R.id.videoview);
         blank=findViewById(R.id.blank_layout);
-        //MediaController mediaController = new MediaController(this);
-        //vv.setMediaController(mediaController);
-        //detailPlayer.setVisibility(View.INVISIBLE);
+
         r=findViewById(R.id.r);
-        //mediaController.setMediaPlayer(vv);
         recyclerView=findViewById(R.id.recyclerview);
         layoutManager = new CustomLinearLayoutManager(this);
         layoutManager.setScrollEnabled(true);
         recyclerView.setLayoutManager(layoutManager);
         itemsList.clear();
-
+        itemsList=getDataList("list");
+        if(itemsList.size()!=0){
+            HaveList=true;
+        }
         adapter=new ItemAdapter(itemsList);
         recyclerView.setAdapter(adapter);
-        File f=new File(url);
-        if(!f.exists()){
-            f.mkdirs();
-            Log.e(TAG, "不存在" );
-
-        }
-        if(f.list()==null||f.list().length==0){
-            if(f.list()==null){
-                //getPermission();
-                Log.e(TAG, "不存在" );
-            }
-
-            //Toast.makeText(this, "文件夹下什么文件都没有噢", Toast.LENGTH_SHORT).show();
-            LoadingUtil.Loading_close();
-            setBlankUI();
-            isNull=true;
-            return;
-        }
-        isNull=false;
-        new Thread(new Runnable() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
-            @Override
-            public void run() {
-                for(final String s:f.list()){
-                    if(!s.endsWith(".mp4")){
-                        continue;
-                    }
-                    if(!s.substring(s.length()-4,s.length()).equals(".mp4")){
-                        continue;
-                    }
-                    String uu=url+s;
-                    String text=sp.getString(s,"");
-//                    String t=text.replace("\n","  ");
-//                    if(!t.equals(text)){
-//                        SharedPreferences.Editor e=sp.edit();
-//                        e.putString(s,t);
-//                        e.commit();
-//                    }
-                    Log.e("yyy",s);
-                    final Items i=new Items();
-                    File file=new File(uu);
-                    double d=(new BigDecimal(file.length() / (1024*1024.0))
-                            .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
-                    String len=d+"MB";
-                    //
-                    BasicFileAttributes attr = null;
-                    Instant instant=null;
-                    String time=null;
-                    if((s.length()==22||s.length()==21)&&s.startsWith("20")){
-                        time=s.substring(0,4)+"/"+s.substring(4,6)+"/"+s.substring(6,8)+" "+s.substring(8,10)+":"+s.substring(10,12);
-                    }else{
-                        try {
-                            Path path =  file.toPath();
-                            attr = Files.readAttributes(path, BasicFileAttributes.class);
-                            instant= attr.creationTime().toInstant();
-                            //Log.e(TAG, "createTime: "+instant );
-                            String temp=instant.toString().replace("T"," ").replace("Z","").replace("-","/");
-                            time=temp.substring(0,temp.length()-3);
-                            //Log.e(TAG, "createTime: "+time );
-                        } catch (IOException e) {
-                            long timeee=file.lastModified();
-                            SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-                            time=formatter.format(timeee);
-                            Log.e(TAG, "modifiedTime: "+time );
-                        }
-                    }
-                    // 创建时间
-                    //String time=s.substring(0,4)+"."+s.substring(4,6)+"."+s.substring(6,8)+" "+s.substring(8,10)+":"+s.substring(10,12);
-                    MediaPlayer mediaPlayer = new MediaPlayer();
-
-                    try {
-                        mediaPlayer.setDataSource(uu);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        mediaPlayer.prepare();
-                    } catch (IOException e) {
-                    }
-                    long timee =  mediaPlayer.getDuration()/1000;//获得了视频的时长（以毫秒为单位）
-                    mediaPlayer.release();
-                    mediaPlayer=null;
-                    String tt;
-                    if(timee/60!=0){
-                        if(timee%60<10){
-                            tt=timee/60+":0"+timee%60;
-                        }else{
-                            tt=timee/60+":"+timee%60;
-                        }
-                    }else{
-                        if(timee%60<10){
-                            tt="00:0"+timee%60;
-                        }else{
-                            tt="00:"+timee%60;
-                        }
-
-                    }
-                    i.setVideo_len(tt);
-                    i.setSize(len);
-                    i.setText(s);
-                    i.setTime(time);
-                    i.setUrl(uu);
-                    i.setTwittertext(text);
-                    itemsList.add(0,i);
-                    handler.sendEmptyMessage(SEARCH_ONE_VIDEO);
-                }
-                sort(itemsList);
-                handler.sendEmptyMessage(SEARCH_VIDEO);
-            }
-        }).start();
         adapter.setOnItemClickListener(new ItemAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int postion) {
@@ -544,6 +442,113 @@ public class VideoActivity extends AppCompatActivity {
                         .show();
             }
         });
+        File f=new File(url);
+        if(!f.exists()){
+            f.mkdirs();
+            Log.e(TAG, "不存在" );
+
+        }
+        if(f.list()==null||f.list().length==0){
+            if(f.list()==null){
+                //getPermission();
+                Log.e(TAG, "不存在" );
+            }
+
+            //Toast.makeText(this, "文件夹下什么文件都没有噢", Toast.LENGTH_SHORT).show();
+            LoadingUtil.Loading_close();
+            setBlankUI();
+            isNull=true;
+            scan.setVisibility(View.INVISIBLE);
+
+            return;
+        }
+        isNull=false;
+        new Thread(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
+            @Override
+            public void run() {
+                for(final String s:f.list()){
+                    if(!s.endsWith(".mp4")){
+                        continue;
+                    }
+                    if(!s.substring(s.length()-4,s.length()).equals(".mp4")){
+                        continue;
+                    }
+                    String uu=url+s;
+                    String text=sp.getString(s,"");
+                    Log.e("yyy",s);
+                    final Items i=new Items();
+                    File file=new File(uu);
+                    double d=(new BigDecimal(file.length() / (1024*1024.0))
+                            .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
+                    String len=d+"MB";
+
+                    BasicFileAttributes attr = null;
+                    Instant instant=null;
+                    String time=null;
+                    if((s.length()==22||s.length()==21)&&s.startsWith("20")){
+                        time=s.substring(0,4)+"/"+s.substring(4,6)+"/"+s.substring(6,8)+" "+s.substring(8,10)+":"+s.substring(10,12);
+                    }else{
+                        try {
+                            Path path =  file.toPath();
+                            attr = Files.readAttributes(path, BasicFileAttributes.class);
+                            instant= attr.creationTime().toInstant();
+                            String temp=instant.toString().replace("T"," ").replace("Z","").replace("-","/");
+                            time=temp.substring(0,temp.length()-3);
+                        } catch (IOException e) {
+                            long timeee=file.lastModified();
+                            SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                            time=formatter.format(timeee);
+                            Log.e(TAG, "modifiedTime: "+time );
+                        }
+                    }
+                    // 创建时间
+                    //String time=s.substring(0,4)+"."+s.substring(4,6)+"."+s.substring(6,8)+" "+s.substring(8,10)+":"+s.substring(10,12);
+                    MediaPlayer mediaPlayer = new MediaPlayer();
+
+                    try {
+                        mediaPlayer.setDataSource(uu);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        mediaPlayer.prepare();
+                    } catch (IOException e) {
+                    }
+                    long timee =  mediaPlayer.getDuration()/1000;//获得了视频的时长（以毫秒为单位）
+                    mediaPlayer.release();
+                    mediaPlayer=null;
+                    String tt;
+                    if(timee/60!=0){
+                        if(timee%60<10){
+                            tt=timee/60+":0"+timee%60;
+                        }else{
+                            tt=timee/60+":"+timee%60;
+                        }
+                    }else{
+                        if(timee%60<10){
+                            tt="00:0"+timee%60;
+                        }else{
+                            tt="00:"+timee%60;
+                        }
+
+                    }
+                    i.setVideo_len(tt);
+                    i.setSize(len);
+                    i.setText(s);
+                    i.setTime(time);
+                    i.setUrl(uu);
+                    i.setTwittertext(text);
+
+                    itemsList.add(0,i);
+                    handler.sendEmptyMessage(SEARCH_ONE_VIDEO);
+                }
+                sort(itemsList);
+
+                handler.sendEmptyMessage(SEARCH_VIDEO);
+            }
+        }).start();
+
 
     }
 
@@ -641,7 +646,40 @@ public class VideoActivity extends AppCompatActivity {
 
             }
         });
+
     }
+    public  void setDataList(String tag, ArrayList<Items> datalist) {
+        if (null == datalist || datalist.size() <= 0)
+            return;
+
+        Gson gson = new Gson();
+        //转换成json数据，再保存
+        String strJson = gson.toJson(datalist);
+        SharedPreferences.Editor editor=sp.edit();
+        editor.clear();
+        editor.putString(tag, strJson);
+        editor.commit();
+
+    }
+
+    /**
+     * 获取List
+     * @param tag
+     * @return
+     */
+    public ArrayList<Items> getDataList(String tag) {
+        ArrayList<Items> datalist=new ArrayList<Items>();
+        String strJson = sp.getString(tag, null);
+        if (null == strJson) {
+            return datalist;
+        }
+        Gson gson = new Gson();
+        datalist = gson.fromJson(strJson, new TypeToken<ArrayList<Items>>() {
+        }.getType());
+        return datalist;
+
+    }
+
     public void setBlankUI(){
         //detailPlayer.setVisibility(View.GONE);
        // recyclerView.setVisibility(View.INVISIBLE);
