@@ -130,7 +130,7 @@ public class VideoActivity extends AppCompatActivity {
                     loadPic();
                     break;
                 case UPDATE_LIST:
-                    sort(newItemsList);
+
                     itemsList=newItemsList;
                     adapter.update(itemsList);
                     loadPic();
@@ -562,6 +562,7 @@ public class VideoActivity extends AppCompatActivity {
                 }
                 if(HaveList){
                     if(itemsList.size()!=newItemsList.size()) {
+                        sort(newItemsList);
                         setDataList(url, newItemsList);
                         handler.sendEmptyMessage(UPDATE_LIST);
                     }else {
