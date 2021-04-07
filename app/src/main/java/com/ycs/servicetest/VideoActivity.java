@@ -130,6 +130,7 @@ public class VideoActivity extends AppCompatActivity {
                     loadPic();
                     break;
                 case UPDATE_LIST:
+                    sort(newItemsList);
                     itemsList=newItemsList;
                     adapter.update(itemsList);
                     loadPic();
