@@ -13,7 +13,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -29,7 +28,6 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -80,6 +78,7 @@ public class VideoActivity extends AppCompatActivity {
     private CustomLinearLayoutManager layoutManager ;
     private RecyclerView recyclerView;
     private ArrayList<Items> itemsList=new ArrayList<>();
+    private ArrayList<Items> newItemsList=new ArrayList<>();
     //private ArrayList<String> srcList=new ArrayList<>();
     //private VideoView vv;
     private MyVideoPlayer detailPlayer;
@@ -102,6 +101,8 @@ public class VideoActivity extends AppCompatActivity {
     public static final int SCANING_ONE_PIC=3;
     public static final int AFTER_SORT_SCAN=4;
     public static final int UPDATE_ALL=5;
+    public static final int UPDATE_LIST=6;
+    public static final int NO_UPDATE_LIST=7;
     private RelativeLayout title;
 //    private LruCache<String, Bitmap> mMemoryCache;
     private RelativeLayout sortImage;
@@ -127,6 +128,15 @@ public class VideoActivity extends AppCompatActivity {
                     Toast.makeText(VideoActivity.this, "共找到"+itemsList.size()+"个视频", Toast.LENGTH_SHORT).show();
                     LoadingUtil.Loading_close();
                     loadPic();
+                    break;
+                case UPDATE_LIST:
+                    itemsList=newItemsList;
+                    adapter.update(itemsList);
+                    loadPic();
+                    scan.setVisibility(View.INVISIBLE);
+                    break;
+                case NO_UPDATE_LIST:
+                    scan.setVisibility(View.INVISIBLE);
                     break;
                 case SEARCH_ONE_VIDEO:
                     adapter.updateOne(itemsList);
@@ -385,9 +395,11 @@ public class VideoActivity extends AppCompatActivity {
         layoutManager.setScrollEnabled(true);
         recyclerView.setLayoutManager(layoutManager);
         itemsList.clear();
-        itemsList=getDataList("list");
+        itemsList=getDataList(url);
         if(itemsList.size()!=0){
             HaveList=true;
+            loadPic();
+            LoadingUtil.Loading_close();
         }
         adapter=new ItemAdapter(itemsList);
         recyclerView.setAdapter(adapter);
@@ -459,12 +471,10 @@ public class VideoActivity extends AppCompatActivity {
             setBlankUI();
             isNull=true;
             scan.setVisibility(View.INVISIBLE);
-
             return;
         }
         isNull=false;
         new Thread(new Runnable() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void run() {
                 for(final String s:f.list()){
@@ -490,9 +500,12 @@ public class VideoActivity extends AppCompatActivity {
                         time=s.substring(0,4)+"/"+s.substring(4,6)+"/"+s.substring(6,8)+" "+s.substring(8,10)+":"+s.substring(10,12);
                     }else{
                         try {
-                            Path path =  file.toPath();
-                            attr = Files.readAttributes(path, BasicFileAttributes.class);
-                            instant= attr.creationTime().toInstant();
+                            Path path = null;
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                path = file.toPath();
+                                attr = Files.readAttributes(path, BasicFileAttributes.class);
+                                instant= attr.creationTime().toInstant();
+                            }
                             String temp=instant.toString().replace("T"," ").replace("Z","").replace("-","/");
                             time=temp.substring(0,temp.length()-3);
                         } catch (IOException e) {
@@ -539,13 +552,26 @@ public class VideoActivity extends AppCompatActivity {
                     i.setTime(time);
                     i.setUrl(uu);
                     i.setTwittertext(text);
-
-                    itemsList.add(0,i);
-                    handler.sendEmptyMessage(SEARCH_ONE_VIDEO);
+                    if(HaveList){
+                        newItemsList.add(0,i);
+                    }else{
+                        itemsList.add(0,i);
+                        handler.sendEmptyMessage(SEARCH_ONE_VIDEO);
+                    }
                 }
-                sort(itemsList);
+                if(HaveList){
+                    if(itemsList.size()!=newItemsList.size()) {
+                        setDataList(url, newItemsList);
+                        handler.sendEmptyMessage(UPDATE_LIST);
+                    }else {
+                        handler.sendEmptyMessage(NO_UPDATE_LIST);
+                    }
+                }else {
+                    sort(itemsList);
+                    setDataList(url,itemsList);
+                    handler.sendEmptyMessage(SEARCH_VIDEO);
+                }
 
-                handler.sendEmptyMessage(SEARCH_VIDEO);
             }
         }).start();
 
@@ -980,7 +1006,6 @@ public class VideoActivity extends AppCompatActivity {
                         if (i < itemsList.size()) {
                             try {
                                 loadBitmap(itemsList.get(i).getUrl(), i);
-
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }

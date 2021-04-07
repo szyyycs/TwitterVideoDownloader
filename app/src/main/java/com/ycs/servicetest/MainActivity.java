@@ -31,6 +31,8 @@ import androidx.core.content.ContextCompat;
 
 import com.downloader.PRDownloader;
 
+import java.util.ArrayList;
+
 import static com.ycs.servicetest.WebUtil.analyzeList;
 import static com.ycs.servicetest.WebUtil.isAnalyse;
 import static com.ycs.servicetest.WebUtil.isDownloading;
@@ -189,7 +191,31 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        btn.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                ArrayList<Items> list=new ArrayList<>();
+                Items i=new Items();
+                i.setText("222");
+                Items ii=new Items();
+                i.setText("222");
+                list.add(i);
+                if(i.equals(ii)){
+                    Log.d(TAG, "item相同");
+                }else {
+                    Log.d(TAG, "item不相同");
+                }
 
+                ArrayList<Items> list2=new ArrayList<>();
+                list2.add(ii);
+                if(list.equals(list2)){
+                    Log.d(TAG, "list相同");
+                }else {
+                    Log.d(TAG, "list2不相同");
+                }
+                return false;
+            }
+        });
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
             if(!isFloatWindowsshow){
                 Intent i=new Intent(MainActivity.this,DownLoadWindowService.class);
@@ -270,7 +296,7 @@ public class MainActivity extends AppCompatActivity {
 //                Toast.makeText(this, "请允许悬浮窗权限", Toast.LENGTH_SHORT);
                 new IosAlertDialog(this)
                         .builder()
-                        .setTitle("前往获取权限")
+                        .setTitle("前往获取悬浮窗权限")
                         .setPositiveButton("立即跳转", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {

@@ -1,7 +1,6 @@
 package com.ycs.servicetest;
 
 import android.graphics.Bitmap;
-import android.widget.ImageView;
 
 import java.io.Serializable;
 
@@ -70,4 +69,5 @@ public class Items implements Serializable {
     public void setSrc(Bitmap src) {
         this.src = src;
     }
+
 }
