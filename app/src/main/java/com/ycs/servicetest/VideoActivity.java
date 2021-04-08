@@ -127,12 +127,14 @@ public class VideoActivity extends AppCompatActivity {
                     adapter.update(itemsList);
                     Toast.makeText(VideoActivity.this, "共找到"+itemsList.size()+"个视频", Toast.LENGTH_SHORT).show();
                     LoadingUtil.Loading_close();
+                    isScaning=false;
                     loadPic();
                     break;
                 case UPDATE_LIST:
 
                     itemsList=newItemsList;
                     adapter.update(itemsList);
+                    isScaning=false;
                     loadPic();
                     scan.setVisibility(View.INVISIBLE);
                     break;
@@ -399,6 +401,7 @@ public class VideoActivity extends AppCompatActivity {
         itemsList=getDataList(url);
         if(itemsList.size()!=0){
             HaveList=true;
+            isScaning=false;
             loadPic();
             LoadingUtil.Loading_close();
         }
@@ -1092,7 +1095,11 @@ public class VideoActivity extends AppCompatActivity {
         DiskLruCache.Editor editor = mDiskCache.edit(key);
         // index与valueCount对应，分别为0,1,2...valueCount-1
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        try {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        }catch (Exception e){
+            Log.e(TAG, "addDiskCache: "+e.getMessage() );
+        }
         editor.newOutputStream(0).write( baos.toByteArray());
         editor.commit();
         baos.close();
@@ -1100,9 +1107,7 @@ public class VideoActivity extends AppCompatActivity {
 }
 
     public synchronized void loadBitmap(String imageKey, int i) throws IOException {
-
 //        Bitmap bitmap = getBitmapFromMemCache(imageKey);
-
         Bitmap bitmap = getCache(imageKey);
         if (bitmap != null) {
             Log.e(TAG, "读取" );
