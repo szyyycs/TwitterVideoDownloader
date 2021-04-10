@@ -44,8 +44,21 @@
                 app:indicatorName="PacmanIndicator"
                 app:indicatorColor="#aaa"
                 android:scaleType="fitXY"
-                android:visibility="invisible"
+
                 android:layout_centerVertical="true"
+                />
+            <TextView
+                android:id="@+id/scanNum"
+                android:layout_width="@dimen/dp_29"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@id/intoTiktok"
+                android:layout_marginRight="10dp"
+                android:layout_alignParentBottom="true"
+                android:gravity="center"
+                android:textSize="10sp"
+                android:text="1234"
+
+
                 />
             <ImageView
                 android:layout_width="@dimen/dp_20"

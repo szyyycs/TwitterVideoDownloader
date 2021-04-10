@@ -25,6 +25,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -88,6 +89,7 @@ public class VideoActivity extends AppCompatActivity {
     private ImageView iv_intotiktok;
     private OrientationUtils orientationUtils;
     private View scan;
+    private TextView scanNum;
     //private String url=Environment.getExternalStorageDirectory() +"/123/";
     //private String url=Environment.getExternalStorageDirectory() +"/DCIM/Camera/";
     private String url=Environment.getExternalStorageDirectory() +"/.savedPic/";
@@ -122,6 +124,7 @@ public class VideoActivity extends AppCompatActivity {
                         setBlankUI();
                         LoadingUtil.Loading_close();
                         scan.setVisibility(View.INVISIBLE);
+                        scanNum.setVisibility(View.INVISIBLE);
                         break;
                     }
                     adapter.update(itemsList);
@@ -131,15 +134,17 @@ public class VideoActivity extends AppCompatActivity {
                     loadPic();
                     break;
                 case UPDATE_LIST:
-
                     itemsList=newItemsList;
                     adapter.update(itemsList);
                     isScaning=false;
                     loadPic();
                     scan.setVisibility(View.INVISIBLE);
+                    scanNum.setVisibility(View.INVISIBLE);
+
                     break;
                 case NO_UPDATE_LIST:
                     scan.setVisibility(View.INVISIBLE);
+                    scanNum.setVisibility(View.INVISIBLE);
                     break;
                 case SEARCH_ONE_VIDEO:
                     adapter.updateOne(itemsList);
@@ -159,7 +164,7 @@ public class VideoActivity extends AppCompatActivity {
         }
     };
     private RelativeLayout r;
-
+    private int num=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -195,6 +200,8 @@ public class VideoActivity extends AppCompatActivity {
         title=findViewById(R.id.title);
         scan=findViewById(R.id.scan);
         scan.setVisibility(View.VISIBLE);
+        scanNum=findViewById(R.id.scanNum);
+        scanNum.setText("0");
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -459,6 +466,7 @@ public class VideoActivity extends AppCompatActivity {
             }
         });
         File f=new File(url);
+        num=0;
         if(!f.exists()){
             f.mkdirs();
             Log.e(TAG, "不存在" );
@@ -475,6 +483,9 @@ public class VideoActivity extends AppCompatActivity {
             setBlankUI();
             isNull=true;
             scan.setVisibility(View.INVISIBLE);
+
+            scanNum.setVisibility(View.INVISIBLE);
+            scanNum.setText(++num+"");
             return;
         }
         isNull=false;
@@ -558,9 +569,21 @@ public class VideoActivity extends AppCompatActivity {
                     i.setTwittertext(text);
                     if(HaveList){
                         newItemsList.add(0,i);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                scanNum.setText(++num+"");
+                            }
+                        });
                     }else{
                         itemsList.add(0,i);
                         handler.sendEmptyMessage(SEARCH_ONE_VIDEO);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                scanNum.setText(++num+"");
+                            }
+                        });
                     }
                 }
                 if(HaveList){
@@ -1155,7 +1178,7 @@ public class VideoActivity extends AppCompatActivity {
                                     return;
                                 }
 
-                            } else{
+                            }else{
                                 return;
                             }
                         }
