@@ -1,19 +1,14 @@
 package com.ycs.servicetest;
+
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.shuyu.gsyvideoplayer.utils.Debuger;
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer;
-import com.shuyu.gsyvideoplayer.video.base.GSYVideoControlView;
 
 import moe.codeest.enviews.ENDownloadView;
-import moe.codeest.enviews.ENPlayView;
-
-import static com.shuyu.gsyvideoplayer.utils.CommonUtil.hideNavKey;
 
 public class MyVideoPlayer extends StandardGSYVideoPlayer {
     private float speed=1;
@@ -129,7 +124,6 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
 
     protected void changeUiToPlayingPause() {
         Debuger.printfLog("changeUiToPlayingShow");
-
         setViewShowState(mTopContainer, VISIBLE);
         setViewShowState(mBottomContainer, VISIBLE);
         setViewShowState(mStartButton, VISIBLE);

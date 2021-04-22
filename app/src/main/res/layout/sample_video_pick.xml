@@ -35,13 +35,14 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:visibility="invisible">
-        <moe.codeest.enviews.ENPlayView
-            android:id="@+id/start"
-            android:layout_width="33dp"
-            android:layout_height="33dp"
 
+        <com.ycs.servicetest.MyENPlayView
+            android:id="@+id/start"
+            android:layout_width="23dp"
+            android:layout_height="23dp"
+            android:layout_gravity="center_vertical"
             android:layout_marginLeft="15dp"
-            android:layout_gravity="center" />
+             />
         <TextView
             android:id="@+id/current"
             android:layout_width="wrap_content"

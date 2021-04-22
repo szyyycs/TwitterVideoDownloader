@@ -131,6 +131,8 @@ public class VideoActivity extends AppCompatActivity {
                     Toast.makeText(VideoActivity.this, "共找到"+itemsList.size()+"个视频", Toast.LENGTH_SHORT).show();
                     LoadingUtil.Loading_close();
                     isScaning=false;
+                    scan.setVisibility(View.INVISIBLE);
+                    scanNum.setVisibility(View.INVISIBLE);
                     loadPic();
                     break;
                 case UPDATE_LIST:

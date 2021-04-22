@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,6 +20,8 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.dinuscxj.progressbar.CircleProgressBar;
+
+import static com.ycs.servicetest.MainActivity.TAG;
 
 public class DownLoadWindowService extends Service {
     private static RelativeLayout view;
@@ -103,6 +106,7 @@ public class DownLoadWindowService extends Service {
             TextView tvLeft=view.findViewById(R.id.left);
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+                    Log.d(TAG, "onTouch: 111");
                     x = (int) event.getRawX();
                     xx=x;
                     yy= (int) event.getRawY();
@@ -118,6 +122,7 @@ public class DownLoadWindowService extends Service {
                     tvRight.setVisibility(View.GONE);
                     break;
                 case MotionEvent.ACTION_MOVE:
+                    Log.d(TAG, "onTouch: 222");
                     int nowX =(int) event.getRawX();
                     int nowY = (int) event.getRawY();
                     int movedX = nowX - windowManager.getDefaultDisplay().getWidth()/2;
@@ -131,6 +136,7 @@ public class DownLoadWindowService extends Service {
                     windowManager.updateViewLayout(view, layoutParams);
                     break;
                 case MotionEvent.ACTION_UP:
+                    Log.d(TAG, "onTouch: 333");
                     int Y = (int) event.getRawY();
                     int mY = Y - y;
                     y = Y;
@@ -146,6 +152,7 @@ public class DownLoadWindowService extends Service {
                         }else {
                             tvRight.setVisibility(View.VISIBLE);
                         }
+                        Log.d(TAG, "移动过小");
                         return true;
                     }
                     if(layoutParams.x + mX>0){
@@ -160,18 +167,10 @@ public class DownLoadWindowService extends Service {
                     // 更新悬浮窗控件布局
                     windowManager.updateViewLayout(view, layoutParams);
                     return true;
-
                 default:
                     break;
             }
-//            if(yy!=layoutParams.y){
-//                //Toast.makeText(DownLoadWindowService.this, "变", Toast.LENGTH_SHORT).show();
-//                return true;
-//            }else {
-                //Toast.makeText(DownLoadWindowService.this, "没变", Toast.LENGTH_SHORT).show();
                 return false;
-            //}
-
         }
     }
     private void setViewFade(){
