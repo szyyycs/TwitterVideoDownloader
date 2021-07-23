@@ -47,6 +47,17 @@
 
                 android:layout_centerVertical="true"
                 />
+            <ImageView
+                android:id="@+id/toScan"
+                android:layout_width="@dimen/dp_14"
+                android:layout_height="@dimen/dp_14"
+                android:layout_toLeftOf="@id/intoTiktok"
+                android:layout_marginRight="@dimen/dp_18"
+                android:scaleType="fitCenter"
+                android:layout_centerVertical="true"
+                android:src="@mipmap/find"
+                android:visibility="invisible"
+                />
             <TextView
                 android:id="@+id/scanNum"
                 android:layout_width="@dimen/dp_29"
@@ -155,6 +166,5 @@
     <androidx.constraintlayout.widget.Group
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-
         />
 </RelativeLayout>

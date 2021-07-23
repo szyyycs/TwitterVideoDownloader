@@ -30,6 +30,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.downloader.PRDownloader;
+import com.tencent.mmkv.MMKV;
 
 import java.util.ArrayList;
 
@@ -71,6 +72,23 @@ public class MainActivity extends AppCompatActivity {
         Window window = getWindow();
         window.setStatusBarColor(ContextCompat.getColor(this,R.color.colorIosBlue));
         PRDownloader.initialize(getApplicationContext());
+        WebUtil.init(getApplicationContext());
+        String rootDir = MMKV.initialize(this);
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                PRDownloader.initialize(getApplicationContext());
+//                WebUtil.init(getApplicationContext());
+//            }
+//        },3000);
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                PRDownloader.initialize(getApplicationContext());
+//                WebUtil.init(getApplicationContext());
+//            }
+//        }).start();
+
         iv=findViewById(R.id.download);
         TextView tv=findViewById(R.id.btn);
         btn=findViewById(R.id.confirm);
@@ -141,7 +159,6 @@ public class MainActivity extends AppCompatActivity {
         }else{
             startService(new Intent(MainActivity.this, MainService.class));
         }
-        WebUtil.init(this);
 
         etInput.addTextChangedListener(new TextWatcher() {
             @Override

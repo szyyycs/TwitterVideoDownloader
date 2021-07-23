@@ -46,51 +46,6 @@ public class MainService extends Service {
     public static NotificationManager nm;
     private DialogReceiver dialogReceiver;
 
-    //    private TimerTask task = new TimerTask() {
-//        @Override
-//        public void run() {
-//            Message message = new Message();
-//            message.what = 1;
-//            handler.sendMessage(message);
-//        }
-//    };
-//    Runnable logr=new Runnable() {
-//        @Override
-//        public void run() {
-//            String newStr=new ClipBoardUtil(MainService.this).paste();
-//            Log.e("yyy", "获取粘贴板内容\n"+newStr );
-//            handler.postDelayed(this,2000);
-//        }
-//    };
-//    Handler handler=new Handler(){
-//    };
-//    Handler handler = new Handler() {
-//        @Override
-//        public void handleMessage(Message msg) {
-//            if(msg.what==1){
-//                        //获取剪切板内容
-//                        newStr=new ClipBoardUtil(MainService.this).paste();
-//                        if(!newStr.equals(oldStr)&&newStr!=null&&newStr!=""){
-//                            builder.setContentText("粘贴内容为"+newStr);
-//                            Notification notification = builder.build();
-//                            notification.priority=Notification.PRIORITY_HIGH;
-////                            tv.setText("粘贴内容为"+newStr);
-////                            windowManager.updateViewLayout(view,layoutParams);
-//                            NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//                            nm.notify(110, notification);
-//                            Toast.makeText(MainService.this,newStr,Toast.LENGTH_SHORT).show();
-//                            Log.e("杨", newStr);
-//                            oldStr=newStr;
-//                        }
-//
-//
-//
-//
-//            }
-//
-//            super.handleMessage(msg);
-//        }
-//    };
     public MainService() {
 
     }
@@ -98,27 +53,6 @@ public class MainService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-//        r=new Runnable() {
-//            @Override
-//            public void run() {
-//                newStr=new ClipBoardUtil(MainService.this).paste();
-//                //Toast.makeText(MainService.this, newStr, Toast.LENGTH_SHORT).show();
-//                if(!newStr.equals(oldStr)&&newStr!=null&&newStr!=""){
-//                    builder.setContentText("粘贴内容为"+newStr);
-//                    Notification notification = builder.build();
-//                    notification.priority=Notification.PRIORITY_HIGH;
-//
-//                    NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//                    nm.notify(110, notification);
-////                    tv.setText("粘贴内容为"+newStr);
-////                    windowManager.updateViewLayout(view,layoutParams);
-//                    Toast.makeText(MainService.this,newStr,Toast.LENGTH_SHORT).show();
-//                    Log.e("杨", newStr);
-//                    oldStr=newStr;
-//                }
-//                h.postDelayed(this, 500);
-//            }
-//        };
     }
 
     @Override
@@ -131,8 +65,6 @@ public class MainService extends Service {
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //showFloatingWindow();
-        //handler.post(logr);
         String CHANNEL_ONE_ID = "com.ycs.cn";
         String CHANNEL_ONE_NAME = "Channel One";
         NotificationChannel notificationChannel = null;
@@ -161,12 +93,9 @@ public class MainService extends Service {
         builder.setContentIntent(PendingIntent.getActivity(MainService.this, 0, it,
                 0))
                 .setContentTitle("提示")
-////                .setLargeIcon(BitmapFactory.decodeResource(this.getResources(),R.drawable.large_icon))
                 .setSmallIcon(R.mipmap.downlo)
-//                        .setContentText("粘贴的内容是"+new ClipBoardUtil(MainService.this).paste())
                 .setWhen(System.currentTimeMillis());
         final Intent intentInput = new Intent(this, DialogReceiver.class);
-       // intentInput.setAction("");
         final PendingIntent pi = PendingIntent.getBroadcast(this, 0, intentInput, PendingIntent.FLAG_UPDATE_CURRENT);
         notification = builder.build();
         if (Build.VERSION.SDK_INT < 29) {

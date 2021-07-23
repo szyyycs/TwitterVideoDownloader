@@ -2,26 +2,19 @@ package com.ycs.servicetest;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
-import android.media.MediaScannerConnection;
-import android.media.ThumbnailUtils;
-import android.media.session.MediaSession;
-import android.media.session.MediaSessionManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.core.content.FileProvider;
 
-import com.downloader.Constants;
 import com.downloader.Error;
 import com.downloader.OnDownloadListener;
 import com.downloader.OnPauseListener;
@@ -29,7 +22,7 @@ import com.downloader.OnProgressListener;
 import com.downloader.OnStartOrResumeListener;
 import com.downloader.PRDownloader;
 import com.downloader.Progress;
-import com.downloader.Status;
+import com.tencent.mmkv.MMKV;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.Twitter;
@@ -42,16 +35,11 @@ import com.twitter.sdk.android.core.models.Tweet;
 import com.twitter.sdk.android.core.services.StatusesService;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -234,10 +222,12 @@ public class WebUtil {
     private static void downloadVideo(String url, Context context, Handler handler,String text) {
         if(!isDownloading){
             String filename=WebUtil.genearteFileName();
-            SharedPreferences sp=context.getSharedPreferences("text", Context.MODE_PRIVATE);
-            SharedPreferences.Editor e = sp.edit();
-            e.putString(filename,text);
-            e.commit();
+//            SharedPreferences sp=context.getSharedPreferences("twitter", Context.MODE_PRIVATE);
+            MMKV kv = MMKV.defaultMMKV();
+//            SharedPreferences.Editor e = sp.edit();
+//            e.putString(filename,text);
+//            e.commit();
+            kv.encode(filename, text);
             download(handler,url,
                     Environment.getExternalStorageDirectory() +"/.savedPic/",
                     filename,context);
@@ -245,7 +235,6 @@ public class WebUtil {
             //downLoadList.add(url);
             if(!downloadMap.containsKey(url)){
                 downloadMap.put(url,text);
-
             }
             Log.e(TAG, "downloadMap的值: " +downloadMap.toString());
         }
