@@ -1,26 +1,15 @@
 package com.ycs.servicetest;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import static com.ycs.servicetest.MainActivity.TAG;
@@ -60,7 +49,7 @@ public class WebService extends Service  {
         Log.e(TAG, "服务开启" );
         Toast.makeText(this, "链接开始解析", Toast.LENGTH_SHORT).show();
         MainService.updateNotification(WebService.this,"链接正在解析中...");
-        WebUtil.isAnalyse=true;
+
         url=intent.getStringExtra("url");
         if(!url.contains("http")){
             url="https://"+url;
@@ -70,7 +59,13 @@ public class WebService extends Service  {
             stopSelf();
             return super.onStartCommand(intent, flags, startId);
         }
+        if(WebUtil.isAnalyse){
+            WebUtil.analyzeList.add(url);
+        }else {
+            WebUtil.isAnalyse=true;
             WebUtil.predownload(url,WebService.this,handler);
+        }
+
 
 //        new Thread(new Runnable() {
 //            @Override

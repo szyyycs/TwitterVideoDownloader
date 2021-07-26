@@ -1,19 +1,13 @@
 package com.ycs.servicetest;
 
 import android.annotation.SuppressLint;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -23,9 +17,7 @@ import com.downloader.Status;
 
 import java.lang.reflect.Method;
 
-import static com.ycs.servicetest.WebUtil.analyzeList;
 import static com.ycs.servicetest.WebUtil.downloadId;
-import static com.ycs.servicetest.WebUtil.isAnalyse;
 import static com.ycs.servicetest.WebUtil.isHttpUrl;
 
 
@@ -38,14 +30,14 @@ public class DialogReceiver extends BroadcastReceiver {
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             if(msg.what==GOTO_DOWNLOAD){
-                isAnalyse=true;
+//                isAnalyse=true;
                 MainService.updateNotification(context,"链接正在解析中...");
                 Intent i=new Intent(context,WebService.class);
                 i.putExtra("url",msg.obj.toString());
                 context.startService(i);
             }
         }
-    };;
+    };
 
     @Override
     public void onReceive(final Context context, Intent intent) {
@@ -64,9 +56,11 @@ public class DialogReceiver extends BroadcastReceiver {
 //            if (Build.VERSION.SDK_INT < 29) {
 //                MainService.updateTitle(context.getResources().getString(R.string.app_name));
 //            }
-        }else if(isAnalyse){
+        }
+        /*else if(isAnalyse){
             Toast.makeText(context, "正在解析链接中，请稍后再粘贴下载", Toast.LENGTH_SHORT).show();
-        }else{
+        }*/
+        else{
             collapseStatusBar(context);
             final IosAlertDialog dialog=new IosAlertDialog(context).builder();
             dialog.setTitle("提示")

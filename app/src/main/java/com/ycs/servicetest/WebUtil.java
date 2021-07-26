@@ -328,18 +328,16 @@ public class WebUtil {
                         if(downloadMap.size()==0){
                             if(analyzeList.size()==0){
                                 handler.sendEmptyMessage(STOP_SERVICE);
+                                WebUtil.isAnalyse=false;
                             }else {
+                                WebUtil.isAnalyse=true;
                                 predownload(analyzeList.get(0),context,handler);
                             }
                         }else{
-                            WebUtil.isAnalyse=true;
                             for(String key:downloadMap.keySet()){
                                 downloadVideo(key,context,handler,downloadMap.get(key));
                                 break;
                             }
-
-
-
                         }
 
                     }

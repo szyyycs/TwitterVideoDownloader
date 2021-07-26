@@ -526,7 +526,7 @@ public class VideoActivity extends AppCompatActivity {
                     }
                     String uu=url+s;
 //                    String text=sptwitter.getString(s,"");
-                    String text =kv.decodeString(s);
+                    String text =kv.decodeString(s,"");
                     Log.e("ccc","s:"+s);
                     Log.e("ccc","text:"+text);
                     final Items i=new Items();
@@ -724,7 +724,7 @@ public class VideoActivity extends AppCompatActivity {
                     }
                     String uu=url+s;
 //                    String text=sptwitter.getString(s,"");
-                    String text =kv.decodeString(s);
+                    String text =kv.decodeString(s,"");
                     Log.e("ccc","s:"+s);
                     Log.e("ccc","text:"+text);
                     final Items i=new Items();
