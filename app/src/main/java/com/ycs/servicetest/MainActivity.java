@@ -32,8 +32,6 @@ import androidx.core.content.ContextCompat;
 import com.downloader.PRDownloader;
 import com.tencent.mmkv.MMKV;
 
-import java.util.ArrayList;
-
 import static com.ycs.servicetest.WebUtil.analyzeList;
 import static com.ycs.servicetest.WebUtil.isAnalyse;
 import static com.ycs.servicetest.WebUtil.isDownloading;
@@ -71,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().hide();
         Window window = getWindow();
         window.setStatusBarColor(ContextCompat.getColor(this,R.color.colorIosBlue));
+        CrashHandlerJ.getInstant().init();
         PRDownloader.initialize(getApplicationContext());
         WebUtil.init(getApplicationContext());
         String rootDir = MMKV.initialize(this);
@@ -188,22 +187,27 @@ public class MainActivity extends AppCompatActivity {
                 if(text.isEmpty()){
                     text=etInput.getHint().toString();
                 }
-                if(isHttpUrl(text)&&text.contains("twitter")){
+
+                if(!WebUtil.isNetworkConnected(MainActivity.this)){
+                    Toast.makeText(MainActivity.this, "网络未打开", Toast.LENGTH_SHORT).show();
+                }else if(isHttpUrl(text)&&text.contains("twitter")){
                     if(isAnalyse||isDownloading){
                         if(!analyzeList.contains(text)){
                             WebUtil.analyzeList.add(text);
                             Log.e(TAG, "analyzeList的值："+analyzeList.toString() );
+                            Toast.makeText(MainActivity.this, "已加入下载列表", Toast.LENGTH_SHORT).show();
+                        }else{
+                            Log.e(TAG, "analyzeList的值："+analyzeList.toString() );
+                            Toast.makeText(MainActivity.this, "已在下载列表中", Toast.LENGTH_SHORT).show();
                         }
-                        Toast.makeText(MainActivity.this, "已加入下载列表", Toast.LENGTH_SHORT).show();
+
                     }else{
                         Message ms=new Message();
                         ms.what=GOTO_DOWNLOAD;
                         ms.obj=text;
                         handler.sendMessage(ms);
                     }
-                }else if(!WebUtil.isNetworkConnected(MainActivity.this)){
-                    Toast.makeText(MainActivity.this, "网络未打开", Toast.LENGTH_SHORT).show();
-                }else {
+                } else {
                     Toast.makeText(MainActivity.this, "您粘贴的不是网址噢", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -211,25 +215,12 @@ public class MainActivity extends AppCompatActivity {
         btn.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                ArrayList<Items> list=new ArrayList<>();
-                Items i=new Items();
-                i.setText("222");
-                Items ii=new Items();
-                i.setText("222");
-                list.add(i);
-                if(i.equals(ii)){
-                    Log.d(TAG, "item相同");
-                }else {
-                    Log.d(TAG, "item不相同");
-                }
-
-                ArrayList<Items> list2=new ArrayList<>();
-                list2.add(ii);
-                if(list.equals(list2)){
-                    Log.d(TAG, "list相同");
-                }else {
-                    Log.d(TAG, "list2不相同");
-                }
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        throw new RuntimeException("主线程异常");
+                    }
+                }).start();
                 return false;
             }
         });

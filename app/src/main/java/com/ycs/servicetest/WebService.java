@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import java.util.ArrayList;
 
 import static com.ycs.servicetest.MainActivity.TAG;
+import static com.ycs.servicetest.WebUtil.analyzeList;
 
 public class WebService extends Service  {
     private String url;
@@ -47,8 +48,6 @@ public class WebService extends Service  {
     public int onStartCommand(Intent intent, int flags, int startId) {
         //LoadingUtil.Loading_show(this);
         Log.e(TAG, "服务开启" );
-        Toast.makeText(this, "链接开始解析", Toast.LENGTH_SHORT).show();
-        MainService.updateNotification(WebService.this,"链接正在解析中...");
 
         url=intent.getStringExtra("url");
         if(!url.contains("http")){
@@ -60,8 +59,18 @@ public class WebService extends Service  {
             return super.onStartCommand(intent, flags, startId);
         }
         if(WebUtil.isAnalyse){
-            WebUtil.analyzeList.add(url);
+            if(!analyzeList.contains(url)){
+                WebUtil.analyzeList.add(url);
+                Log.e("yyy", "analyzeList的值："+analyzeList.toString() );
+                Toast.makeText(this, "已加入下载列表", Toast.LENGTH_SHORT).show();
+            }else{
+                Log.e("yyy", "analyzeList的值："+analyzeList.toString() );
+                Toast.makeText(this, "已在下载列表中", Toast.LENGTH_SHORT).show();
+            }
+
         }else {
+            Toast.makeText(this, "链接开始解析", Toast.LENGTH_SHORT).show();
+            MainService.updateNotification(WebService.this,"链接正在解析中...");
             WebUtil.isAnalyse=true;
             WebUtil.predownload(url,WebService.this,handler);
         }

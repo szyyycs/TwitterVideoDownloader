@@ -518,6 +518,7 @@ public class VideoActivity extends AppCompatActivity {
             @Override
             public void run() {
                 for(final String s:f.list()){
+
                     if(!s.endsWith(".mp4")){
                         continue;
                     }

@@ -12,12 +12,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.downloader.PRDownloader;
-import com.downloader.Status;
-
 import java.lang.reflect.Method;
 
-import static com.ycs.servicetest.WebUtil.downloadId;
 import static com.ycs.servicetest.WebUtil.isHttpUrl;
 
 
@@ -43,24 +39,24 @@ public class DialogReceiver extends BroadcastReceiver {
     public void onReceive(final Context context, Intent intent) {
         final String[] paste = {"请输入下载链接"};
         this.context=context;
-        if(PRDownloader.getStatus(downloadId)== Status.RUNNING||WebUtil.isDownloading){
-            Toast.makeText(context, "正在下载中", Toast.LENGTH_SHORT).show();
-//            PRDownloader.pause(downloadId);
-//            Toast.makeText(context, "下载已暂停", Toast.LENGTH_SHORT).show();
-//            if (Build.VERSION.SDK_INT < 29) {
-//                MainService.updateTitle("下载已暂停");
-//            }
-//        }else if(PRDownloader.getStatus(downloadId)== Status.PAUSED){
-//            PRDownloader.resume(downloadId);
-//            Toast.makeText(context, "下载已继续", Toast.LENGTH_SHORT).show();
-//            if (Build.VERSION.SDK_INT < 29) {
-//                MainService.updateTitle(context.getResources().getString(R.string.app_name));
-//            }
-        }
+//        if(PRDownloader.getStatus(downloadId)== Status.RUNNING||WebUtil.isDownloading){
+//            Toast.makeText(context, "正在下载中", Toast.LENGTH_SHORT).show();
+////            PRDownloader.pause(downloadId);
+////            Toast.makeText(context, "下载已暂停", Toast.LENGTH_SHORT).show();
+////            if (Build.VERSION.SDK_INT < 29) {
+////                MainService.updateTitle("下载已暂停");
+////            }
+////        }else if(PRDownloader.getStatus(downloadId)== Status.PAUSED){
+////            PRDownloader.resume(downloadId);
+////            Toast.makeText(context, "下载已继续", Toast.LENGTH_SHORT).show();
+////            if (Build.VERSION.SDK_INT < 29) {
+////                MainService.updateTitle(context.getResources().getString(R.string.app_name));
+////            }
+//        }
         /*else if(isAnalyse){
             Toast.makeText(context, "正在解析链接中，请稍后再粘贴下载", Toast.LENGTH_SHORT).show();
         }*/
-        else{
+        //else{
             collapseStatusBar(context);
             final IosAlertDialog dialog=new IosAlertDialog(context).builder();
             dialog.setTitle("提示")
@@ -109,7 +105,7 @@ public class DialogReceiver extends BroadcastReceiver {
                 }
             });
 
-        }
+       // }
 
     }
 

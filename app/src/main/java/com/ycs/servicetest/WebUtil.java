@@ -209,11 +209,21 @@ public class WebUtil {
             public void failure(TwitterException exception) {
                 isAnalyse=false;
                 MainService.updateNotification(context,"网络连接失败");
-                Log.e(TAG, "失败惹 "+exception.getMessage() );
+                Log.e(TAG, "失败惹 "+exception.getMessage()+"分析列表长度"+analyzeList.size());
+
                 if(exception.getMessage().contains("404")){
                     Toast.makeText(context, "链接失效", Toast.LENGTH_SHORT).show();
                 }else{
                     Toast.makeText(context, "连接失败，联网了吗？开VPN了吗？", Toast.LENGTH_SHORT).show();
+                }
+                if(analyzeList.contains(murl)){
+                    analyzeList.remove(murl);
+                }
+                if(analyzeList.size()==0){
+                    WebUtil.isAnalyse=false;
+                }else{
+                    WebUtil.isAnalyse=true;
+                    predownload(analyzeList.get(0),context,handler);
                 }
 
             }

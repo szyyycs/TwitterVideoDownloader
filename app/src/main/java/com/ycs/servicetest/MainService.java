@@ -126,8 +126,11 @@ public class MainService extends Service {
                             if(!analyzeList.contains(msg)){
                                 WebUtil.analyzeList.add(msg);
                                 Log.e("yyy", "analyzeList的值："+analyzeList.toString() );
+                                Toast.makeText(MainService.this, "已加入下载列表", Toast.LENGTH_SHORT).show();
+                            }else{
+                                Toast.makeText(MainService.this, "已在下载队列中", Toast.LENGTH_SHORT).show();
+                                Log.e("yyy", "analyzeList的值："+analyzeList.toString() );
                             }
-                            Toast.makeText(MainService.this, "已加入下载队列", Toast.LENGTH_SHORT).show();
                             return;
                         }
                         Intent i = new Intent(MainService.this, WebService.class);
