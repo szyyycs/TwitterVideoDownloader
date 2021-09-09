@@ -43,11 +43,19 @@
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="15dp"
              />
+        <ImageView
+            android:id="@+id/next"
+            android:layout_width="21dp"
+            android:layout_height="21dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="13dp"
+            android:src="@mipmap/next"
+            />
         <TextView
             android:id="@+id/current"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="12dp"
+            android:layout_marginLeft="13dp"
             android:text="00:00"
             android:textColor="#ffffff" />
 
@@ -70,7 +78,7 @@
             android:id="@+id/total"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="16dp"
+            android:layout_marginRight="14dp"
             android:text="00:00"
             android:textColor="#ffffff" />
 
@@ -78,7 +86,7 @@
             android:id="@+id/switchSize"
             android:layout_width="@dimen/dp_35"
             android:layout_height="match_parent"
-            android:layout_marginRight="16dp"
+            android:layout_marginRight="14dp"
             android:gravity="center"
             android:minEms="2"
             android:text="倍速"

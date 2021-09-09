@@ -116,6 +116,7 @@ public class VideoActivity extends AppCompatActivity {
     private int position=0;
     int i[]={0,0,0};
     static final String TAG="yyy";
+    private int nowPlayPosition=0;
     private Handler handler=new Handler(){
         @Override
         public void handleMessage(@NonNull Message msg) {
@@ -239,12 +240,36 @@ public class VideoActivity extends AppCompatActivity {
                 }
                 Collections.shuffle(vm);
                 intent.putExtra("list", vm);
+                Toast.makeText(VideoActivity.this, "随机模式", Toast.LENGTH_SHORT).show();
                 intent.putExtra("i",position);
                 intent.setClass(VideoActivity.this, tiktok.class);
                 startActivity(intent);
             }
         });
-        
+        iv_intotiktok.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if(isNull){
+                    Toast.makeText(VideoActivity.this,"您视频列表为空，请下载视频后再进入抖音模式哦！",Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+                Intent intent = new Intent();
+                ArrayList<VideoModel> vm=new ArrayList<>();
+                for(Items ii:itemsList){
+                    VideoModel vvv=new VideoModel();
+                    vvv.setUrl(ii.getUrl());
+                    vm.add(vvv);
+                }
+                Toast.makeText(VideoActivity.this, "顺序模式", Toast.LENGTH_SHORT).show();
+//                Collections.shuffle(vm);
+                intent.putExtra("list", vm);
+
+                intent.putExtra("i",position);
+                intent.setClass(VideoActivity.this, tiktok.class);
+                startActivity(intent);
+                return false;
+            }
+        });
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
         sortImage=findViewById(R.id.sort);
         sortImage.setOnClickListener(new View.OnClickListener() {
@@ -381,11 +406,43 @@ public class VideoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 isFullScreen=true;
-                 //orientationUtils.resolveByClick();
-
-                detailPlayer.startWindowFullscreen(VideoActivity.this,false,false);
-//                detailPlayer.getTitleTextView().setVisibility(View.GONE);
-//                detailPlayer.getBackButton().setVisibility(View.GONE);
+                MyVideoPlayer p= (MyVideoPlayer) detailPlayer.startWindowFullscreen(VideoActivity.this,false,false);
+                p.getNextVideo().setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(itemsList.size()<=position+1){
+                            position=(position+1)%itemsList.size();
+                            isPlay=true;
+                            p.getCurrentPlayer().release();
+                            p.setUp(itemsList.get(position).getUrl(),true,itemsList.get(position).getTwittertext());
+                            p.startPlay();
+                            return;
+                        }
+                        position++;
+                        isPlay=true;
+                        p.getCurrentPlayer().release();
+                        p.setUp(itemsList.get(position).getUrl(),true,itemsList.get(position).getTwittertext());
+                        p.startPlay();
+                    }
+                });
+            }
+        });
+        detailPlayer.getNextVideo().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(itemsList.size()<=position+1){
+                    position=(position+1)%itemsList.size();
+                    isPlay=true;
+                    detailPlayer.getCurrentPlayer().release();
+                    detailPlayer.setUp(itemsList.get(position).getUrl(),true,itemsList.get(position).getTwittertext());
+                    detailPlayer.startPlay();
+                    return;
+                }
+                position++;
+                isPlay=true;
+                detailPlayer.getCurrentPlayer().release();
+                detailPlayer.setUp(itemsList.get(position).getUrl(),true,itemsList.get(position).getTwittertext());
+                detailPlayer.startPlay();
             }
         });
 
@@ -548,13 +605,19 @@ public class VideoActivity extends AppCompatActivity {
                                 attr = Files.readAttributes(path, BasicFileAttributes.class);
                                 instant= attr.creationTime().toInstant();
                             }
-                            String temp=instant.toString().replace("T"," ").replace("Z","").replace("-","/");
-                            time=temp.substring(0,temp.length()-3);
-                        } catch (IOException e) {
+                            if(instant!=null){
+                                String temp=instant.toString().replace("T"," ").replace("Z","").replace("-","/");
+                                time=temp.substring(0,temp.length()-3);
+                            }else{
+                                long timeee=file.lastModified();
+                                SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                                time=formatter.format(timeee);
+                            }
+                        } catch (Exception e) {
                             long timeee=file.lastModified();
                             SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
                             time=formatter.format(timeee);
-                            Log.e(TAG, "modifiedTime: "+time );
+                            Log.e(TAG, "modifiedTime: "+time +e.getMessage());
                         }
                     }
                     // 创建时间

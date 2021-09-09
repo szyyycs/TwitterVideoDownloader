@@ -194,7 +194,7 @@ public class DownLoadWindowService extends Service {
         civ.setVisibility(View.VISIBLE);
     }
     private void fade(View view){
-        ObjectAnimator animator = ObjectAnimator.ofFloat(view, "alpha",1,0.3f);
+        ObjectAnimator animator = ObjectAnimator.ofFloat(view, "alpha",1,0.5f);
         animator.setDuration(1000);
         animator.start();
     }

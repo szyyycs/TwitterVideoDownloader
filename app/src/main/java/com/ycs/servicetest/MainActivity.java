@@ -37,6 +37,9 @@ import static com.ycs.servicetest.WebUtil.isAnalyse;
 import static com.ycs.servicetest.WebUtil.isDownloading;
 import static com.ycs.servicetest.WebUtil.isHttpUrl;
 
+//import io.flutter.embedding.android.FlutterActivity;
+//import io.flutter.embedding.android.FlutterView;
+
 public class MainActivity extends AppCompatActivity {
     final static String TAG="yyy";
     final static int GOTO_DOWNLOAD=1;
@@ -215,12 +218,7 @@ public class MainActivity extends AppCompatActivity {
         btn.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        throw new RuntimeException("主线程异常");
-                    }
-                }).start();
+               // startActivity(FlutterActivity.createDefaultIntent(MainActivity.this));
                 return false;
             }
         });

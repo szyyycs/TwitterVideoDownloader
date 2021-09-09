@@ -105,7 +105,7 @@ public class MainService extends Service {
             notification.contentView = views;
         }
         Intent ii=new Intent(MainService.this,MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        ii.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pii=PendingIntent.getActivity(this,2,ii,PendingIntent.FLAG_UPDATE_CURRENT);
         views.setOnClickPendingIntent(R.id.small_icon,pii);
         views.setOnClickPendingIntent(R.id.input, pi);

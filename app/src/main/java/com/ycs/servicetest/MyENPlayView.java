@@ -16,8 +16,8 @@ public class MyENPlayView extends ENPlayView {
 
     public MyENPlayView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        super.DEFAULT_BG_LINE_WIDTH=3;
-        super.DEFAULT_LINE_WIDTH=3;
+        super.DEFAULT_BG_LINE_WIDTH=1;
+        super.DEFAULT_LINE_WIDTH=1;
 
     }
 

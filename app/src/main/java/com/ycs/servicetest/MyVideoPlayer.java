@@ -3,6 +3,7 @@ package com.ycs.servicetest;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.shuyu.gsyvideoplayer.utils.Debuger;
@@ -13,6 +14,7 @@ import moe.codeest.enviews.ENDownloadView;
 public class MyVideoPlayer extends StandardGSYVideoPlayer {
     private float speed=1;
     TextView changeSpeed;
+    ImageView nextVideo;
     public MyVideoPlayer(Context context) {
         super(context);
     }
@@ -25,6 +27,7 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
         initView();
     }
     void initView(){
+        nextVideo=findViewById(R.id.next);
         changeSpeed = (TextView) findViewById(R.id.switchSize);
         changeSpeed.setOnClickListener(new OnClickListener() {
            @Override
@@ -32,6 +35,10 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
                resolveTypeUI();
            }
        });
+
+    }
+    public ImageView getNextVideo(){
+        return nextVideo;
     }
     private void resolveTypeUI() {
         if (speed == 1) {
@@ -58,6 +65,7 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
         //super.showWifiDialog();
         startPlayLogic();
     }
+
     @Override
     protected void changeUiToPlayingShow() {
         Debuger.printfLog("changeUiToPlayingShow");

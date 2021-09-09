@@ -1,2 +1,4 @@
 include ':app'
+setBinding(new Binding([gradle: this]))
 rootProject.name = "ServiceTest"
+
