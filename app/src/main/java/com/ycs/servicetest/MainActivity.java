@@ -32,6 +32,7 @@ import androidx.core.content.ContextCompat;
 import com.downloader.PRDownloader;
 import com.tencent.mmkv.MMKV;
 
+import static com.ycs.servicetest.Constant.REQUEST_CODE;
 import static com.ycs.servicetest.WebUtil.analyzeList;
 import static com.ycs.servicetest.WebUtil.isAnalyse;
 import static com.ycs.servicetest.WebUtil.isDownloading;
@@ -48,14 +49,14 @@ public class MainActivity extends AppCompatActivity {
     private EditText etInput;
     private Boolean isFloatWindowsshow=false;
     private String[] permissions = {Manifest.permission.SYSTEM_ALERT_WINDOW,Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.SYSTEM_ALERT_WINDOW};
+            Manifest.permission.READ_EXTERNAL_STORAGE};
     private ImageView iv;
 
     private Handler handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 if(msg.what==GOTO_DOWNLOAD){
-                    WebUtil.isAnalyse=true;
+                    //WebUtil.isAnalyse=true;
                     MainService.updateNotification(MainActivity.this,"链接正在解析中...");
                     Intent i=new Intent(MainActivity.this,WebService.class);
                     i.putExtra("url",msg.obj.toString());
@@ -72,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().hide();
         Window window = getWindow();
         window.setStatusBarColor(ContextCompat.getColor(this,R.color.colorIosBlue));
-        CrashHandlerJ.getInstant().init();
+//        CrashHandlerJ.getInstant().init();
         PRDownloader.initialize(getApplicationContext());
         WebUtil.init(getApplicationContext());
         String rootDir = MMKV.initialize(this);
@@ -218,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
         btn.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-               // startActivity(FlutterActivity.createDefaultIntent(MainActivity.this));
+
                 return false;
             }
         });
@@ -229,6 +230,16 @@ public class MainActivity extends AppCompatActivity {
                 isFloatWindowsshow=true;
             }
         }
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+            if (Environment.isExternalStorageManager()) {
+                //Toast.makeText(MainActivity.this, "已获得所有权限", Toast.LENGTH_SHORT).show();
+            } else {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                intent.setData(Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, REQUEST_CODE);
+            }
+        }
+
 
     }
 
@@ -245,6 +256,15 @@ public class MainActivity extends AppCompatActivity {
                     //startService(new Intent(MainActivity.this, MainService.class));
                 }
             }
+        }else if(requestCode==REQUEST_CODE){
+            if (Environment.isExternalStorageManager()) {
+                Toast.makeText(this, "已获得所有权限", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "暂未取得读取文件权限，请前往获取", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                intent.setData(Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, REQUEST_CODE);
+            }
         }
     }
 
@@ -252,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if(requestCode==111){
-            Log.e("yyy","11111");
+            Log.e("yyy","获取权限返回");
             //Toast.makeText(this, "yyy", Toast.LENGTH_SHORT).show();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (ContextCompat.checkSelfPermission(this,

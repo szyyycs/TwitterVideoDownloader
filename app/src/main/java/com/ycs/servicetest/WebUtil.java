@@ -209,11 +209,13 @@ public class WebUtil {
             public void failure(TwitterException exception) {
                 isAnalyse=false;
                 MainService.updateNotification(context,"网络连接失败");
-                Log.e(TAG, "失败惹 "+exception.getMessage()+"分析列表长度"+analyzeList.size());
+               // Log.e(TAG, "失败惹 "+exception.getMessage()+"分析列表长度"+analyzeList.size());
 
                 if(exception.getMessage().contains("404")){
                     Toast.makeText(context, "链接失效", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "失败惹,链接失效 "+exception.getMessage()+"分析列表长度"+analyzeList.size());
                 }else{
+                    Log.e(TAG, "失败惹 ，联网失败"+exception.getMessage()+"分析列表长度"+analyzeList.size());
                     Toast.makeText(context, "连接失败，联网了吗？开VPN了吗？", Toast.LENGTH_SHORT).show();
                 }
                 if(analyzeList.contains(murl)){
@@ -238,9 +240,19 @@ public class WebUtil {
 //            e.putString(filename,text);
 //            e.commit();
             kv.encode(filename, text);
+
+
+//            ContextWrapper cw = new ContextWrapper(context);
+//            File directory = cw.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+//            File ff = new File(directory, "/.savedPic/");
+//            Log.d(TAG, "onLongClick: "+ff.getPath());
+//            download(handler,url,
+//                    ff.getPath(),
+//                    filename,context);
             download(handler,url,
                     Environment.getExternalStorageDirectory() +"/.savedPic/",
                     filename,context);
+
         }else{
             //downLoadList.add(url);
             if(!downloadMap.containsKey(url)){
@@ -326,7 +338,7 @@ public class WebUtil {
 
                         File f=new File(new File(path),filename);
                         if(Build.VERSION.SDK_INT>= 24){
-                            uri = FileProvider.getUriForFile(context, "com.ycs.codecreate.provider", f);
+                            uri = FileProvider.getUriForFile(context, "com.ycs.servicetest.provider", f);
                         }else{
                             uri=Uri.fromFile(f);
                         }
@@ -355,6 +367,7 @@ public class WebUtil {
                     @Override
                     public void onError(Error error) {
                         isDownloading=false;
+                        Log.e(TAG, "下载失败！错误信息为连接错误："+error.isConnectionError()+"服务错误："+error.isServerError());
                         Toast.makeText(context, "下载失败！"+error.toString(), Toast.LENGTH_SHORT).show();
                         MainService.update(filename+"下载失败，请重试");
                         DownLoadWindowService.recover();

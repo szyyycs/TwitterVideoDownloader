@@ -53,7 +53,9 @@ public class DownLoadWindowService extends Service {
     public void onDestroy() {
         super.onDestroy();
         stopSelf();
-        windowManager.removeView(view);
+        if(windowManager!=null){
+            windowManager.removeView(view);
+        }
     }
 
     private void showFloatingWindow() {

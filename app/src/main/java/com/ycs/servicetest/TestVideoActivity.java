@@ -1,6 +1,5 @@
 package com.ycs.servicetest;
 
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.media.ThumbnailUtils;
 import android.os.Bundle;
@@ -8,27 +7,18 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.shuyu.gsyvideoplayer.GSYBaseActivityDetail;
-import com.shuyu.gsyvideoplayer.GSYVideoManager;
 import com.shuyu.gsyvideoplayer.builder.GSYVideoOptionBuilder;
-import com.shuyu.gsyvideoplayer.listener.GSYSampleCallBack;
-import com.shuyu.gsyvideoplayer.listener.LockClickListener;
-import com.shuyu.gsyvideoplayer.listener.VideoAllCallBack;
-import com.shuyu.gsyvideoplayer.utils.OrientationUtils;
-import com.shuyu.gsyvideoplayer.video.GSYADVideoPlayer;
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer;
 
-import java.io.File;
-
-public class TestVideoActivity extends GSYBaseActivityDetail{
+public class TestVideoActivity extends GSYBaseActivityDetail {
     StandardGSYVideoPlayer detailPlayer;
+
     //OrientationUtils orientationUtils;
-      @Override
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_video);
@@ -45,8 +35,8 @@ public class TestVideoActivity extends GSYBaseActivityDetail{
     @Override
     public GSYVideoOptionBuilder getGSYVideoOptionBuilder() {
         ImageView imageView = new ImageView(this);
-        String url=Environment.getExternalStorageDirectory() +"/savedPic/20201120114245367c.mp4";
-        Bitmap b = ThumbnailUtils.createVideoThumbnail(Environment.getExternalStorageDirectory() +"/savedPic/20201120114245367c.mp4",
+        String url = Environment.getExternalStorageDirectory() + "/savedPic/20201120114245367c.mp4";
+        Bitmap b = ThumbnailUtils.createVideoThumbnail(Environment.getExternalStorageDirectory() + "/savedPic/20201120114245367c.mp4",
                 MediaStore.Images.Thumbnails.MINI_KIND);
         imageView.setImageBitmap(b);
 

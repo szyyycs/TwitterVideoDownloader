@@ -4,14 +4,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.ThumbnailUtils;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.util.Log;
-import android.util.LruCache;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.jakewharton.disklrucache.DiskLruCache;
 import com.shuyu.gsyvideoplayer.GSYVideoManager;
@@ -24,8 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder{
     public final static String TAG = "yyy";
@@ -78,6 +72,8 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder{
 
         public void onBind(final int position, VideoModel vm) {
             Log.e(TAG, "vm.getUrl(): "+vm.getUrl() );
+            //Glide.with(context).load(vm.getUrl()).into(imageView);
+
             imageView.setImageBitmap(getCache(vm.getUrl()));
             //imageView.setImageResource(R.mipmap.blank);
             gsyVideoOptionBuilder

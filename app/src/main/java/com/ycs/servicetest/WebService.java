@@ -15,27 +15,27 @@ import java.util.ArrayList;
 import static com.ycs.servicetest.MainActivity.TAG;
 import static com.ycs.servicetest.WebUtil.analyzeList;
 
-public class WebService extends Service  {
+public class WebService extends Service {
     private String url;
     private Object object = new Object();
-    private static final int STOPSELF=1;
-    private Handler handler=new Handler(){
+    private static final int STOPSELF = 1;
+    private Handler handler = new Handler() {
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
-            if(msg.what==STOPSELF){
+            if (msg.what == STOPSELF) {
                 stopSelf();
-            }else if(msg.what==2){
+            } else if (msg.what == 2) {
 
             }
         }
     };
 
-    private ArrayList<String> srcList=new ArrayList<>();
+    private ArrayList<String> srcList = new ArrayList<>();
+
     public WebService() {
 
     }
-
 
 
     @Override
@@ -47,32 +47,32 @@ public class WebService extends Service  {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //LoadingUtil.Loading_show(this);
-        Log.e(TAG, "服务开启" );
+        Log.e(TAG, "服务开启");
 
-        url=intent.getStringExtra("url");
-        if(!url.contains("http")){
-            url="https://"+url;
+        url = intent.getStringExtra("url");
+        if (!url.contains("http")) {
+            url = "https://" + url;
         }
-        if(!url.contains("twitter")){
+        if (!url.contains("twitter")) {
             Toast.makeText(this, "粘贴的不是推特链接噢！", Toast.LENGTH_SHORT).show();
             stopSelf();
             return super.onStartCommand(intent, flags, startId);
         }
-        if(WebUtil.isAnalyse){
-            if(!analyzeList.contains(url)){
+        if (WebUtil.isAnalyse) {
+            if (!analyzeList.contains(url)) {
                 WebUtil.analyzeList.add(url);
-                Log.e("yyy", "analyzeList的值："+analyzeList.toString() );
+                Log.e("yyy", "analyzeList的值：" + analyzeList.toString());
                 Toast.makeText(this, "已加入下载列表", Toast.LENGTH_SHORT).show();
-            }else{
-                Log.e("yyy", "analyzeList的值："+analyzeList.toString() );
+            } else {
+                Log.e("yyy", "analyzeList的值：" + analyzeList.toString());
                 Toast.makeText(this, "已在下载列表中", Toast.LENGTH_SHORT).show();
             }
 
-        }else {
+        } else {
             Toast.makeText(this, "链接开始解析", Toast.LENGTH_SHORT).show();
-            MainService.updateNotification(WebService.this,"链接正在解析中...");
-            WebUtil.isAnalyse=true;
-            WebUtil.predownload(url,WebService.this,handler);
+            MainService.updateNotification(WebService.this, "链接正在解析中...");
+            WebUtil.isAnalyse = true;
+            WebUtil.predownload(url, WebService.this, handler);
         }
 
 
@@ -121,7 +121,7 @@ public class WebService extends Service  {
 //                                    e.printStackTrace();
 //                                }
 //                            }
-                       // }
+        // }
 //                    }else{
 //
 //                    }

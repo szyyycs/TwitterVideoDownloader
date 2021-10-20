@@ -1,25 +1,14 @@
 package com.ycs.servicetest;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.Environment;
-import android.util.Log;
 import android.view.WindowManager;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.jakewharton.disklrucache.DiskLruCache;
 import com.shuyu.gsyvideoplayer.GSYVideoManager;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +18,7 @@ public class tiktok extends AppCompatActivity {
 
     List<VideoModel> dataList = new ArrayList<>();
 
-    int posision;
+   // int posision;
     ViewPagerAdapter viewPagerAdapter;
 
     @Override
@@ -40,7 +29,7 @@ public class tiktok extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         dataList=(ArrayList<VideoModel>)getIntent().getSerializableExtra("list");
-        posision=getIntent().getIntExtra("i",0);
+//        posision=getIntent().getIntExtra("i",0);
 
 
         viewPager2=findViewById(R.id.view_pager2);
@@ -59,11 +48,17 @@ public class tiktok extends AppCompatActivity {
                     //对应的播放列表TAG
                     if (GSYVideoManager.instance().getPlayTag().equals(RecyclerItemNormalHolder.TAG)
                             && (position != playPosition)) {
-
                         playPosition(position);
+//                        if(position>=2){
+//                            release(position-2);
+//                        }
+
                     }
                 }
             }
+
+
+
         });
         viewPager2.post(new Runnable() {
             @Override
@@ -118,6 +113,17 @@ public class tiktok extends AppCompatActivity {
             RecyclerItemNormalHolder recyclerItemNormalHolder = (RecyclerItemNormalHolder) viewHolder;
             recyclerItemNormalHolder.getPlayer().setUp(dataList.get(position).getUrl(),true,"");
             recyclerItemNormalHolder.getPlayer().startPlayLogic();
+        }
+    }
+    private void release(int position) {
+        RecyclerView.ViewHolder viewHolder = ((RecyclerView) viewPager2.getChildAt(0)).findViewHolderForAdapterPosition(position);
+        if (viewHolder != null) {
+            RecyclerItemNormalHolder recyclerItemNormalHolder = (RecyclerItemNormalHolder) viewHolder;
+            if(recyclerItemNormalHolder.getPlayer()!=null){
+                recyclerItemNormalHolder.getPlayer().release();
+                
+            }
+
         }
     }
     private void playNewPosition(int position) {
