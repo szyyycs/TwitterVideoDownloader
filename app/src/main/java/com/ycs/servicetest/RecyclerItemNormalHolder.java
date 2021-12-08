@@ -9,6 +9,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.jakewharton.disklrucache.DiskLruCache;
 import com.shuyu.gsyvideoplayer.GSYVideoManager;
 import com.shuyu.gsyvideoplayer.builder.GSYVideoOptionBuilder;
@@ -74,8 +76,18 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder{
             Log.e(TAG, "vm.getUrl(): "+vm.getUrl() );
             //Glide.with(context).load(vm.getUrl()).into(imageView);
 
-            imageView.setImageBitmap(getCache(vm.getUrl()));
+            //imageView.setImageBitmap(getCache(vm.getUrl()));
+
             //imageView.setImageResource(R.mipmap.blank);
+            Glide.with(context)
+                    .setDefaultRequestOptions(
+                            new RequestOptions()
+                                    .frame(0)
+                                    .centerCrop()
+                                    .error(R.mipmap.blank)
+                                    )
+                    .load(vm.getUrl())
+                    .into(imageView);
             gsyVideoOptionBuilder
                     .setIsTouchWiget(false)
                     .setThumbImageView(imageView)
@@ -152,6 +164,7 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder{
     }
     private Bitmap getCache(String key) {
 //        Log.e(TAG, "get" );
+
         key=hashKeyForDisk(key);
 
         try {

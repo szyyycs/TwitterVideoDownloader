@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -30,6 +31,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.downloader.PRDownloader;
+import com.tencent.bugly.Bugly;
+import com.tencent.bugly.beta.Beta;
 import com.tencent.mmkv.MMKV;
 
 import static com.ycs.servicetest.Constant.REQUEST_CODE;
@@ -51,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private String[] permissions = {Manifest.permission.SYSTEM_ALERT_WINDOW,Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE};
     private ImageView iv;
-
+    private Vibrator vibrator;
     private Handler handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
@@ -70,6 +73,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //CrashReport.initCrashReport(getApplicationContext(), "b0a053b5dd", true);
+        Beta.upgradeDialogLayoutId= R.layout.layout_upgrade;
+        Bugly.init(getApplicationContext(), "b0a053b5dd", false);
         getSupportActionBar().hide();
         Window window = getWindow();
         window.setStatusBarColor(ContextCompat.getColor(this,R.color.colorIosBlue));
@@ -77,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         PRDownloader.initialize(getApplicationContext());
         WebUtil.init(getApplicationContext());
         String rootDir = MMKV.initialize(this);
+        vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
 //        new Handler().postDelayed(new Runnable() {
 //            @Override
 //            public void run() {
@@ -108,8 +115,8 @@ public class MainActivity extends AppCompatActivity {
         tv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i=new Intent(MainActivity.this, tiktok.class);
-                startActivity(i);
+//                Intent i=new Intent(MainActivity.this, tiktok.class);
+//                startActivity(i);
             }
         });
         iv.setOnLongClickListener(new View.OnLongClickListener() {
@@ -210,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
                         ms.what=GOTO_DOWNLOAD;
                         ms.obj=text;
                         handler.sendMessage(ms);
+
                     }
                 } else {
                     Toast.makeText(MainActivity.this, "您粘贴的不是网址噢", Toast.LENGTH_SHORT).show();
@@ -219,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
         btn.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-
+                Log.d(TAG, "onLongClick: "+9/0);
                 return false;
             }
         });

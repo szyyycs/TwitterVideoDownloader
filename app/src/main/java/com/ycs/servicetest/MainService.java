@@ -93,7 +93,7 @@ public class MainService extends Service {
         builder.setContentIntent(PendingIntent.getActivity(MainService.this, 0, it,
                 0))
                 .setContentTitle("提示")
-                .setSmallIcon(R.mipmap.downlo)
+                .setSmallIcon(R.mipmap.app_icon)
                 .setWhen(System.currentTimeMillis());
         final Intent intentInput = new Intent(this, DialogReceiver.class);
         final PendingIntent pi = PendingIntent.getBroadcast(this, 0, intentInput, PendingIntent.FLAG_UPDATE_CURRENT);

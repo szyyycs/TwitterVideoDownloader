@@ -570,6 +570,7 @@ public class VideoActivity extends AppCompatActivity {
         toScan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                newItemsList.clear();
                 startScan();
             }
         });
@@ -605,7 +606,6 @@ public class VideoActivity extends AppCompatActivity {
             @Override
             public void run() {
                 for (final String s : f.list()) {
-
                     if (!s.endsWith(".mp4")) {
                         continue;
                     }
@@ -630,7 +630,7 @@ public class VideoActivity extends AppCompatActivity {
                     } else {
                         try {
                             Path path = null;
-                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 path = file.toPath();
                                 attr = Files.readAttributes(path, BasicFileAttributes.class);
                                 instant = attr.creationTime().toInstant();
@@ -684,6 +684,7 @@ public class VideoActivity extends AppCompatActivity {
                     i.setVideo_len(tt);
                     i.setSize(len);
                     i.setText(s);
+                    Log.e(TAG, "time"+time );
                     i.setTime(time);
                     i.setUrl(uu);
                     i.setTwittertext(text);
@@ -836,7 +837,7 @@ public class VideoActivity extends AppCompatActivity {
                     } else {
                         try {
                             Path path = null;
-                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 path = file.toPath();
                                 attr = Files.readAttributes(path, BasicFileAttributes.class);
                                 instant = attr.creationTime().toInstant();
@@ -910,6 +911,7 @@ public class VideoActivity extends AppCompatActivity {
                 }
                 if (HaveList) {
                     if (itemsList.size() != newItemsList.size()) {
+                      //  Log.d(TAG, itemsList.toString());
                         sort(newItemsList);
                         setDataList(url, newItemsList);
                         handler.sendEmptyMessage(UPDATE_LIST);
@@ -1204,12 +1206,17 @@ public class VideoActivity extends AppCompatActivity {
 //    }
     public void sort(ArrayList<Items> stus) {
         isScaning = false;
+
         Collections.sort(stus, new Comparator<Items>() {
 
             @Override
             public int compare(Items o1, Items o2) {
                 // 升序
                 //return o1.getAge()-o2.getAge();
+                if(o2.getTime()==null||o1.getTime()==null){
+                    Log.d(TAG, "timenull");
+                    return 1;
+                }
                 return o2.getTime().compareTo(o1.getTime());
                 // 降序
                 // return o2.getAge()-o1.getAge();

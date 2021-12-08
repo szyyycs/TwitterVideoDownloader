@@ -93,6 +93,7 @@ public class DownLoadWindowService extends Service {
             layoutParams.width = getResources().getDimensionPixelSize(R.dimen.dp_40);
             layoutParams.height = getResources().getDimensionPixelSize(R.dimen.dp_40);
             windowManager.addView(view, layoutParams);
+
             setViewFade();
         }
     }
@@ -102,10 +103,23 @@ public class DownLoadWindowService extends Service {
         private int xx;
         private int yy;
         private boolean isLeft;
+        TextView tvRight=view.findViewById(R.id.right);
+        TextView tvLeft=view.findViewById(R.id.left);
+        private long[] mHits = new long[2];
+        private Runnable click=new Runnable() {
+            @Override
+            public void run() {
+                sendBroadcast(new Intent(DownLoadWindowService.this,DialogReceiver.class));
+                setViewFade();
+                if(isLeft){
+                    tvLeft.setVisibility(View.VISIBLE);
+                }else {
+                    tvRight.setVisibility(View.VISIBLE);
+                }
+            }
+        };
         @Override
         public boolean onTouch(View view, MotionEvent event) {
-            TextView tvRight=view.findViewById(R.id.right);
-            TextView tvLeft=view.findViewById(R.id.left);
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     Log.d(TAG, "onTouch: 111");
@@ -147,6 +161,22 @@ public class DownLoadWindowService extends Service {
 
                     x = X;
                     if (Math.abs(X-xx) < 1.5&&Math.abs(Y-yy) < 1.5){
+                        System.arraycopy(mHits, 1, mHits, 0, mHits.length - 1);
+//                        mHits[mHits.length - 1] = SystemClock.uptimeMillis();
+//                        if (mHits[0] >= (SystemClock.uptimeMillis() - 400)) {
+//                            handler.removeCallbacks(click);
+//                            setViewFade();
+//                            if(isLeft){
+//                                tvLeft.setVisibility(View.VISIBLE);
+//                            }else {
+//                                tvRight.setVisibility(View.VISIBLE);
+//                            }
+//
+//
+//
+//                            return true;
+//                        }
+//                        handler.postDelayed(click,500);
                         sendBroadcast(new Intent(DownLoadWindowService.this,DialogReceiver.class));
                         setViewFade();
                         if(isLeft){
@@ -154,7 +184,6 @@ public class DownLoadWindowService extends Service {
                         }else {
                             tvRight.setVisibility(View.VISIBLE);
                         }
-                        Log.d(TAG, "移动过小");
                         return true;
                     }
                     if(layoutParams.x + mX>0){

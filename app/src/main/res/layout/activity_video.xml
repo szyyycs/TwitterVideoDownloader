@@ -48,6 +48,7 @@
                 android:layout_centerVertical="true"
                 />
             <ImageView
+                android:background="?selectableItemBackgroundBorderless"
                 android:id="@+id/toScan"
                 android:layout_width="@dimen/dp_14"
                 android:layout_height="@dimen/dp_14"
@@ -74,6 +75,7 @@
             <ImageView
                 android:layout_width="@dimen/dp_20"
                 android:layout_height="@dimen/dp_17"
+                android:background="?selectableItemBackgroundBorderless"
                 android:src="@mipmap/tiktok"
                 android:id="@+id/intoTiktok"
                 android:layout_centerVertical="true"
@@ -94,7 +96,7 @@
                     android:layout_height="@dimen/dp_25"
                     android:layout_centerInParent="true"
                     android:src="@mipmap/sortt"
-
+                    android:background="?selectableItemBackgroundBorderless"
                     android:layout_centerVertical="true"
                     android:layout_marginRight="@dimen/dp_10"
 
@@ -141,8 +143,8 @@
         >
 
         <ImageView
-            android:layout_width="@dimen/dp_150"
-            android:layout_height="@dimen/dp_150"
+            android:layout_width="@dimen/dp_80"
+            android:layout_height="@dimen/dp_80"
             android:src="@mipmap/blank"
             android:visibility="visible"
             android:id="@+id/blank"

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:background="#55000000"
+    >
+    <RelativeLayout
+        android:id="@+id/lLayout_bg"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+
+        android:layout_centerInParent="true"
+        android:orientation="vertical">
+
+
+        <LinearLayout
+            android:layout_below="@+id/dialog_image"
+            android:layout_marginTop="-0dp"
+            android:layout_width="@dimen/dp_250"
+            android:layout_height="wrap_content"
+            android:background="@drawable/upgrade_dialog_shape"
+            android:orientation="vertical">
+
+
+            <TextView
+                android:id="@+id/txt_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="15dp"
+                android:visibility="gone"
+                android:tag="beta_upgrade_info"
+                android:text="版本：1.0.4\n包大小：20MB\n更新时间：12.5"
+                android:textColor="#777"
+                android:textSize="13sp" />
+            <TextView
+                android:id="@+id/txt_msg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginTop="15dp"
+
+                android:tag="beta_upgrade_feature"
+                android:text="更新说明：\n没事想更新一下嘻嘻(●'◡'●)"
+                android:textColor="#999"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:background="#c6c6c6" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_neg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="42dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/iosdialog_left_selector"
+                    android:gravity="center"
+                    android:text="下次再说"
+                    android:tag="beta_cancel_button"
+                    android:textColor="#555"
+                    android:textSize="15sp" />
+
+                <ImageView
+                    android:id="@+id/img_line"
+                    android:layout_width="0.5dp"
+                    android:layout_height="42dp"
+                    android:background="#c6c6c6" />
+
+                <Button
+                    android:tag="beta_confirm_button"
+                    android:id="@+id/btn_pos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="42dp"
+                    android:layout_weight="1"
+                    android:text="立即升级"
+                    android:background="@drawable/iosdialog_right_selector"
+                    android:gravity="center"
+                    android:textColor="#555"
+                    android:textSize="15sp" />
+            </LinearLayout>
+        </LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:tag="beta_title"
+            android:visibility="gone"
+            />
+        <ImageView
+
+            android:id="@+id/dialog_image"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:src="@mipmap/dialog_image2"
+            android:scaleType="fitXY"
+            />
+
+    </RelativeLayout>
+</RelativeLayout>
+
