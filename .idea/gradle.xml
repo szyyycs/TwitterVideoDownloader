@@ -7,11 +7,14 @@
         <option name="testRunner" value="PLATFORM" />
         <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="gradleJvm" value="1.8" />
+        <option name="gradleJvm" value="1.8 (2)" />
         <option name="modules">
           <set>
+            <option value="D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/nayuta_sensors-1.0.1/android" />
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/flutter_module" />
+            <option value="$PROJECT_DIR$/flutter_module/.android/Flutter" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

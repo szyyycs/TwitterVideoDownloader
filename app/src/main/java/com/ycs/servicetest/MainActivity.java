@@ -17,9 +17,11 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -35,6 +37,12 @@ import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
 import com.tencent.mmkv.MMKV;
 
+import java.util.Calendar;
+
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.android.FlutterFragment;
+import io.flutter.embedding.android.FlutterView;
+
 import static com.ycs.servicetest.Constant.REQUEST_CODE;
 import static com.ycs.servicetest.WebUtil.analyzeList;
 import static com.ycs.servicetest.WebUtil.isAnalyse;
@@ -49,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     final static int GOTO_DOWNLOAD=1;
     private RelativeLayout floatWindow;
     private Button btn;
+    private Context context;
     private EditText etInput;
     private Boolean isFloatWindowsshow=false;
     private String[] permissions = {Manifest.permission.SYSTEM_ALERT_WINDOW,Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -65,18 +74,78 @@ public class MainActivity extends AppCompatActivity {
                     i.putExtra("url",msg.obj.toString());
                     startService(i);
                 }
+
                 super.handleMessage(msg);
             }
         };
+    void showDialog(){
+        ImageDialog d=new ImageDialog(MainActivity.this).builder();
+        d.show();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        d.setAni(R.mipmap.two);
+                    }
+                });
+            }
+        },1000);
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        d.setAni(R.mipmap.one);
 
+                    }
+                });
+            }
+        },2000);
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                startActivity(
+                        FlutterActivity.createDefaultIntent(context)
+                );
+            }
+        },3000);
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                d.dismiss();
+            }
+        },4000);
+
+    }
+    void checkTime(){
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH)+1;
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        if(year==2021&&month==12&&day==10){
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    showDialog();
+                }
+            },2000);
+
+        }
+        Log.d(TAG, "year"+year+"month"+month+"day"+day);
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //CrashReport.initCrashReport(getApplicationContext(), "b0a053b5dd", true);
+        context=getApplicationContext();
         Beta.upgradeDialogLayoutId= R.layout.layout_upgrade;
         Bugly.init(getApplicationContext(), "b0a053b5dd", false);
         getSupportActionBar().hide();
+        checkTime();
         Window window = getWindow();
         window.setStatusBarColor(ContextCompat.getColor(this,R.color.colorIosBlue));
 //        CrashHandlerJ.getInstant().init();
@@ -227,15 +296,21 @@ public class MainActivity extends AppCompatActivity {
         btn.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                Log.d(TAG, "onLongClick: "+9/0);
+
                 return false;
             }
         });
+
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
             if(!isFloatWindowsshow){
                 Intent i=new Intent(MainActivity.this,DownLoadWindowService.class);
-                startService(i);
-                isFloatWindowsshow=true;
+                try{
+                    startService(i);
+                    isFloatWindowsshow=true;
+                }catch (Exception e){
+
+                }
+
             }
         }
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
