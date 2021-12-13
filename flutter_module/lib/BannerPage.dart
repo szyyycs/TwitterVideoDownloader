@@ -1,20 +1,103 @@
+import 'dart:developer';
+import 'dart:io';
+
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_interactional_widget/flutter_interactional_widget.dart';
+
 
 class BannerPage extends StatefulWidget {
   @override
   _BannerPageState createState() => _BannerPageState();
+
 }
 
-class _BannerPageState extends State<BannerPage> {
+class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin{
   double height=200;
+  bool isPlay=true;
+  Animation<double> animation;
+  AnimationController controller;
+
+  String src;
+  AudioPlayer audioPlayer=new AudioPlayer() ;
+  AudioCache player;
+
+  initState() {
+    super.initState();
+    player =new AudioCache(fixedPlayer: audioPlayer);
+    src="play";
+    controller = AnimationController(duration: const Duration(milliseconds: 4000), vsync: this);
+    animation = Tween(begin: 0.0, end: 1.0).animate(controller);
+    controller.repeat();
+    play();
+  }
+  @override
+  void dispose() {
+    player.clearAll();
+    audioPlayer.stop();
+    audioPlayer.dispose();
+    controller.dispose();
+    super.dispose();
+    print("dispose");
+  }
+
+
+  void play(){
+    player.loop('happy.mp3');
+  }
+  void pause(){
+    audioPlayer.pause();
+    //audioPlayer.pause();
+  }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          banner()
-        ],
+    return WillPopScope(
+      onWillPop: () async{
+        // player.clearAll();
+        // audioPlayer.stop();
+        // audioPlayer.dispose();
+        // controller.dispose();
+        // print("dispose");
+        dispose();
+        return true;
+      },
+      child: Scaffold(
+        body: Stack(
+          children: [
+            banner(),
+            Positioned(
+                top: 40,
+                left: 20,
+                child: GestureDetector(
+                  onTap: () {
+                    if(isPlay){
+                      controller.repeat();
+                      play();
+                      setState(() {
+                        isPlay=false;
+                        src="play";
+                      });
+                    }else{
+                      controller.stop();
+                      pause();
+                      setState(() {
+                        isPlay=true;
+                        src="pause";
+                      });
+                    }
+                   // Fluttertoast.showToast(msg:"111");
+                  },
+                  child: RotationTransition(
+                      turns: animation,
+                      child: Image.asset(
+                        "assets/$src.png",
+                        width:  60,
+                        height: 60,),
+                ))
+            )
+          ],
+        ),
       ),
     );
   }
