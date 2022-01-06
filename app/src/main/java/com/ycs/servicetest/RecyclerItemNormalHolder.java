@@ -83,7 +83,7 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder{
                     .setDefaultRequestOptions(
                             new RequestOptions()
                                     .frame(0)
-                                    .centerCrop()
+                                    .centerInside()
                                     .error(R.mipmap.blank)
                                     )
                     .load(vm.getUrl())

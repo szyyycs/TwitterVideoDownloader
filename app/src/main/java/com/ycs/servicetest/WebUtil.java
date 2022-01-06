@@ -43,6 +43,8 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.SaveListener;
 import retrofit2.Call;
 
 import static android.util.Patterns.DOMAIN_NAME;
@@ -235,12 +237,24 @@ public class WebUtil {
         if(!isDownloading){
             String filename=WebUtil.genearteFileName();
 //            SharedPreferences sp=context.getSharedPreferences("twitter", Context.MODE_PRIVATE);
-            MMKV kv = MMKV.defaultMMKV();
+            MMKV kv_text=MMKV.mmkvWithID("text");
 //            SharedPreferences.Editor e = sp.edit();
 //            e.putString(filename,text);
 //            e.commit();
-            kv.encode(filename, text);
-
+            kv_text.encode(filename, text);
+            TwitterText t = new TwitterText();
+            t.setFilename(filename);
+            t.setText(text);
+            t.save(new SaveListener<String>() {
+                @Override
+                public void done(String objectId, BmobException e) {
+                    if(e==null){
+                        Log.d(TAG, "上传成功!");
+                    }else{
+                        Toast.makeText(context, "上传文案数据失败！", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
 
 //            ContextWrapper cw = new ContextWrapper(context);
 //            File directory = cw.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);

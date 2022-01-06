@@ -38,6 +38,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.jakewharton.disklrucache.DiskLruCache;
@@ -67,6 +69,11 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
+
+import cn.bmob.v3.BmobQuery;
+import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.FindListener;
 
 import static com.ycs.servicetest.Constant.REQUEST_CODE;
 
@@ -97,6 +104,7 @@ public class VideoActivity extends AppCompatActivity {
     private OrientationUtils orientationUtils;
     private View scan;
     private ImageView toScan;
+
     private TextView scanNum;
     //private String url=Environment.getExternalStorageDirectory() +"/123/";
     //private String url=Environment.getExternalStorageDirectory() +"/DCIM/Camera/";
@@ -116,8 +124,7 @@ public class VideoActivity extends AppCompatActivity {
     private RelativeLayout title;
     //    private LruCache<String, Bitmap> mMemoryCache;
     private RelativeLayout sortImage;
-    //    private SharedPreferences sp;
-    // private SharedPreferences sptwitter;
+    private Boolean twitterIsEmpty=false;
     private Boolean isNull = true;
     private int position = 0;
     int i[] = {0, 0, 0};
@@ -129,7 +136,9 @@ public class VideoActivity extends AppCompatActivity {
             super.handleMessage(msg);
             switch (msg.what) {
                 case SEARCH_VIDEO:
+                    //之前没有list，第一次扫描
                     if (itemsList.size() == 0) {
+                        //list长度为空，显示空
                         isNull = true;
                         setBlankUI();
                         LoadingUtil.Loading_close();
@@ -138,6 +147,7 @@ public class VideoActivity extends AppCompatActivity {
                         scanNum.setVisibility(View.INVISIBLE);
                         break;
                     }
+                    //不为空，更新列表，并开始加载日期
                     adapter.update(itemsList);
                     Toast.makeText(VideoActivity.this, "共找到" + itemsList.size() + "个视频", Toast.LENGTH_SHORT).show();
                     LoadingUtil.Loading_close();
@@ -145,19 +155,26 @@ public class VideoActivity extends AppCompatActivity {
                     scan.setVisibility(View.INVISIBLE);
                     toScan.setVisibility(View.VISIBLE);
                     scanNum.setVisibility(View.INVISIBLE);
-                    loadPic();
+                    if(kv_text.count()!=0){
+                        loadPic();
+                    }else{
+                        loadTwitterText();
+                    }
                     break;
                 case UPDATE_LIST:
+                    // 新扫描之后，更新列表，重新加载缩略图
                     itemsList = newItemsList;
                     adapter.update(itemsList);
                     isScaning = false;
+                    Log.d(TAG, "updateList");
                     loadPic();
                     scan.setVisibility(View.INVISIBLE);
                     toScan.setVisibility(View.VISIBLE);
                     scanNum.setVisibility(View.INVISIBLE);
-
                     break;
                 case NO_UPDATE_LIST:
+                    isScaning = false;
+                   // loadPic();
                     scan.setVisibility(View.INVISIBLE);
                     toScan.setVisibility(View.VISIBLE);
                     scanNum.setVisibility(View.INVISIBLE);
@@ -182,6 +199,7 @@ public class VideoActivity extends AppCompatActivity {
     private RelativeLayout r;
     private int num = 0;
     private MMKV kv;
+    private MMKV kv_text;
     private boolean isSavedPic = true;
 
     @Override
@@ -203,7 +221,7 @@ public class VideoActivity extends AppCompatActivity {
         }
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
             if (Environment.isExternalStorageManager()) {
-                Toast.makeText(this, "已获得所有权限", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "已获得所有权限", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "暂未取得读取文件权限，请前往获取", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
@@ -283,7 +301,6 @@ public class VideoActivity extends AppCompatActivity {
                     vm.add(vvv);
                 }
                 Toast.makeText(VideoActivity.this, "顺序模式", Toast.LENGTH_SHORT).show();
-//                Collections.shuffle(vm);
                 intent.putExtra("list", vm);
 
                 intent.putExtra("i", position);
@@ -294,69 +311,62 @@ public class VideoActivity extends AppCompatActivity {
         });
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
         sortImage = findViewById(R.id.sort);
-        sortImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Toast.makeText(VideoActivity.this, "点了", Toast.LENGTH_SHORT).show();
-                new XPopup.Builder(VideoActivity.this)
-                        .atView(sortImage)  // 依附于所点击的View，内部会自动判断在上方或者下方显示
-                        .asAttachList(new String[]{"按下载时间排序", "按视频时长排序", "按描述长度排序"},
-                                new int[]{R.mipmap.downloadtime, R.mipmap.video, R.mipmap.miaoshu},
-                                new OnSelectListener() {
-                                    @Override
-                                    public void onSelect(int position, String text) {
-                                        if (position == 0) {
-                                            isScaning = false;
-                                            if (i[position] % 2 == 0) {
-                                                deSort(itemsList);
-                                            } else {
-                                                sort(itemsList);
-                                            }
-                                            i[position]++;
-                                            adapter.update(itemsList);
-                                            handler.sendEmptyMessage(AFTER_SORT_SCAN);
-                                        } else if (position == 1) {
-                                            isScaning = false;
-                                            if (i[position] % 2 == 0) {
-                                                desortByLarge(itemsList);
-                                            } else {
-                                                sortByLarge(itemsList);
-                                            }
-                                            i[position]++;
-                                            adapter.update(itemsList);
-                                            handler.sendEmptyMessage(AFTER_SORT_SCAN);
-                                        } else if (position == 2) {
-                                            isScaning = false;
-                                            if (i[position] % 2 == 0) {
-                                                deSortByComment(itemsList);
-                                            } else {
-                                                sortByComment(itemsList);
-                                            }
-                                            i[position]++;
-                                            //sortByComment(itemsList);
-                                            adapter.update(itemsList);
-                                            handler.sendEmptyMessage(AFTER_SORT_SCAN);
+        sortImage.setOnClickListener(v -> {
+            /*
+            我的拿手好戏
+            你要得意一点呢
+            我的拿~手~好~戏~
+            对，你不会姐会！
+            对小孩子说这种女王发言
+            * */
+            //Toast.makeText(VideoActivity.this, "点了", Toast.LENGTH_SHORT).show();
+            new XPopup.Builder(VideoActivity.this)
+                    .atView(sortImage)  // 依附于所点击的View，内部会自动判断在上方或者下方显示
+                    .asAttachList(new String[]{"按下载时间排序", "按视频时长排序", "按描述长度排序"},
+                            new int[]{R.mipmap.downloadtime, R.mipmap.video, R.mipmap.miaoshu},
+                            new OnSelectListener() {
+                                @Override
+                                public void onSelect(int position, String text) {
+                                    if (position == 0) {
+                                        isScaning = false;
+                                        if (i[position] % 2 == 0) {
+                                            deSort(itemsList);
+                                        } else {
+                                            sort(itemsList);
                                         }
-
+                                        i[position]++;
+                                        adapter.update(itemsList);
+                                        handler.sendEmptyMessage(AFTER_SORT_SCAN);
+                                    } else if (position == 1) {
+                                        isScaning = false;
+                                        if (i[position] % 2 == 0) {
+                                            desortByLarge(itemsList);
+                                        } else {
+                                            sortByLarge(itemsList);
+                                        }
+                                        i[position]++;
+                                        adapter.update(itemsList);
+                                        handler.sendEmptyMessage(AFTER_SORT_SCAN);
+                                    } else if (position == 2) {
+                                        isScaning = false;
+                                        if (i[position] % 2 == 0) {
+                                            deSortByComment(itemsList);
+                                        } else {
+                                            sortByComment(itemsList);
+                                        }
+                                        i[position]++;
+                                        adapter.update(itemsList);
+                                        handler.sendEmptyMessage(AFTER_SORT_SCAN);
                                     }
-                                })
-                        .show();
+
+                                }
+                            })
+                    .show();
 
 
-            }
         });
-
-//                        .asBottomList("选择排序规则", new String[]{"按下载时间排序", "按视频时长排序"},
-//                                new OnSelectListener() {
-//                                    @Override
-//                                    public void onSelect(int position, String text) {
-//                                        Toast.makeText(VideoActivity.this, "我点了"+text+"这个选项！", Toast.LENGTH_SHORT).show();
-//                                    }
-//                                })
-
-//        sp=getSharedPreferences("text", Context.MODE_PRIVATE);
-//        sptwitter=getSharedPreferences("twitter", Context.MODE_PRIVATE);
         kv = MMKV.defaultMMKV();
+        kv_text=MMKV.mmkvWithID("text");
         detailPlayer = findViewById(R.id.detail_player);
         detailPlayer.getTitleTextView().setVisibility(View.GONE);
         detailPlayer.getBackButton().setVisibility(View.GONE);
@@ -492,7 +502,6 @@ public class VideoActivity extends AppCompatActivity {
         });
 //
         blank = findViewById(R.id.blank_layout);
-
         r = findViewById(R.id.r);
         recyclerView = findViewById(R.id.recyclerview);
         layoutManager = new CustomLinearLayoutManager(this);
@@ -504,7 +513,7 @@ public class VideoActivity extends AppCompatActivity {
         if (itemsList.size() != 0) {
             HaveList = true;
             isScaning = false;
-            loadPic();
+            //loadPic();
             LoadingUtil.Loading_close();
         }
         adapter = new ItemAdapter(itemsList);
@@ -570,11 +579,10 @@ public class VideoActivity extends AppCompatActivity {
         toScan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                newItemsList.clear();
+
                 startScan();
             }
         });
-        Log.d("yyy", "长度为" + f.list().length);
         /*********************
          *
          *
@@ -602,125 +610,96 @@ public class VideoActivity extends AppCompatActivity {
             return;
         }
         isNull = false;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (final String s : f.list()) {
-                    if (!s.endsWith(".mp4")) {
-                        continue;
-                    }
-                    if (!s.substring(s.length() - 4, s.length()).equals(".mp4")) {
-                        continue;
-                    }
-                    String uu = url + s;
-//                    String text=sptwitter.getString(s,"");
-                    String text = kv.decodeString(s, "");
-                    Log.e("ccc", "s:" + s);
-                    Log.e("ccc", "text:" + text);
-                    final Items i = new Items();
-                    File file = new File(uu);
-                    double d = (new BigDecimal(file.length() / (1024 * 1024.0))
-                            .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
-                    String len = d + "MB";
-                    BasicFileAttributes attr = null;
-                    Instant instant = null;
-                    String time = null;
-                    if ((s.length() == 22 || s.length() == 21) && s.startsWith("20")) {
-                        time = s.substring(0, 4) + "/" + s.substring(4, 6) + "/" + s.substring(6, 8) + " " + s.substring(8, 10) + ":" + s.substring(10, 12);
-                    } else {
-                        try {
-                            Path path = null;
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                path = file.toPath();
-                                attr = Files.readAttributes(path, BasicFileAttributes.class);
-                                instant = attr.creationTime().toInstant();
-                            }
-                            if (instant != null) {
-                                String temp = instant.toString().replace("T", " ").replace("Z", "").replace("-", "/");
-                                time = temp.substring(0, temp.length() - 3);
-                            } else {
-                                long timeee = file.lastModified();
-                                SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-                                time = formatter.format(timeee);
-                            }
-                        } catch (Exception e) {
+        if(kv_text.count()==0){
+            Log.d(TAG, "没有推文存储");
+        }
+        new Thread(() -> {
+            for (final String s : f.list()) {
+                if (!s.endsWith(".mp4")) {
+                    continue;
+                }
+                if (!s.substring(s.length() - 4, s.length()).equals(".mp4")) {
+                    continue;
+                }
+                String uu = url + s;
+                String text = kv_text.decodeString(s, "");
+
+                final Items i = new Items();
+                File file = new File(uu);
+                double d = (new BigDecimal(file.length() / (1024 * 1024.0))
+                        .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
+                String len = d + "MB";
+                BasicFileAttributes attr = null;
+                Instant instant = null;
+                String time = null;
+                if ((s.length() == 22 || s.length() == 21) && s.startsWith("20")) {
+                    time = s.substring(0, 4) + "/" + s.substring(4, 6) + "/" + s.substring(6, 8) + " " + s.substring(8, 10) + ":" + s.substring(10, 12);
+                } else {
+                    try {
+                        Path path = null;
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            path = file.toPath();
+                            attr = Files.readAttributes(path, BasicFileAttributes.class);
+                            instant = attr.creationTime().toInstant();
+                        }
+                        if (instant != null) {
+                            String temp = instant.toString().replace("T", " ").replace("Z", "").replace("-", "/");
+                            time = temp.substring(0, temp.length() - 3);
+                        } else {
                             long timeee = file.lastModified();
                             SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
                             time = formatter.format(timeee);
-                            Log.e(TAG, "modifiedTime: " + time + e.getMessage());
                         }
-                    }
-                    // 创建时间
-                    //String time=s.substring(0,4)+"."+s.substring(4,6)+"."+s.substring(6,8)+" "+s.substring(8,10)+":"+s.substring(10,12);
-                    MediaPlayer mediaPlayer = new MediaPlayer();
-
-                    try {
-                        mediaPlayer.setDataSource(uu);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        mediaPlayer.prepare();
-                    } catch (IOException e) {
-                    }
-                    long timee = mediaPlayer.getDuration() / 1000;//获得了视频的时长（以毫秒为单位）
-                    mediaPlayer.release();
-                    mediaPlayer = null;
-                    String tt;
-                    if (timee / 60 != 0) {
-                        if (timee % 60 < 10) {
-                            tt = timee / 60 + ":0" + timee % 60;
-                        } else {
-                            tt = timee / 60 + ":" + timee % 60;
-                        }
-                    } else {
-                        if (timee % 60 < 10) {
-                            tt = "00:0" + timee % 60;
-                        } else {
-                            tt = "00:" + timee % 60;
-                        }
-
-                    }
-                    i.setVideo_len(tt);
-                    i.setSize(len);
-                    i.setText(s);
-                    Log.e(TAG, "time"+time );
-                    i.setTime(time);
-                    i.setUrl(uu);
-                    i.setTwittertext(text);
-                    if (HaveList) {
-                        newItemsList.add(0, i);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                scanNum.setText(++num + "");
-                            }
-                        });
-                    } else {
-                        itemsList.add(0, i);
-                        handler.sendEmptyMessage(SEARCH_ONE_VIDEO);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                scanNum.setText(++num + "");
-                            }
-                        });
+                    } catch (Exception e) {
+                        long timeee = file.lastModified();
+                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                        time = formatter.format(timeee);
+                        Log.e(TAG, "modifiedTime: " + time + e.getMessage());
                     }
                 }
+               // Log.d(TAG, "初始扫描的time:"+time);
+                i.setSize(len);
+                i.setText(s);
+                i.setTime(time);
+                i.setUrl(uu);
+                i.setTwittertext(text);
                 if (HaveList) {
-                    if (itemsList.size() != newItemsList.size()) {
-                        sort(newItemsList);
-                        setDataList(url, newItemsList);
-                        handler.sendEmptyMessage(UPDATE_LIST);
-                    } else {
-                        handler.sendEmptyMessage(NO_UPDATE_LIST);
-                    }
+                    newItemsList.add(0, i);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            scanNum.setText(++num + "");
+                        }
+                    });
                 } else {
-                    sort(itemsList);
-                    setDataList(url, itemsList);
-                    handler.sendEmptyMessage(SEARCH_VIDEO);
+                    itemsList.add(0, i);
+                    handler.sendEmptyMessage(SEARCH_ONE_VIDEO);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            scanNum.setText(++num + "");
+                        }
+                    });
                 }
 
+            }
+            if (HaveList) {
+                //之前扫描过，存在有list
+                if (itemsList.size() != newItemsList.size()) {
+                    //list长度不一致，需要更新
+                    sort(newItemsList);
+                    setDataList(url, newItemsList);
+                    handler.sendEmptyMessage(UPDATE_LIST);
+                } else {
+                    //list长度不一致，不需要更新
+                    handler.sendEmptyMessage(NO_UPDATE_LIST);
+                }
+            } else {
+                //刚进入第一次扫描
+                //
+                sort(itemsList);
+                setDataList(url, itemsList);
+                handler.sendEmptyMessage(SEARCH_VIDEO);
             }
         }).start();
 
@@ -781,6 +760,10 @@ public class VideoActivity extends AppCompatActivity {
     }
 
     public void startScan() {
+        if(toScan.getVisibility()==View.INVISIBLE){
+            Toast.makeText(this, "正在扫描中，请稍后重试...", Toast.LENGTH_SHORT).show();
+            return;
+        }
         toScan.setVisibility(View.INVISIBLE);
         scanNum.setVisibility(View.VISIBLE);
         scan.setVisibility(View.VISIBLE);
@@ -788,143 +771,103 @@ public class VideoActivity extends AppCompatActivity {
         num = 0;
         if (!f.exists()) {
             f.mkdirs();
-
         }
         if (f.list() == null || f.list().length == 0) {
             if (f.list() == null) {
-
                 //getPermission();
                 Log.e(TAG, "不存在");
             }
-
             //Toast.makeText(this, "文件夹下什么文件都没有噢", Toast.LENGTH_SHORT).show();
             LoadingUtil.Loading_close();
             setBlankUI();
             isNull = true;
             scan.setVisibility(View.INVISIBLE);
             toScan.setVisibility(View.VISIBLE);
-
             scanNum.setVisibility(View.INVISIBLE);
-            scanNum.setText(++num + "");
             return;
         }
         isNull = false;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (final String s : f.list()) {
-                    if (!s.endsWith(".mp4")) {
-                        continue;
-                    }
-                    if (!s.substring(s.length() - 4, s.length()).equals(".mp4")) {
-                        continue;
-                    }
-                    String uu = url + s;
-//                    String text=sptwitter.getString(s,"");
-                    String text = kv.decodeString(s, "");
-                    Log.e("ccc", "s:" + s);
-                    Log.e("ccc", "text:" + text);
-                    final Items i = new Items();
-                    File file = new File(uu);
-                    double d = (new BigDecimal(file.length() / (1024 * 1024.0))
-                            .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
-                    String len = d + "MB";
-                    BasicFileAttributes attr = null;
-                    Instant instant = null;
-                    String time = null;
-                    if ((s.length() == 22 || s.length() == 21) && s.startsWith("20")) {
-                        time = s.substring(0, 4) + "/" + s.substring(4, 6) + "/" + s.substring(6, 8) + " " + s.substring(8, 10) + ":" + s.substring(10, 12);
-                    } else {
-                        try {
-                            Path path = null;
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                path = file.toPath();
-                                attr = Files.readAttributes(path, BasicFileAttributes.class);
-                                instant = attr.creationTime().toInstant();
-                            }
-                            if(instant!=null){
-                                String temp = instant.toString().replace("T", " ").replace("Z", "").replace("-", "/");
-                                time = temp.substring(0, temp.length() - 3);
-                            }
-                        } catch (Exception e) {
+        HaveList=true;
+        newItemsList.clear();
+        new Thread(() -> {
+            long before = System.currentTimeMillis();
+            for (final String s : f.list()) {
+                if (!s.endsWith(".mp4")) {
+                    continue;
+                }
+                if (!s.substring(s.length() - 4, s.length()).equals(".mp4")) {
+                    continue;
+                }
+                String uu = url + s;
+                String text = kv_text.decodeString(s, "");
+                final Items i = new Items();
+                File file = new File(uu);
+                double d = (new BigDecimal(file.length() / (1024 * 1024.0))
+                        .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
+                String len = d + "MB";
+                BasicFileAttributes attr = null;
+                Instant instant = null;
+                String time = null;
+                if ((s.length() == 22 || s.length() == 21) && s.startsWith("20")) {
+                    time = s.substring(0, 4) + "/" + s.substring(4, 6) + "/" + s.substring(6, 8) + " " + s.substring(8, 10) + ":" + s.substring(10, 12);
+                } else {
+                    try {
+                        Path path = null;
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            path = file.toPath();
+                            attr = Files.readAttributes(path, BasicFileAttributes.class);
+                            instant = attr.creationTime().toInstant();
+                        }
+                        if (instant != null) {
+                            String temp = instant.toString().replace("T", " ").replace("Z", "").replace("-", "/");
+                            time = temp.substring(0, temp.length() - 3);
+                        } else {
                             long timeee = file.lastModified();
                             SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
                             time = formatter.format(timeee);
-                            Log.e(TAG, "modifiedTime: " + time);
                         }
-                    }
-                    // 创建时间
-                    //String time=s.substring(0,4)+"."+s.substring(4,6)+"."+s.substring(6,8)+" "+s.substring(8,10)+":"+s.substring(10,12);
-                    MediaPlayer mediaPlayer = new MediaPlayer();
-
-                    try {
-                        mediaPlayer.setDataSource(uu);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        mediaPlayer.prepare();
-                    } catch (IOException e) {
-                    }
-                    long timee = mediaPlayer.getDuration() / 1000;//获得了视频的时长（以毫秒为单位）
-                    mediaPlayer.release();
-                    mediaPlayer = null;
-                    String tt;
-                    if (timee / 60 != 0) {
-                        if (timee % 60 < 10) {
-                            tt = timee / 60 + ":0" + timee % 60;
-                        } else {
-                            tt = timee / 60 + ":" + timee % 60;
-                        }
-                    } else {
-                        if (timee % 60 < 10) {
-                            tt = "00:0" + timee % 60;
-                        } else {
-                            tt = "00:" + timee % 60;
-                        }
-
-                    }
-                    i.setVideo_len(tt);
-                    i.setSize(len);
-                    i.setText(s);
-                    i.setTime(time);
-                    i.setUrl(uu);
-                    i.setTwittertext(text);
-                    if (HaveList) {
-                        newItemsList.add(0, i);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                scanNum.setText(++num + "");
-                            }
-                        });
-                    } else {
-                        itemsList.add(0, i);
-                        handler.sendEmptyMessage(SEARCH_ONE_VIDEO);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                scanNum.setText(++num + "");
-                            }
-                        });
+                    } catch (Exception e) {
+                        long timeee = file.lastModified();
+                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                        time = formatter.format(timeee);
+                        Log.e(TAG, "modifiedTime: " + time + e.getMessage());
                     }
                 }
-                if (HaveList) {
-                    if (itemsList.size() != newItemsList.size()) {
-                      //  Log.d(TAG, itemsList.toString());
-                        sort(newItemsList);
-                        setDataList(url, newItemsList);
-                        handler.sendEmptyMessage(UPDATE_LIST);
-                    } else {
-                        handler.sendEmptyMessage(NO_UPDATE_LIST);
+               // Log.d(TAG, "后扫的time: " + time);
+                i.setSize(len);
+                i.setText(s);
+                i.setTime(time);
+                i.setUrl(uu);
+                i.setTwittertext(text);
+                newItemsList.add(0, i);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        scanNum.setText(++num + "");
                     }
-                } else {
-                    sort(itemsList);
-                    setDataList(url, itemsList);
-                    handler.sendEmptyMessage(SEARCH_VIDEO);
-                }
-
+                });
             }
+            if (itemsList.size() != newItemsList.size()) {
+                Log.d(TAG, itemsList.toString());
+                sort(newItemsList);
+                setDataList(url, newItemsList);
+                handler.sendEmptyMessage(UPDATE_LIST);
+            } else {
+                if(twitterIsEmpty){
+                    sort(newItemsList);
+                    setDataList(url, newItemsList);
+                    itemsList = newItemsList;
+                    runOnUiThread(()->{
+                        adapter.update(itemsList);
+                    });
+                    loadPic();
+                    //惊呆了老铁铁，这是什么操作，从来没见过，真是让我开了眼。
+                    twitterIsEmpty=false;
+                }
+                handler.sendEmptyMessage(NO_UPDATE_LIST);
+            }
+            long after = System.currentTimeMillis();
+            Log.d(TAG, "time:"+(after-before));
         }).start();
     }
 
@@ -938,7 +881,7 @@ public class VideoActivity extends AppCompatActivity {
         params.height = screenHeight;
         recyclerView.setLayoutParams(params);
         title.setVisibility(View.VISIBLE);
-        // ViewWrapper wrapper = new ViewWrapper(recyclerView);
+
         ObjectAnimator animator4 = ObjectAnimator.ofFloat(recyclerView, "translationY", 0);
         animatorSet.play(animator4);
         animatorSet.setDuration(500).start();
@@ -975,6 +918,7 @@ public class VideoActivity extends AppCompatActivity {
     }
 
     public void setDataList(String tag, ArrayList<Items> datalist) {
+        HaveList=true;
         if (null == datalist || datalist.size() <= 0)
             return;
 
@@ -982,11 +926,6 @@ public class VideoActivity extends AppCompatActivity {
         //转换成json数据，再保存
         String strJson = gson.toJson(datalist);
         kv.encode(tag, strJson);
-//        SharedPreferences.Editor editor=sp.edit();
-////        editor.clear();
-//        editor.putString(tag, strJson);
-//        editor.commit();
-
     }
 
     /**
@@ -1011,8 +950,6 @@ public class VideoActivity extends AppCompatActivity {
     }
 
     public void setBlankUI() {
-        //detailPlayer.setVisibility(View.GONE);
-        // recyclerView.setVisibility(View.INVISIBLE);
         blank.setVisibility(View.VISIBLE);
     }
 
@@ -1037,7 +974,6 @@ public class VideoActivity extends AppCompatActivity {
                 ViewGroup.LayoutParams params = recyclerView.getLayoutParams();
                 int screenHeight = getWindowManager().getDefaultDisplay().getHeight(); // 屏幕高（像素，如：800p）
                 params.height = screenHeight - i + getResources().getDimensionPixelSize(R.dimen.dp_40);
-                ;
                 recyclerView.setLayoutParams(params);
                 detailPlayer.startPlay();
                 //vv.start();
@@ -1064,33 +1000,6 @@ public class VideoActivity extends AppCompatActivity {
             detailPlayer.onConfigurationChanged(this, newConfig, orientationUtils, true, true);
         }
     }
-
-    private static class ViewWrapper {
-        private View mTarget;
-
-        public ViewWrapper(View target) {
-            mTarget = target;
-        }
-
-        public int getWidth() {
-            return mTarget.getLayoutParams().width;
-        }
-
-        public void setWidth(int width) {
-            mTarget.getLayoutParams().width = width;
-            mTarget.requestLayout();
-        }
-
-        public int getHeight() {
-            return mTarget.getLayoutParams().width;
-        }
-
-        public void setHeight(int height) {
-            mTarget.getLayoutParams().height = height;
-            mTarget.requestLayout();
-        }
-    }
-
     public Bitmap getBitmap(String path) throws IOException {
         try {
             URL url = new URL(path);
@@ -1129,99 +1038,19 @@ public class VideoActivity extends AppCompatActivity {
         return bmp;
     }
 
-    //    public void downloadPicture(final String uurl){
-//
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//
-//                URL url = null;
-//                HttpURLConnection con = null;
-//                try {
-//
-//                    url = new URL(uurl);
-//                    con = (HttpURLConnection) url.openConnection();
-//                    con.setRequestMethod("GET");
-//                    con.setReadTimeout(5000);
-//                    con.setDoInput(true);
-//                    double length=con.getContentLength();
-//                    String filename = Environment.getExternalStorageDirectory() +"/.savedPic/";
-//                    File file = new File(filename);
-//                    if(!file.exists()){
-//                        file.mkdirs();
-//                    }
-//                    File f = new File(file,String.valueOf(System.currentTimeMillis()+".jpg"));
-//                    final String fname=f.getName();
-//                    Uri uri = null;
-//                    if(Build.VERSION.SDK_INT>= 24){
-//                        uri = FileProvider.getUriForFile(VideoActivity.this, "com.ycs.servicetest.provider", f);
-//                    }else{
-//                        uri= Uri.fromFile(f);
-//                    }
-//                    OutputStream fos= (OutputStream) getContentResolver().openOutputStream(uri);
-////                    FileOutputStream fos = new FileOutputStream(file);
-//                    InputStream in = con.getInputStream();
-//                    byte ch[] = new byte[2 * 1024];
-//                    int len=0;
-//                    long haswrite=0L;
-//                    int percent=0;
-//                    if (fos!= null){
-//                        while ((len = in.read(ch)) != -1){
-//                            fos.write(ch,0,len);
-//                            haswrite += len;
-//                            //BidDecimal精确数
-//                            double d = (new BigDecimal(haswrite / length)
-//                                    .setScale(2, BigDecimal.ROUND_HALF_UP)).doubleValue();
-//                            percent = (int) (d * 100);
-//                            Log.e("yyy", "进度"+percent);
-//                            MainService.updateProgress(VideoActivity.this,percent);
-//
-//                        }
-////                        if(percent==100){
-////                            Looper.prepare();
-////                            mhandler.post(new Runnable() {
-////                                @Override
-////                                public void run() {
-////                                    Toast.makeText(VideoActivity.this, fname+"下载成功", Toast.LENGTH_SHORT).show();
-////                                }
-////                            });
-////
-////                        }
-//                        in.close();
-//                        fos.close();
-//
-//                    }else{
-//                        Log.e("yyy", "fou为空" );
-//                    }
-//
-//                } catch (MalformedURLException e) {
-//                    e.printStackTrace();
-//                    Log.e("yyy","失败"+e.getMessage());
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                    Log.e("yyy","失败"+e.getMessage());
-//                }
-//            }
-//        }).start();
-//    }
     public void sort(ArrayList<Items> stus) {
         isScaning = false;
-
-        Collections.sort(stus, new Comparator<Items>() {
-
-            @Override
-            public int compare(Items o1, Items o2) {
-                // 升序
-                //return o1.getAge()-o2.getAge();
-                if(o2.getTime()==null||o1.getTime()==null){
-                    Log.d(TAG, "timenull");
-                    return 1;
-                }
-                return o2.getTime().compareTo(o1.getTime());
-                // 降序
-                // return o2.getAge()-o1.getAge();
-                // return o2.getAge().compareTo(o1.getAge());
+        Collections.sort(stus, (o1, o2) -> {
+            // 升序
+            //return o1.getAge()-o2.getAge();
+            if(o2.getTime()==null||o1.getTime()==null){
+                Log.d(TAG, "视频时间null");
+                return 1;
             }
+            return o2.getTime().compareTo(o1.getTime());
+            // 降序
+            // return o2.getAge()-o1.getAge();
+            // return o2.getAge().compareTo(o1.getAge());
         });
 
     }
@@ -1232,6 +1061,10 @@ public class VideoActivity extends AppCompatActivity {
 
             @Override
             public int compare(Items o1, Items o2) {
+                if(o2.getTime()==null||o1.getTime()==null){
+                    Log.d(TAG, "视频时间null");
+                    return 1;
+                }
                 return o1.getTime().compareTo(o2.getTime());
             }
         });
@@ -1244,6 +1077,10 @@ public class VideoActivity extends AppCompatActivity {
 
             @Override
             public int compare(Items o1, Items o2) {
+                if(o2.getVideo_len()==null||o1.getVideo_len()==null){
+                    Log.d(TAG, "视频时长报Null");
+                    return 1;
+                }
                 return o2.getVideo_len().compareTo(o1.getVideo_len());
             }
         });
@@ -1255,6 +1092,10 @@ public class VideoActivity extends AppCompatActivity {
         Collections.sort(stus, new Comparator<Items>() {
             @Override
             public int compare(Items o1, Items o2) {
+                if(o2.getTwittertext()==null||o1.getTwittertext()==null){
+
+                    return 1;
+                }
                 return o2.getTwittertext().length() - o1.getTwittertext().length();
             }
         });
@@ -1263,24 +1104,24 @@ public class VideoActivity extends AppCompatActivity {
 
     public void deSortByComment(ArrayList<Items> stus) {
         isScaning = false;
-        Collections.sort(stus, new Comparator<Items>() {
-
-            @Override
-            public int compare(Items o1, Items o2) {
-                return o1.getTwittertext().length() - o2.getTwittertext().length();
+        Collections.sort(stus, (o1, o2) -> {
+            if(o2.getTwittertext()==null||o1.getTwittertext()==null){
+                Log.d(TAG, "推特文案长度报Null");
+                return 1;
             }
+            return o1.getTwittertext().length() - o2.getTwittertext().length();
         });
 
     }
 
     public void desortByLarge(ArrayList<Items> stus) {
         isScaning = false;
-        Collections.sort(stus, new Comparator<Items>() {
-
-            @Override
-            public int compare(Items o1, Items o2) {
-                return o1.getVideo_len().compareTo(o2.getVideo_len());
+        Collections.sort(stus, (o1, o2) -> {
+            if(o2.getTwittertext()==null||o1.getTwittertext()==null){
+                Log.d(TAG, "视频长度报Null");
+                return 1;
             }
+            return o1.getVideo_len().compareTo(o2.getVideo_len());
         });
 
     }
@@ -1289,6 +1130,7 @@ public class VideoActivity extends AppCompatActivity {
         Collections.sort(stus, new Comparator<String>() {
             @Override
             public int compare(String o1, String o2) {
+
                 return o2.compareTo(o1);
             }
         });
@@ -1318,32 +1160,51 @@ public class VideoActivity extends AppCompatActivity {
         attrs.flags &= ~WindowManager.LayoutParams.FLAG_FULLSCREEN;
         getWindow().setAttributes(attrs);
     }
+    private void loadTwitterText(){
+        new Thread(()->{
+            BmobQuery<TwitterText> query = new BmobQuery<>();
+            query.order("createdAt")
+                    .findObjects(new FindListener<TwitterText>() {
+                        @Override
+                        public void done(List<TwitterText> object, BmobException e) {
+                            if (e == null) {
+                                //Log.d(TAG, "下载的文案"+object.get(0).getFilename()+object.get(0).getText()+object.get(0));
+                                for(TwitterText tt:object){
+                                    kv_text.encode(tt.getFilename(),tt.getText());
+                                }
+                                twitterIsEmpty=true;
+                                startScan();
+                            } else {
 
-    private void loadPic() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                isScaning = true;
-                for (int i = 0; i < itemsList.size(); i++) {
-                    if (isScaning) {
-                        if (i < itemsList.size()) {
-                            try {
-                                loadBitmap(itemsList.get(i).getUrl(), i);
-                            } catch (IOException e) {
-                                e.printStackTrace();
                             }
+                        }
+                    });
+
+        }).start();
+    }
+    private void loadPic() {
+        new Thread(() -> {
+            isScaning = true;
+            for (int i = 0; i < itemsList.size(); i++) {
+                if (isScaning) {
+                    if (i < itemsList.size()) {
+                        if(itemsList.get(i).getVideo_len()==null||itemsList.get(i).getVideo_len().isEmpty()){
+                            itemsList.get(i).setVideo_len(loadVideoLen(itemsList.get(i).getUrl()));
                             Message msg = new Message();
                             msg.what = SCANING_ONE_PIC;
                             msg.obj = i;
-                            handler.sendMessage(msg);
-                        } else {
-                            return;
+                            if (isScaning) {
+                                handler.sendMessage(msg);
+                            }
                         }
-
-
                     } else {
                         return;
                     }
+                } else {
+                    return;
+                }
+                if(i==itemsList.size()-1){
+                    setDataList(url, itemsList);
                 }
             }
         }).start();
@@ -1429,12 +1290,13 @@ public class VideoActivity extends AppCompatActivity {
         //mDiskCache.close();
     }
 
+
     public synchronized void loadBitmap(String imageKey, int i) throws IOException {
-//        Bitmap bitmap = getBitmapFromMemCache(imageKey);
         Bitmap bitmap = getCache(imageKey);
         if (bitmap != null) {
             Log.e(TAG, "读取");
             if (i < itemsList.size()) {
+
                 itemsList.get(i).setSrc(bitmap);
             } else {
                 return;
@@ -1454,13 +1316,43 @@ public class VideoActivity extends AppCompatActivity {
                 return;
             }
             addDiskCache(itemsList.get(i).getUrl(), bitmap);
-            //addBitmapToMemoryCache(itemsList.get(i).getUrl(),bitmap);
         }
     }
 
     //    public Bitmap getBitmapFromMemCache(String key) {
 //        return mMemoryCache.get(key);
 //    }
+
+    private String loadVideoLen(String uu){
+        String tt="";
+        MediaPlayer mediaPlayer = new MediaPlayer();
+        try {
+            mediaPlayer.setDataSource(uu);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            mediaPlayer.prepare();
+        } catch (IOException e) {
+        }
+        long timee = mediaPlayer.getDuration() / 1000;//获得了视频的时长（以毫秒为单位）
+        mediaPlayer.release();
+        mediaPlayer = null;
+        if (timee / 60 != 0) {
+            if (timee % 60 < 10) {
+                tt = timee / 60 + ":0" + timee % 60;
+            } else {
+                tt = timee / 60 + ":" + timee % 60;
+            }
+        } else {
+            if (timee % 60 < 10) {
+                tt = "00:0" + timee % 60;
+            } else {
+                tt = "00:" + timee % 60;
+            }
+        }
+        return tt;
+    }
     private synchronized void loadPicAfterSort() {
         new Thread(new Runnable() {
             @Override
@@ -1471,16 +1363,13 @@ public class VideoActivity extends AppCompatActivity {
                         if (itemsList.get(i).getSrc() == null) {
                             if (isScaning) {
                                 if (i < itemsList.size()) {
-                                    try {
-                                        loadBitmap(itemsList.get(i).getUrl(), i);
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
+                                    if(itemsList.get(i).getVideo_len()==null||itemsList.get(i).getVideo_len()=="") {
+                                        itemsList.get(i).setVideo_len(loadVideoLen(itemsList.get(i).getUrl()));
                                     }
                                     Message msg = new Message();
                                     msg.what = SCANING_ONE_PIC;
                                     msg.obj = i;
                                     handler.sendMessage(msg);
-//                                    handler.sendEmptyMessage(UPDATE_ALL);
                                 } else {
                                     return;
                                 }

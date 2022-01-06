@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
@@ -80,10 +81,12 @@ class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin{
                       });
                     }else{
                       controller.stop();
+                      controller.reset();
                       pause();
                       setState(() {
                         isPlay=true;
                         src="pause";
+
                       });
                     }
                    // Fluttertoast.showToast(msg:"111");

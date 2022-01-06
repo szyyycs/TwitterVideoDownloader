@@ -39,6 +39,7 @@ import com.tencent.mmkv.MMKV;
 
 import java.util.Calendar;
 
+import cn.bmob.v3.Bmob;
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.android.FlutterFragment;
 import io.flutter.embedding.android.FlutterView;
@@ -144,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
         context=getApplicationContext();
         Beta.upgradeDialogLayoutId= R.layout.layout_upgrade;
         Bugly.init(getApplicationContext(), "b0a053b5dd", false);
+        Bmob.initialize(this, "2d24c857824e0609dd2e185bf5378acc");
         getSupportActionBar().hide();
         checkTime();
         Window window = getWindow();
@@ -296,7 +298,7 @@ public class MainActivity extends AppCompatActivity {
         btn.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-
+                startActivity(new Intent(MainActivity.this,PubuActivity.class));
                 return false;
             }
         });
@@ -352,8 +354,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissionss, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissionss, grantResults);
         if(requestCode==111){
             Log.e("yyy","获取权限返回");
             //Toast.makeText(this, "yyy", Toast.LENGTH_SHORT).show();

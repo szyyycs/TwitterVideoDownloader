@@ -1,8 +1,10 @@
 package com.ycs.servicetest;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -17,6 +19,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +38,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
     public ItemAdapter(ArrayList<Items> itemsList) {
         this.itemslist=itemsList;
     }
+    private Context context;
 
     @NonNull
     @Override
@@ -40,6 +46,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.layout_item, parent, false);
         ViewHolder holder = new ViewHolder(view,mListener,itemLongClickListener);
+        context=parent.getContext();
         return holder;
     }
 
@@ -47,17 +54,27 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ItemAdapter.ViewHolder holder, int position) {
         final Items items = itemslist.get(position);
         holder.items_tv.setText(items.getText());
-        if(items.getSrc()!=null){
-            holder.items_img.setImageBitmap(items.getSrc());
+        if(context!=null){
+            Glide.with(context)
+                .setDefaultRequestOptions(
+                    new RequestOptions()
+                            .frame(0)
+                            .centerCrop()
+                            .error(R.mipmap.blank)
+                )
+                .load(items.getUrl())
+                .into(holder.items_img);
         }
         holder.size_tv.setText(items.getSize());
         holder.time_tv.setText(items.getTime());
+
         holder.text_tv.setText(items.getTwittertext());
         if(holder.text_tv.getLineCount() > 3){//判断行数大于多少时改变
             int lineEndIndex = holder.text_tv.getLayout().getLineEnd(2); //设置第4行打省略号
             String text = holder.text_tv.getText().subSequence(0, lineEndIndex-2) +"...";
             holder.text_tv.setText(text);
         }
+
         holder.videolen_tv.setText(items.getVideo_len());
     }
 
@@ -65,7 +82,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
     public int getItemCount() {
         return itemslist.size();
     }
-
 
 
     static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,View.OnLongClickListener{

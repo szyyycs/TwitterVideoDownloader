@@ -30,17 +30,16 @@
         android:testOnly="false"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name="io.flutter.embedding.android.FlutterActivity"
-            android:theme="@style/FlutterPageTheme"
-            >
+        <activity android:name=".PubuActivity"></activity>
+        <activity
+            android:name="io.flutter.embedding.android.FlutterActivity"
+            android:theme="@style/FlutterPageTheme">
             <meta-data
                 android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
-                android:value="true"/>
-
+                android:value="true" />
             <meta-data
                 android:name="io.flutter.embedding.android.SplashScreenDrawable"
-                android:resource="@drawable/launch_background"/>
-
+                android:resource="@drawable/launch_background" />
         </activity>
         <activity android:name=".TestActivity" />
 
@@ -69,14 +68,6 @@
             android:exported="false" />
 
         <activity android:name=".FloatActivity" />
-        <activity
-            android:name=".TestVideoActivity2"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".TestVideoActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
-            android:screenOrientation="portrait" />
         <activity android:name=".tiktok" />
         <activity
             android:name=".MainActivity"
@@ -86,15 +77,15 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-<!--            <meta-data-->
-<!--                android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"-->
-<!--                android:value="true"/>-->
+            <!-- <meta-data -->
+            <!-- android:name="io.flutter.app.android.SplashScreenUntilFirstFrame" -->
+            <!-- android:value="true"/> -->
 
-<!--            <meta-data-->
-<!--                android:name="io.flutter.embedding.android.SplashScreenDrawable"-->
-<!--                android:resource="@drawable/launch_background"/>-->
+
+            <!-- <meta-data -->
+            <!-- android:name="io.flutter.embedding.android.SplashScreenDrawable" -->
+            <!-- android:resource="@drawable/launch_background"/> -->
         </activity>
-        <activity android:name=".Test" />
 
         <receiver android:name=".DialogReceiver" />
 
@@ -106,6 +97,10 @@
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/files_path" />
+        </provider>
+        <provider
+            android:name="cn.bmob.v3.util.BmobContentProvider"
+            android:authorities="com.ycs.servicetest.BmobContentProvider">
         </provider>
     </application>
 
