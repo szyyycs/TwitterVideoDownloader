@@ -2,14 +2,12 @@ package com.ycs.servicetest
 
 import android.content.Context
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
 import androidx.recyclerview.widget.RecyclerView
@@ -20,10 +18,12 @@ import com.bumptech.glide.request.RequestOptions
 
 class PubuAdapter(dataList: MutableList<ImageModel>) : RecyclerView.Adapter<PubuAdapter.PubuHolder>() {
     private var data:MutableList<ImageModel> = dataList;
+    private lateinit var mListener: OnItemClickListener
+    private lateinit var mLongListener: OnLongItemClickListener
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PubuHolder {
         var view:View=LayoutInflater.from(parent.context).inflate(R.layout.pubu_item, parent, false);
-        Log.d("yyy", "onBindViewHolder: 2")
-        return PubuHolder(view);
+       // Log.d("yyy", "onBindViewHolder: 2")
+        return PubuHolder(view, mListener, mLongListener);
     }
 
     override fun getItemCount(): Int {
@@ -31,16 +31,24 @@ class PubuAdapter(dataList: MutableList<ImageModel>) : RecyclerView.Adapter<Pubu
     }
 
     override fun onBindViewHolder(holder: PubuHolder, position: Int) {
-        Log.d("yyy", "onBindViewHolder: 1")
+       // Log.d("yyy", "onBindViewHolder: 1")
         var model:ImageModel=data[position]
         val screenWidth = getScreenWidth(holder.itemView.context)
         val lp = holder.showIv.layoutParams
         lp.width = screenWidth / 2
         // 固定设置每个ItemView的高度，防止滑动的复用ItemView的时候重新分配itemView的高度
+       // lp.height = ((screenWidth/2)* model.imageHeight).toInt()
         lp.height = (screenWidth * model.imageHeight).toInt()
         holder.showIv.layoutParams = lp
-        holder.descTv.text=model.desc
-
+        if(model.desc.isEmpty()){
+            holder.descTv.visibility=View.GONE;
+        }else{
+            holder.descTv.text=model.desc
+            holder.descTv.visibility=View.VISIBLE
+        }
+        holder.time.text=model.time
+        holder.videoLen.text=model.len
+        holder.videoSize.text=model.size
         Glide.with(holder.itemView.context)
                 .setDefaultRequestOptions(
                         RequestOptions()
@@ -52,19 +60,49 @@ class PubuAdapter(dataList: MutableList<ImageModel>) : RecyclerView.Adapter<Pubu
                 .into(holder.showIv)
 
     }
-    fun addData(newData:ImageModel) {
+    fun addData(newData: ImageModel) {
             data.add(newData)
             notifyItemInserted(data.size)
     }
-    class PubuHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    fun setOnItemClickListener(listener: OnItemClickListener) {
+        this.mListener = listener
+    }
+    fun setOnLongItemClickListener(listener: OnLongItemClickListener){
+        this.mLongListener = listener
+    }
+    fun update(il: MutableList<ImageModel>) {
+        this.data = il
+        //notifyItemInserted(0);
+        notifyDataSetChanged()
+    }
+    interface OnLongItemClickListener {
+        fun onLongItemClick(view: View?, postion: Int)
+    }
+    interface OnItemClickListener {
+        fun onItemClick(view: View?, postion: Int)
+    }
+    class PubuHolder(itemView: View, itemClickListener: OnItemClickListener, itemLongItemClickListener: OnLongItemClickListener)
+        : RecyclerView.ViewHolder(itemView),View.OnClickListener,View.OnLongClickListener{
         val showIv: ImageView = itemView.findViewById(R.id.show_iv)
         val descTv: TextView = itemView.findViewById(R.id.desc_tv)
+        val videoSize: TextView = itemView.findViewById(R.id.video_len)
+        val time: TextView = itemView.findViewById(R.id.time)
+        val videoLen: TextView = itemView.findViewById(R.id.len)
+        var mListener: OnItemClickListener = itemClickListener
+        var mLongListener: OnLongItemClickListener = itemLongItemClickListener
         init {
-            itemView.setOnClickListener {
-                Toast.makeText(itemView.context, "position:$layoutPosition",
-                        Toast.LENGTH_SHORT).show()
-            }
+            itemView.setOnClickListener(this)
+            itemView.setOnLongClickListener(this)
         }
+        override fun onClick(v: View?) {
+            mListener!!.onItemClick(v, position)
+        }
+
+        override fun onLongClick(v: View?): Boolean {
+            mLongListener.onLongItemClick(v, position)
+            return false
+        }
+
     }
 
     private var mRecyclerView: RecyclerView? = null

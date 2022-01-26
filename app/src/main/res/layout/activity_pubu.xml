@@ -5,10 +5,49 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".PubuActivity">
+
 <androidx.recyclerview.widget.RecyclerView
     android:id="@+id/rvv"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
 </androidx.recyclerview.widget.RecyclerView>
+    <com.ycs.servicetest.MyVideoPlayer
+        android:id="@+id/detail_player"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible"
+        android:translationY="@dimen/dp_1000"
+        android:layout_alignParentBottom="true"
+        />
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/blank_layout"
+        android:visibility="invisible"
+        android:layout_centerInParent="true"
+        >
+
+        <ImageView
+            android:layout_width="@dimen/dp_80"
+            android:layout_height="@dimen/dp_80"
+            android:src="@mipmap/blank"
+            android:visibility="visible"
+            android:id="@+id/blank"
+            android:layout_centerHorizontal="true"
+
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/blank"
+            android:textSize="20sp"
+            android:textColor="#999"
+            android:maxEms="10"
+            android:gravity="center"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="@dimen/dp_20"
+            android:text="一个视频文件都没有呢，快去下载一个吧！"
+            />
+    </RelativeLayout>
 </RelativeLayout>

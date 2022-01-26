@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:math';
 
+//import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,6 +27,7 @@ class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin{
 
   initState() {
     super.initState();
+    print("dispose222");
     player =new AudioCache(fixedPlayer: audioPlayer);
     src="play";
     controller = AnimationController(duration: const Duration(milliseconds: 4000), vsync: this);
@@ -36,11 +38,11 @@ class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin{
   @override
   void dispose() {
     player.clearAll();
-    audioPlayer.stop();
+     audioPlayer.stop();
     audioPlayer.dispose();
     controller.dispose();
     super.dispose();
-    print("dispose");
+    print("dispose4");
   }
 
 
@@ -113,6 +115,9 @@ class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin{
       middleScale: 1,
       foregroundScale: 1.1,
       backgroundScale: 1.2,
+      // middleScale: 1,
+      // foregroundScale: 1.05,
+      // backgroundScale: 1.1,
       backgroundWidget: backgroundWiget(),
       foregroundWidget: foregroundWiget(),
       middleWidget: middleWiget(),
@@ -122,17 +127,19 @@ class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin{
   Widget backgroundWiget() {
     return Container(
        child: getImage('background.png'),
+      //child: getImage('back.png'),
     );
   }
   Widget foregroundWiget() {
     return Container(
        child: getImage('foreground.png'),
-
+      //child: getImage('fore.png'),
     );
   }
   Widget middleWiget() {
     return Container(
       child: getImage('middle.png'),
+     // child: getImage('mid.png'),
     );
   }
   Image getImage(String s) {

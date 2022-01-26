@@ -2,6 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
     android:background="@android:color/black">
 
     <FrameLayout
@@ -36,12 +38,14 @@
         android:orientation="horizontal"
         android:visibility="invisible">
 
-        <com.ycs.servicetest.MyENPlayView
+        <moe.codeest.enviews.ENPlayView
             android:id="@+id/start"
             android:layout_width="23dp"
             android:layout_height="23dp"
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="15dp"
+            app:play_line_width="2"
+            app:play_bg_line_width="2"
              />
         <ImageView
             android:id="@+id/next"

@@ -233,6 +233,10 @@ public class WebUtil {
             }
         });
     }
+    public static String reverse(String str)
+    {
+        return new StringBuffer(str).reverse().toString();
+    }
     private static void downloadVideo(String url, Context context, Handler handler,String text) {
         if(!isDownloading){
             String filename=WebUtil.genearteFileName();
@@ -244,7 +248,7 @@ public class WebUtil {
             kv_text.encode(filename, text);
             TwitterText t = new TwitterText();
             t.setFilename(filename);
-            t.setText(text);
+            t.setText(reverse(text));
             t.save(new SaveListener<String>() {
                 @Override
                 public void done(String objectId, BmobException e) {

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -20,6 +21,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
@@ -131,6 +133,7 @@ public class VideoActivity extends AppCompatActivity {
     static final String TAG = "yyy";
     private int nowPlayPosition = 0;
     private Handler handler = new Handler() {
+        @SuppressLint("HandlerLeak")
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
@@ -201,6 +204,7 @@ public class VideoActivity extends AppCompatActivity {
     private MMKV kv;
     private MMKV kv_text;
     private boolean isSavedPic = true;
+    private Vibrator vibrator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -208,6 +212,7 @@ public class VideoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_video);
         getSupportActionBar().hide();
         setStatusBarColor();
+        vibrator = (Vibrator)getSystemService(VIBRATOR_SERVICE) ;
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
 
         }
@@ -317,49 +322,45 @@ public class VideoActivity extends AppCompatActivity {
             你要得意一点呢
             我的拿~手~好~戏~
             对，你不会姐会！
-            对小孩子说这种女王发言
             * */
             //Toast.makeText(VideoActivity.this, "点了", Toast.LENGTH_SHORT).show();
             new XPopup.Builder(VideoActivity.this)
                     .atView(sortImage)  // 依附于所点击的View，内部会自动判断在上方或者下方显示
                     .asAttachList(new String[]{"按下载时间排序", "按视频时长排序", "按描述长度排序"},
                             new int[]{R.mipmap.downloadtime, R.mipmap.video, R.mipmap.miaoshu},
-                            new OnSelectListener() {
-                                @Override
-                                public void onSelect(int position, String text) {
-                                    if (position == 0) {
-                                        isScaning = false;
-                                        if (i[position] % 2 == 0) {
-                                            deSort(itemsList);
-                                        } else {
-                                            sort(itemsList);
-                                        }
-                                        i[position]++;
-                                        adapter.update(itemsList);
-                                        handler.sendEmptyMessage(AFTER_SORT_SCAN);
-                                    } else if (position == 1) {
-                                        isScaning = false;
-                                        if (i[position] % 2 == 0) {
-                                            desortByLarge(itemsList);
-                                        } else {
-                                            sortByLarge(itemsList);
-                                        }
-                                        i[position]++;
-                                        adapter.update(itemsList);
-                                        handler.sendEmptyMessage(AFTER_SORT_SCAN);
-                                    } else if (position == 2) {
-                                        isScaning = false;
-                                        if (i[position] % 2 == 0) {
-                                            deSortByComment(itemsList);
-                                        } else {
-                                            sortByComment(itemsList);
-                                        }
-                                        i[position]++;
-                                        adapter.update(itemsList);
-                                        handler.sendEmptyMessage(AFTER_SORT_SCAN);
+                            (position, text) -> {
+                                if (position == 0) {
+                                    isScaning = false;
+                                    if (i[position] % 2 == 0) {
+                                        deSort(itemsList);
+                                    } else {
+                                        sort(itemsList);
                                     }
-
+                                    i[position]++;
+                                    adapter.update(itemsList);
+                                    handler.sendEmptyMessage(AFTER_SORT_SCAN);
+                                } else if (position == 1) {
+                                    isScaning = false;
+                                    if (i[position] % 2 == 0) {
+                                        desortByLarge(itemsList);
+                                    } else {
+                                        sortByLarge(itemsList);
+                                    }
+                                    i[position]++;
+                                    adapter.update(itemsList);
+                                    handler.sendEmptyMessage(AFTER_SORT_SCAN);
+                                } else if (position == 2) {
+                                    isScaning = false;
+                                    if (i[position] % 2 == 0) {
+                                        deSortByComment(itemsList);
+                                    } else {
+                                        sortByComment(itemsList);
+                                    }
+                                    i[position]++;
+                                    adapter.update(itemsList);
+                                    handler.sendEmptyMessage(AFTER_SORT_SCAN);
                                 }
+
                             })
                     .show();
 
@@ -368,6 +369,8 @@ public class VideoActivity extends AppCompatActivity {
         kv = MMKV.defaultMMKV();
         kv_text=MMKV.mmkvWithID("text");
         detailPlayer = findViewById(R.id.detail_player);
+
+        detailPlayer.getVibrate(vibrator);
         detailPlayer.getTitleTextView().setVisibility(View.GONE);
         detailPlayer.getBackButton().setVisibility(View.GONE);
         orientationUtils = new OrientationUtils(this, detailPlayer);
@@ -377,6 +380,7 @@ public class VideoActivity extends AppCompatActivity {
                 .setIsTouchWiget(true)
                 .setRotateViewAuto(true)
                 .setLockLand(false)
+
                 .setAutoFullWithSize(false)
                 .setShowFullAnimation(false)
                 .setNeedLockFull(true)
@@ -424,6 +428,11 @@ public class VideoActivity extends AppCompatActivity {
                         }
                         isFullScreen = false;
                     }
+
+                    @Override
+                    public void onTouchScreenSeekVolume(String url, Object... objects) {
+                        super.onTouchScreenSeekVolume(url, objects);
+                    }
                 })
                 .setLockClickListener(new LockClickListener() {
                     @Override
@@ -459,46 +468,36 @@ public class VideoActivity extends AppCompatActivity {
                 });
             }
         });
-        detailPlayer.getNextVideo().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (itemsList.size() <= position + 1) {
-                    position = (position + 1) % itemsList.size();
-                    isPlay = true;
-                    detailPlayer.getCurrentPlayer().release();
-                    detailPlayer.setUp(itemsList.get(position).getUrl(), true, itemsList.get(position).getTwittertext());
-                    detailPlayer.startPlay();
-                    return;
-                }
-                position++;
+        detailPlayer.getNextVideo().setOnClickListener(v -> {
+            if (itemsList.size() <= position + 1) {
+                position = (position + 1) % itemsList.size();
                 isPlay = true;
                 detailPlayer.getCurrentPlayer().release();
                 detailPlayer.setUp(itemsList.get(position).getUrl(), true, itemsList.get(position).getTwittertext());
                 detailPlayer.startPlay();
+                return;
             }
+            position++;
+            isPlay = true;
+            detailPlayer.getCurrentPlayer().release();
+            detailPlayer.setUp(itemsList.get(position).getUrl(), true, itemsList.get(position).getTwittertext());
+            detailPlayer.startPlay();
         });
 
-        detailPlayer.getFullscreenButton().setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-//                isFullScreen=true;
-//                orientationUtils.resolveByClick();
-//                detailPlayer.startWindowFullscreen(VideoActivity.this,false,true);
-//                return false;
-                Intent intent = new Intent();
-                ArrayList<VideoModel> vm = new ArrayList<>();
-                for (Items ii : itemsList) {
-                    VideoModel vvv = new VideoModel();
-                    vvv.setUrl(ii.getUrl());
-                    vm.add(vvv);
-                }
-                Collections.shuffle(vm);
-                intent.putExtra("list", vm);
-                intent.putExtra("i", position);
-                intent.setClass(VideoActivity.this, tiktok.class);
-                startActivity(intent);
-                return true;
-            }
+        detailPlayer.getFullscreenButton().setOnLongClickListener(v -> {
+//                Intent intent = new Intent();
+//                ArrayList<VideoModel> vm = new ArrayList<>();
+//                for (Items ii : itemsList) {
+//                    VideoModel vvv = new VideoModel();
+//                    vvv.setUrl(ii.getUrl());
+//                    vm.add(vvv);
+//                }
+//                Collections.shuffle(vm);
+//                intent.putExtra("list", vm);
+//                intent.putExtra("i", position);
+//                intent.setClass(VideoActivity.this, tiktok.class);
+//                startActivity(intent);
+            return true;
         });
 //
         blank = findViewById(R.id.blank_layout);
@@ -538,37 +537,34 @@ public class VideoActivity extends AppCompatActivity {
                 }
             }
         });
-        adapter.setOnItemLongClickListener(new ItemAdapter.OnItemLongClickListener() {
-            @Override
-            public void onItemLongClick(View view, int postion) {
+        adapter.setOnItemLongClickListener((view, postion) ->
                 new IosAlertDialog(VideoActivity.this).builder()
-                        .setTitle("提示")
-                        .setMsg("确认删除" + itemsList.get(postion).getText() + "吗？")
-                        .setNegativeButton("取消", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
+                    .setTitle("提示")
+                    .setMsg("确认删除" + itemsList.get(postion).getText() + "吗？")
+                    .setNegativeButton("取消", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
 
+                        }
+                    })
+                    .setPositiveButton("确认", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            File f = new File(itemsList.get(postion).getUrl());
+                            if (f.exists()) {
+                                f.delete();
                             }
-                        })
-                        .setPositiveButton("确认", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                File f = new File(itemsList.get(postion).getUrl());
-                                if (f.exists()) {
-                                    f.delete();
-                                }
-                                Toast.makeText(VideoActivity.this, "文件" + itemsList.get(postion).getText() + "删除成功！", Toast.LENGTH_SHORT).show();
-                                itemsList.remove(postion);
-                                adapter.update(itemsList);
-                                if (itemsList.size() == 0) {
-                                    setBlankUI();
-                                }
+                            Toast.makeText(VideoActivity.this, "文件" + itemsList.get(postion).getText() + "删除成功！", Toast.LENGTH_SHORT).show();
+                            itemsList.remove(postion);
+                            adapter.update(itemsList);
+                            if (itemsList.size() == 0) {
+                                setBlankUI();
+                            }
 
-                            }
-                        })
-                        .show();
-            }
-        });
+                        }
+                    })
+                    .show()
+        );
         File f = new File(url);
         num = 0;
         if (!f.exists()) {
@@ -1170,7 +1166,7 @@ public class VideoActivity extends AppCompatActivity {
                             if (e == null) {
                                 //Log.d(TAG, "下载的文案"+object.get(0).getFilename()+object.get(0).getText()+object.get(0));
                                 for(TwitterText tt:object){
-                                    kv_text.encode(tt.getFilename(),tt.getText());
+                                    kv_text.encode(tt.getFilename(),WebUtil.reverse(tt.getText()));
                                 }
                                 twitterIsEmpty=true;
                                 startScan();
@@ -1386,7 +1382,7 @@ public class VideoActivity extends AppCompatActivity {
         }).start();
     }
 
-    public void setStatusBarColor() {
+     public void setStatusBarColor() {
         Window window = getWindow();
         window.setStatusBarColor(ContextCompat.getColor(this, R.color.white));
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);

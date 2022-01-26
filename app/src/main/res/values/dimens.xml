@@ -399,7 +399,7 @@
     <dimen name="dp_600">600dp</dimen>
     <dimen name="dp_640">640dp</dimen>
     <dimen name="dp_720">720dp</dimen>
-
+    <dimen name="dp_1000">1000dp</dimen>
     <!-- font size,you can add if there is no one -->
     <dimen name="sp_6">6sp</dimen>
     <dimen name="sp_7">7sp</dimen>

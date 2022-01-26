@@ -30,7 +30,9 @@
         android:testOnly="false"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".PubuActivity"></activity>
+        <activity android:name=".PubuActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            ></activity>
         <activity
             android:name="io.flutter.embedding.android.FlutterActivity"
             android:theme="@style/FlutterPageTheme">

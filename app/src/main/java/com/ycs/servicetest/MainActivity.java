@@ -17,6 +17,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
@@ -37,6 +38,7 @@ import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
 import com.tencent.mmkv.MMKV;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import cn.bmob.v3.Bmob;
@@ -56,6 +58,7 @@ import static com.ycs.servicetest.WebUtil.isHttpUrl;
 public class MainActivity extends AppCompatActivity {
     final static String TAG="yyy";
     final static int GOTO_DOWNLOAD=1;
+
     private RelativeLayout floatWindow;
     private Button btn;
     private Context context;
@@ -65,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.READ_EXTERNAL_STORAGE};
     private ImageView iv;
     private Vibrator vibrator;
+    //跳到下载
     private Handler handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
@@ -79,63 +83,27 @@ public class MainActivity extends AppCompatActivity {
                 super.handleMessage(msg);
             }
         };
+    //显示倒计时dialog
     void showDialog(){
         ImageDialog d=new ImageDialog(MainActivity.this).builder();
         d.show();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        d.setAni(R.mipmap.two);
-                    }
-                });
-            }
-        },1000);
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        d.setAni(R.mipmap.one);
-
-                    }
-                });
-            }
-        },2000);
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                startActivity(
-                        FlutterActivity.createDefaultIntent(context)
-                );
-            }
-        },3000);
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                d.dismiss();
-            }
-        },4000);
+        handler.postDelayed(() -> runOnUiThread(() -> d.setAni(R.mipmap.two)),1000);
+        handler.postDelayed(() -> runOnUiThread(() -> d.setAni(R.mipmap.one)),2000);
+        handler.postDelayed(() -> startActivity(
+                FlutterActivity.createDefaultIntent(context)
+        ),3000);
+        handler.postDelayed(() -> d.dismiss(),4000);
 
     }
+    //检查时间
     void checkTime(){
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH)+1;
         int day = calendar.get(Calendar.DAY_OF_MONTH);
-        if(year==2021&&month==12&&day==10){
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    showDialog();
-                }
-            },2000);
-
+        if(month==12&&day==10){
+            handler.postDelayed(() -> showDialog(),2000);
         }
-        Log.d(TAG, "year"+year+"month"+month+"day"+day);
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -176,52 +144,39 @@ public class MainActivity extends AppCompatActivity {
         etInput=findViewById(R.id.input);
         floatWindow=findViewById(R.id.floatWindow);
         getPemission();
-        iv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i=new Intent(MainActivity.this, VideoActivity.class);
-                startActivity(i);
-            }
+        iv.setOnClickListener(v -> {
+            Intent i=new Intent(MainActivity.this, VideoActivity.class);
+            startActivity(i);
         });
-        tv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                Intent i=new Intent(MainActivity.this, tiktok.class);
-//                startActivity(i);
-            }
+        tv.setOnLongClickListener(v -> {
+            startActivity(
+                    FlutterActivity.createDefaultIntent(context)
+            );
+            return false;
         });
-        iv.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                IosAlertDialog dialog=new IosAlertDialog(MainActivity.this).builder();
-                SharedPreferences ssp=getSharedPreferences("url",Context.MODE_PRIVATE);
-                String url=ssp.getString("url","");
-                if(url.equals("")){
-                    url= Environment.getExternalStorageDirectory() +"/.savedPic/";
-                }
-                dialog.setEditText(url)
-                        .setTitle("设置你的下载路径")
-                        .setPositiveButton("确定", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                if(!dialog.getEditText().isEmpty()){
-                                    SharedPreferences.Editor e=ssp.edit();
-                                    e.putString("url",Environment.getExternalStorageDirectory() +"/"+dialog.getEditText()+"/");
-                                    e.commit();
-                                }
-
-                            }
-                        })
-                        .setNegativeButton("取消", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-
-                            }
-                        })
-                        .show();
-
-                return true;
+        iv.setOnLongClickListener(v -> {
+            IosAlertDialog dialog=new IosAlertDialog(MainActivity.this).builder();
+            SharedPreferences ssp=getSharedPreferences("url",Context.MODE_PRIVATE);
+            String url=ssp.getString("url","");
+            if(url.equals("")){
+                url= Environment.getExternalStorageDirectory() +"/.savedPic/";
             }
+            dialog.setEditText(url)
+                    .setTitle("设置你的下载路径")
+                    .setPositiveButton("确定", v1 -> {
+                        if(!dialog.getEditText().isEmpty()){
+                            SharedPreferences.Editor e=ssp.edit();
+                            e.putString("url",Environment.getExternalStorageDirectory() +"/"+dialog.getEditText()+"/");
+                            e.commit();
+                        }
+
+                    })
+                    .setNegativeButton("取消", v12 -> {
+
+                    })
+                    .show();
+
+            return true;
         });
 ////        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //            if (!Settings.canDrawOverlays(this)) {
@@ -295,7 +250,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        btn.setOnLongClickListener(new View.OnLongClickListener() {
+        btn.setOnLongClickListener(new OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 startActivity(new Intent(MainActivity.this,PubuActivity.class));

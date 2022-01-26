@@ -1,20 +1,31 @@
 package com.ycs.servicetest;
 
+import android.annotation.SuppressLint;
+import android.app.usage.UsageEvents;
 import android.content.Context;
+import android.os.Vibrator;
 import android.util.AttributeSet;
+import android.util.EventLog;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.shuyu.gsyvideoplayer.utils.Debuger;
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer;
 
 import moe.codeest.enviews.ENDownloadView;
+import moe.codeest.enviews.ENPlayView;
+
 
 public class MyVideoPlayer extends StandardGSYVideoPlayer {
     private float speed=1;
     TextView changeSpeed;
     ImageView nextVideo;
+    private Vibrator vi;
+    private boolean mSpeed=false;
     public MyVideoPlayer(Context context) {
         super(context);
     }
@@ -26,9 +37,62 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
         super.init(context);
         initView();
     }
+
+    @Override
+    protected void touchSurfaceUp() {
+        super.touchSurfaceUp();
+        if(mSpeed){
+            mSpeed=false;
+            getCurrentPlayer().setSpeedPlaying(speed, true);
+            changeSpeed.setText(""+speed);
+            Log.d("yyy", "touchLongPress: up");
+        }
+    }
+
+    @Override
+    protected void touchLongPress(MotionEvent e) {
+        super.touchLongPress(e);
+        switch (e.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                vi.vibrate(50);
+                mSpeed=true;
+                getCurrentPlayer().setSpeedPlaying(2, true);
+                changeSpeed.setText("2.0");
+                Log.d("yyy", "touchLongPress: down");
+                break;
+            case MotionEvent.ACTION_UP:
+
+                break;
+            default:
+
+        }
+
+    }
+    public void getVibrate(Vibrator vibrator){
+        this.vi=vibrator;
+    }
+    @SuppressLint("ClickableViewAccessibility")
     void initView(){
         nextVideo=findViewById(R.id.next);
         changeSpeed = (TextView) findViewById(R.id.switchSize);
+
+//        thumb.setOnTouchListener((v, event) -> {
+//            Log.d("yyy", "onTouch: 美紫紫");
+//            switch (event.getAction()){
+//                case MotionEvent.ACTION_DOWN:
+//                    changeSpeed.setText("2");
+//                    Log.d("yyy", "onTouch: 2");
+//                    getCurrentPlayer().setSpeedPlaying(2, true);
+//                    break;
+//                case MotionEvent.ACTION_UP:
+//                    changeSpeed.setText(""+speed);
+//                    getCurrentPlayer().setSpeedPlaying(speed, true);
+//                    break;
+//                default:
+//
+//            }
+//            return false;
+//        });
         changeSpeed.setOnClickListener(new OnClickListener() {
            @Override
            public void onClick(View v) {
@@ -40,6 +104,7 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
     public ImageView getNextVideo(){
         return nextVideo;
     }
+
     private void resolveTypeUI() {
         if (speed == 1) {
             speed = 1.25f;
@@ -162,31 +227,6 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
         //mStartButton.setVisibility(INVISIBLE);
     }
 
-//    @Override
-//    protected void updateStartImage() {
-//        if (mStartButton instanceof ENPlayView) {
-//            ENPlayView enPlayView = (ENPlayView) mStartButton;
-//            enPlayView.setDuration(500);
-//            if (mCurrentState == CURRENT_STATE_PLAYING) {
-//                enPlayView.play();
-//            } else if (mCurrentState == CURRENT_STATE_ERROR) {
-//                enPlayView.pause();
-//            } else {
-//                enPlayView.pause();
-//            }
-//        } else if (mStartButton instanceof ImageView) {
-//            ImageView imageView = (ImageView) mStartButton;
-//            if (mCurrentState == CURRENT_STATE_PLAYING) {
-//                imageView.setImageResource(R.drawable.video_click_pause_selector);
-//            } else if (mCurrentState == CURRENT_STATE_ERROR) {
-//                imageView.setImageResource(R.drawable.video_click_error_selector);
-//            } else {
-//                imageView.setVisibility(INVISIBLE);
-//                imageView.setImageResource(R.drawable.video_click_play_selector);
-//            }
-//        }
-//    }
-
     public void startPlay(){
         getStartButton().performClick();
         postDelayed(new Runnable() {
@@ -195,31 +235,6 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
                 hideAllWidget();
             }
         }, 400);
-//        if (mVideoAllCallBack != null) {
-//            Debuger.printfLog("onClickStartThumb");
-//            mVideoAllCallBack.onClickStartThumb(mOriginUrl, mTitle, MyVideoPlayer.this);
-//            //自定义的在开始时发生的事情
-//        }
-//        //清空progress
-//
-//        prepareVideo();
-//        hideAllWidget();
-//        setViewShowState(mLockScreen, GONE);
-
-//        if (mHideKey && mIfCurrentIsFullscreen && mShowVKey) {
-//            hideNavKey(mContext);
-//        }
-//        changeUiToPlayingClear();
-//        if (mVideoAllCallBack != null) {
-//            mVideoAllCallBack.onClickStartThumb(mOriginUrl, mTitle, MyVideoPlayer.this);
-//        }
-//        prepareVideo();
-//        //setStateAndUi(CURRENT_STATE_PLAYING);
-//        cancelDismissControlViewTimer();
-//        mPostDismiss = true;
-////        setViewShowState(mLockScreen, GONE);
-////        hideAllWidget();
-//        postDelayed(ttask,500);
     }
 
 }
