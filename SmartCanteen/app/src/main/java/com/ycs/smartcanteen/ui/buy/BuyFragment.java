@@ -24,7 +24,7 @@ public class BuyFragment extends Fragment {
 
     private String mParam1;
     private String mParam2;
-
+    private int i=0;
     public BuyFragment() {
 
     }
