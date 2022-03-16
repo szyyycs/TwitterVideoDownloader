@@ -10,10 +10,12 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.ycs.servicetest.utils.WebUtil;
+
 import java.util.ArrayList;
 
 import static com.ycs.servicetest.MainActivity.TAG;
-import static com.ycs.servicetest.WebUtil.analyzeList;
+import static com.ycs.servicetest.utils.WebUtil.analyzeList;
 
 public class WebService extends Service {
     private String url;

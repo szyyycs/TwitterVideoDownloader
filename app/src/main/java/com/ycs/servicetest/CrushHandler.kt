@@ -2,6 +2,7 @@ package com.ycs.servicetest
 
 import android.content.Context
 import android.util.Log
+import com.ycs.servicetest.utils.LogUtil
 
 class CrashHandler public constructor(): Thread.UncaughtExceptionHandler {
     private var context: Context? = null

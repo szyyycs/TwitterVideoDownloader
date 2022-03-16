@@ -24,11 +24,14 @@ import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 
+import com.ycs.servicetest.utils.ClipBoardUtil;
+import com.ycs.servicetest.utils.WebUtil;
+
 import java.util.Timer;
 
-import static com.ycs.servicetest.WebUtil.analyzeList;
-import static com.ycs.servicetest.WebUtil.isDownloading;
-import static com.ycs.servicetest.WebUtil.isHttpUrl;
+import static com.ycs.servicetest.utils.WebUtil.analyzeList;
+import static com.ycs.servicetest.utils.WebUtil.isDownloading;
+import static com.ycs.servicetest.utils.WebUtil.isHttpUrl;
 
 
 public class MainService extends Service {
@@ -122,7 +125,7 @@ public class MainService extends Service {
                     NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                     nm.notify(110, notification);
                     if (isHttpUrl(msg)&&msg.contains("twitter")) {
-                        if(isDownloading||WebUtil.isAnalyse){
+                        if(isDownloading|| WebUtil.isAnalyse){
                             if(!analyzeList.contains(msg)){
                                 WebUtil.analyzeList.add(msg);
                                 Log.e("yyy", "analyzeList的值："+analyzeList.toString() );

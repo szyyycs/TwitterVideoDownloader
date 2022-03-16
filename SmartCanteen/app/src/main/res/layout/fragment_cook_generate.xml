@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.CookGenerateFragment">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:background="#fff"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_width="150dp"
+            android:id="@+id/back"
+            android:visibility="invisible"
+            android:background="?selectableItemBackground"
+            android:layout_height="match_parent">
+            <ImageView
+                android:layout_width="40dp"
+                android:paddingBottom="10dp"
+                android:layout_height="match_parent"
+                android:src="@mipmap/delete"
+                android:paddingLeft="20dp"
+
+
+
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:text="删除该食谱"
+                android:gravity="center"
+                android:paddingLeft="10dp"
+                android:id="@+id/tip_text"
+                android:textColor="#888"
+                android:paddingBottom="10dp"
+                android:layout_height="match_parent"/>
+        </LinearLayout>
+
+        <com.google.android.material.tabs.TabLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="10dp"
+            android:id="@+id/tabLayout"
+            app:tabMode="fixed"
+            android:layout_gravity="center"
+            android:background="#fff"
+            app:tabSelectedTextColor="#777"
+            app:tabIndicatorHeight="3dp"
+            app:tabTextColor="#aaa"
+            app:tabTextAppearance="@style/title"
+            android:layout_marginRight="150dp"
+            app:tabIndicatorColor="#ddd"
+            app:tabIndicatorFullWidth="false"
+            />
+    </LinearLayout>
+
+    <androidx.viewpager.widget.ViewPager
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:id="@+id/viewPage"
+        />
+
+</LinearLayout>

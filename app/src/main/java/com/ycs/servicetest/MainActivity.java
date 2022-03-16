@@ -17,12 +17,9 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnLongClickListener;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -37,20 +34,21 @@ import com.downloader.PRDownloader;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
 import com.tencent.mmkv.MMKV;
+import com.ycs.servicetest.utils.ClipBoardUtil;
+import com.ycs.servicetest.utils.ImageDialog;
+import com.ycs.servicetest.utils.IosAlertDialog;
+import com.ycs.servicetest.utils.WebUtil;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 
 import cn.bmob.v3.Bmob;
 import io.flutter.embedding.android.FlutterActivity;
-import io.flutter.embedding.android.FlutterFragment;
-import io.flutter.embedding.android.FlutterView;
 
 import static com.ycs.servicetest.Constant.REQUEST_CODE;
-import static com.ycs.servicetest.WebUtil.analyzeList;
-import static com.ycs.servicetest.WebUtil.isAnalyse;
-import static com.ycs.servicetest.WebUtil.isDownloading;
-import static com.ycs.servicetest.WebUtil.isHttpUrl;
+import static com.ycs.servicetest.utils.WebUtil.analyzeList;
+import static com.ycs.servicetest.utils.WebUtil.isAnalyse;
+import static com.ycs.servicetest.utils.WebUtil.isDownloading;
+import static com.ycs.servicetest.utils.WebUtil.isHttpUrl;
 
 //import io.flutter.embedding.android.FlutterActivity;
 //import io.flutter.embedding.android.FlutterView;
@@ -104,6 +102,9 @@ public class MainActivity extends AppCompatActivity {
         if(month==12&&day==10){
             handler.postDelayed(() -> showDialog(),2000);
         }
+        if(month==2&&day==1){
+            handler.postDelayed(() -> showDialog(),2000);
+        }
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,32 +119,22 @@ public class MainActivity extends AppCompatActivity {
         checkTime();
         Window window = getWindow();
         window.setStatusBarColor(ContextCompat.getColor(this,R.color.colorIosBlue));
-//        CrashHandlerJ.getInstant().init();
         PRDownloader.initialize(getApplicationContext());
         WebUtil.init(getApplicationContext());
         String rootDir = MMKV.initialize(this);
         vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
-//        new Handler().postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                PRDownloader.initialize(getApplicationContext());
-//                WebUtil.init(getApplicationContext());
-//            }
-//        },3000);
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                PRDownloader.initialize(getApplicationContext());
-//                WebUtil.init(getApplicationContext());
-//            }
-//        }).start();
-
-        iv=findViewById(R.id.download);
+        getPermission();
+        showNotification();
+        initView();
+        showFloatWindows();
+        checkPermission();
+    }
+    public void initView(){
         TextView tv=findViewById(R.id.btn);
+        iv=findViewById(R.id.download);
         btn=findViewById(R.id.confirm);
         etInput=findViewById(R.id.input);
         floatWindow=findViewById(R.id.floatWindow);
-        getPemission();
         iv.setOnClickListener(v -> {
             Intent i=new Intent(MainActivity.this, VideoActivity.class);
             startActivity(i);
@@ -153,6 +144,61 @@ public class MainActivity extends AppCompatActivity {
                     FlutterActivity.createDefaultIntent(context)
             );
             return false;
+        });
+        btn.setOnClickListener(v -> {
+            String text=etInput.getText().toString();
+            if(text.isEmpty()){
+                text=etInput.getHint().toString();
+            }
+
+            if(!WebUtil.isNetworkConnected(MainActivity.this)){
+                Toast.makeText(MainActivity.this, "网络未打开", Toast.LENGTH_SHORT).show();
+            }else if(isHttpUrl(text)&&text.contains("twitter")){
+                if(isAnalyse||isDownloading){
+                    if(!analyzeList.contains(text)){
+                        WebUtil.analyzeList.add(text);
+                        Log.e(TAG, "analyzeList的值："+analyzeList.toString() );
+                        Toast.makeText(MainActivity.this, "已加入下载列表", Toast.LENGTH_SHORT).show();
+                    }else{
+                        Log.e(TAG, "analyzeList的值："+analyzeList.toString() );
+                        Toast.makeText(MainActivity.this, "已在下载列表中", Toast.LENGTH_SHORT).show();
+                    }
+
+                }else{
+                    Message ms=new Message();
+                    ms.what=GOTO_DOWNLOAD;
+                    ms.obj=text;
+                    handler.sendMessage(ms);
+
+                }
+            } else {
+                Toast.makeText(MainActivity.this, "您粘贴的不是网址噢", Toast.LENGTH_SHORT).show();
+            }
+        });
+        btn.setOnLongClickListener(v -> {
+            startActivity(new Intent(MainActivity.this,PubuActivity.class));
+            return false;
+        });
+        etInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(etInput.getHint()!="在这粘贴链接"){
+                    btn.setText("下载");
+                } else{
+                    btn.setText("粘贴");
+
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
         });
         iv.setOnLongClickListener(v -> {
             IosAlertDialog dialog=new IosAlertDialog(MainActivity.this).builder();
@@ -178,86 +224,26 @@ public class MainActivity extends AppCompatActivity {
 
             return true;
         });
-////        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            if (!Settings.canDrawOverlays(this)) {
-//                Toast.makeText(this, "当前无权限，请授权", Toast.LENGTH_SHORT);
-//                startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName())), 0);
-//            }
-//            if (ContextCompat.checkSelfPermission(this,
-//                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
-//                    != PackageManager.PERMISSION_GRANTED)
-//            {
-//                ActivityCompat.requestPermissions(this, permissions,199);
-//            }
-//        }
+    }
+    public void showNotification(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(new Intent(MainActivity.this, MainService.class));
         }else{
             startService(new Intent(MainActivity.this, MainService.class));
         }
-
-        etInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+    }
+    public void checkPermission(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+            if (Environment.isExternalStorageManager()) {
+                //Toast.makeText(MainActivity.this, "已获得所有权限", Toast.LENGTH_SHORT).show();
+            } else {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                intent.setData(Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, REQUEST_CODE);
             }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(etInput.getHint()!="在这粘贴链接"){
-                    btn.setText("下载");
-                } else{
-                    btn.setText("粘贴");
-
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String text=etInput.getText().toString();
-                if(text.isEmpty()){
-                    text=etInput.getHint().toString();
-                }
-
-                if(!WebUtil.isNetworkConnected(MainActivity.this)){
-                    Toast.makeText(MainActivity.this, "网络未打开", Toast.LENGTH_SHORT).show();
-                }else if(isHttpUrl(text)&&text.contains("twitter")){
-                    if(isAnalyse||isDownloading){
-                        if(!analyzeList.contains(text)){
-                            WebUtil.analyzeList.add(text);
-                            Log.e(TAG, "analyzeList的值："+analyzeList.toString() );
-                            Toast.makeText(MainActivity.this, "已加入下载列表", Toast.LENGTH_SHORT).show();
-                        }else{
-                            Log.e(TAG, "analyzeList的值："+analyzeList.toString() );
-                            Toast.makeText(MainActivity.this, "已在下载列表中", Toast.LENGTH_SHORT).show();
-                        }
-
-                    }else{
-                        Message ms=new Message();
-                        ms.what=GOTO_DOWNLOAD;
-                        ms.obj=text;
-                        handler.sendMessage(ms);
-
-                    }
-                } else {
-                    Toast.makeText(MainActivity.this, "您粘贴的不是网址噢", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-        btn.setOnLongClickListener(new OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                startActivity(new Intent(MainActivity.this,PubuActivity.class));
-                return false;
-            }
-        });
-
+        }
+    }
+    public void showFloatWindows(){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
             if(!isFloatWindowsshow){
                 Intent i=new Intent(MainActivity.this,DownLoadWindowService.class);
@@ -270,19 +256,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
-            if (Environment.isExternalStorageManager()) {
-                //Toast.makeText(MainActivity.this, "已获得所有权限", Toast.LENGTH_SHORT).show();
-            } else {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
-                intent.setData(Uri.parse("package:" + getPackageName()));
-                startActivityForResult(intent, REQUEST_CODE);
-            }
-        }
-
-
     }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -332,16 +306,13 @@ public class MainActivity extends AppCompatActivity {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                getWindow().getDecorView().post(new Runnable() {
-                    @Override
-                    public void run() {
-                        String paste=new ClipBoardUtil(MainActivity.this).paste();
-                        etInput.setHint(paste);
-                        if(etInput.getHint().toString().equals("在这粘贴链接")){
-                            btn.setText("粘贴");
-                        } else{
-                            btn.setText("下载");
-                        }
+                getWindow().getDecorView().post(() -> {
+                    String paste=new ClipBoardUtil(MainActivity.this).paste();
+                    etInput.setHint(paste);
+                    if(etInput.getHint().toString().equals("在这粘贴链接")){
+                        btn.setText("粘贴");
+                    } else{
+                        btn.setText("下载");
                     }
                 });
             }
@@ -355,7 +326,7 @@ public class MainActivity extends AppCompatActivity {
         stopService(new Intent(MainActivity.this,MainService.class));
     }
 
-    private void getPemission(){
+    private void getPermission(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
             if (!Settings.canDrawOverlays(this)) {

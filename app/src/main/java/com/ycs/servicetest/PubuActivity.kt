@@ -14,9 +14,13 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.shuyu.gsyvideoplayer.GSYVideoManager
 import com.shuyu.gsyvideoplayer.builder.GSYVideoOptionBuilder
 import com.shuyu.gsyvideoplayer.listener.GSYSampleCallBack
+import com.shuyu.gsyvideoplayer.player.PlayerFactory
+import com.shuyu.gsyvideoplayer.player.SystemPlayerManager
 import com.shuyu.gsyvideoplayer.utils.OrientationUtils
 import com.tencent.mmkv.MMKV
-import com.ycs.servicetest.PubuAdapter.OnItemClickListener
+import com.ycs.servicetest.list.PubuAdapter
+import com.ycs.servicetest.list.PubuAdapter.OnItemClickListener
+import com.ycs.servicetest.utils.IosAlertDialog
 import kotlinx.android.synthetic.main.activity_pubu.*
 import java.io.File
 import java.io.IOException
@@ -29,8 +33,8 @@ class PubuActivity : AppCompatActivity() {
 
     companion object{
         private const val TAG="yyy"
-       private var url = Environment.getExternalStorageDirectory().toString()+"/DCIM/Camera/"
-       // private val url = Environment.getExternalStorageDirectory().toString()+"/.savedPic/"
+       //private var url = Environment.getExternalStorageDirectory().toString()+"/DCIM/Camera/"
+        private var url = Environment.getExternalStorageDirectory().toString()+"/.savedPic/"
         private val LOADTEXT=3
         private val UPDATEALL=2
         private val heightArray = doubleArrayOf(0.45, 0.5, 0.55)
@@ -42,7 +46,7 @@ class PubuActivity : AppCompatActivity() {
     private lateinit var kv_text: MMKV
     private lateinit var orientationUtils: OrientationUtils
     private val imageModels: MutableList<ImageModel> = mutableListOf()
-    private var adapter:PubuAdapter= PubuAdapter(imageModels)
+    private var adapter: PubuAdapter = PubuAdapter(imageModels)
     private var isPlay=false
     private var isFullScreen=false
     private var position=0
@@ -54,7 +58,6 @@ class PubuActivity : AppCompatActivity() {
             }
             UPDATEALL -> {
                 adapter.notifyDataSetChanged()
-
                 loadText()
             }
             LOADTEXT -> {
@@ -63,7 +66,7 @@ class PubuActivity : AppCompatActivity() {
         }
         true
     }
-    fun setStatusBarColor() {
+    private fun setStatusBarColor() {
         val window = window
         window.statusBarColor = ContextCompat.getColor(this, R.color.white)
         getWindow().decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
@@ -130,18 +133,15 @@ class PubuActivity : AppCompatActivity() {
         canChange=true
         detailPlayer.slideExit()
     }
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_pubu)
-        setStatusBarColor()
-        vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
-        initPlayer()
+    private fun getSp(){
         val spp = getSharedPreferences("url", MODE_PRIVATE)
         if (spp.getString("url", "") != "") {
             if (url !== spp.getString("url", "")) {
                 url = spp.getString("url", "")!!
             }
         }
+    }
+    public fun initStaggeredGridLayout(){
         val staggeredGridLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         staggeredGridLayoutManager.gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_NONE
         rvv.layoutManager = staggeredGridLayoutManager
@@ -151,7 +151,6 @@ class PubuActivity : AppCompatActivity() {
         adapter.setOnItemClickListener(object : OnItemClickListener {
             override fun onItemClick(view: View?, postion: Int) {
                 isFullScreen = true
-                Log.d(TAG, "onItemClick: {$postion}")
                 detailPlayer.setUp(imageModels[postion].url, true, imageModels[postion].desc)
                 detailPlayer.visibility = View.VISIBLE
                 showVideoView()
@@ -199,6 +198,15 @@ class PubuActivity : AppCompatActivity() {
             }
 
         })
+    }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_pubu)
+        setStatusBarColor()
+        vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
+        initPlayer()
+        getSp()
+        initStaggeredGridLayout()
         kv_text = MMKV.mmkvWithID("text")
         val f = File(url)
         if (!f.exists()) {
@@ -249,7 +257,6 @@ class PubuActivity : AppCompatActivity() {
             imageModels.shuffle()
             mHandler.sendEmptyMessage(UPDATEALL)
         }.start()
-
     }
     fun setBlankUI() {
         blank_layout.visibility = View.VISIBLE
@@ -283,9 +290,11 @@ class PubuActivity : AppCompatActivity() {
         detailPlayer = findViewById<MyVideoPlayer>(R.id.detail_player)
         detailPlayer.getTitleTextView().setVisibility(View.GONE)
         detailPlayer.getBackButton().setVisibility(View.GONE)
+        PlayerFactory.setPlayManager(SystemPlayerManager::class.java)
         orientationUtils = OrientationUtils(this, detailPlayer)
         orientationUtils.isEnable = false
         val gsyVideoOption = GSYVideoOptionBuilder()
+
         gsyVideoOption
                 .setIsTouchWiget(true)
                 .setRotateViewAuto(true)
@@ -336,7 +345,7 @@ class PubuActivity : AppCompatActivity() {
                 })
                 .setLockClickListener { view, lock ->
                     if (orientationUtils != null) {
-                        orientationUtils.setEnable(!lock)
+                        orientationUtils.isEnable = !lock
                     }
                 }
                 .build(detailPlayer)

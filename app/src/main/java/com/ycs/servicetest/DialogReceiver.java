@@ -12,9 +12,12 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.ycs.servicetest.utils.ClipBoardUtil;
+import com.ycs.servicetest.utils.IosAlertDialog;
+
 import java.lang.reflect.Method;
 
-import static com.ycs.servicetest.WebUtil.isHttpUrl;
+import static com.ycs.servicetest.utils.WebUtil.isHttpUrl;
 
 
 public class DialogReceiver extends BroadcastReceiver {

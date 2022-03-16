@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/navigation_home"
+        android:orderInCategory="0"
+        android:icon="@drawable/ic_home"
+        android:title="首页"
+        app:showAsAction="ifRoom"
+        />
+
+    <item
+        android:orderInCategory="1"
+        android:id="@+id/navigation_dashboard"
+        android:icon="@drawable/ic_cookbook"
+        android:title="食谱"
+        app:showAsAction="ifRoom"
+        />
+
+    <item
+        android:orderInCategory="2"
+        android:id="@+id/navigation_buy"
+        android:icon="@drawable/ic_buy"
+        android:title="采购"
+        app:showAsAction="ifRoom"
+        />
+    <item
+        android:orderInCategory="3"
+        android:id="@+id/navigation_notifications"
+        android:icon="@drawable/ic_me"
+        android:title="我的"
+        app:showAsAction="always"
+        />
+
+</menu>

@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.shuyu.gsyvideoplayer.GSYVideoManager;
+import com.ycs.servicetest.list.RecyclerItemNormalHolder;
 
 import java.util.ArrayList;
 import java.util.List;

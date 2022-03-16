@@ -1,23 +1,20 @@
 package com.ycs.servicetest;
 
 import android.annotation.SuppressLint;
-import android.app.usage.UsageEvents;
 import android.content.Context;
 import android.os.Vibrator;
 import android.util.AttributeSet;
-import android.util.EventLog;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
+
 import android.widget.TextView;
 
 import com.shuyu.gsyvideoplayer.utils.Debuger;
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer;
 
 import moe.codeest.enviews.ENDownloadView;
-import moe.codeest.enviews.ENPlayView;
+
 
 
 public class MyVideoPlayer extends StandardGSYVideoPlayer {
@@ -45,7 +42,8 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
             mSpeed=false;
             getCurrentPlayer().setSpeedPlaying(speed, true);
             changeSpeed.setText(""+speed);
-            Log.d("yyy", "touchLongPress: up");
+            startDismissControlViewTimer();
+           // Log.d("yyy", "touchLongPress: up");
         }
     }
 
@@ -54,11 +52,14 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
         super.touchLongPress(e);
         switch (e.getAction()){
             case MotionEvent.ACTION_DOWN:
-                vi.vibrate(50);
+                if(vi!=null){
+                    vi.vibrate(50);
+                }
                 mSpeed=true;
-                getCurrentPlayer().setSpeedPlaying(2, true);
-                changeSpeed.setText("2.0");
-                Log.d("yyy", "touchLongPress: down");
+                getCurrentPlayer().setSpeedPlaying(2f, false);
+                changeSpeed.setText("加速");
+                cancelDismissControlViewTimer();
+              //  Log.d("yyy", "touchLongPress: down");
                 break;
             case MotionEvent.ACTION_UP:
 
@@ -93,12 +94,7 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
 //            }
 //            return false;
 //        });
-        changeSpeed.setOnClickListener(new OnClickListener() {
-           @Override
-           public void onClick(View v) {
-               resolveTypeUI();
-           }
-       });
+        changeSpeed.setOnClickListener(v -> resolveTypeUI());
 
     }
     public ImageView getNextVideo(){
@@ -112,13 +108,13 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
             speed = 1.5f;
         } else if (speed == 1.5f) {
             speed = 2f;
-        } else if (speed == 2) {
+        } else if (speed == 2f) {
             speed = 0.5f;
         } else if (speed == 0.5f) {
             speed = 1;
         }
         changeSpeed.setText(""+speed);
-        this.setSpeedPlaying(speed, true);
+        getCurrentPlayer().setSpeedPlaying(speed, true);
     }
     @Override
     public int getLayoutId() {
@@ -229,12 +225,7 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
 
     public void startPlay(){
         getStartButton().performClick();
-        postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                hideAllWidget();
-            }
-        }, 400);
+        postDelayed(() -> hideAllWidget(), 400);
     }
 
 }

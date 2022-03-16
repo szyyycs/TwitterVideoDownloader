@@ -5,6 +5,8 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.ycs.servicetest.utils.LogUtil;
+
 
 class CrashHandlerJ implements Thread.UncaughtExceptionHandler {
 

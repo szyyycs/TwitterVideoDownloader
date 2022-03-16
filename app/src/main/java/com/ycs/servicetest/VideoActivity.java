@@ -40,19 +40,23 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.jakewharton.disklrucache.DiskLruCache;
 import com.lxj.xpopup.XPopup;
-import com.lxj.xpopup.interfaces.OnSelectListener;
 import com.shuyu.gsyvideoplayer.GSYVideoManager;
 import com.shuyu.gsyvideoplayer.builder.GSYVideoOptionBuilder;
 import com.shuyu.gsyvideoplayer.listener.GSYSampleCallBack;
 import com.shuyu.gsyvideoplayer.listener.LockClickListener;
+import com.shuyu.gsyvideoplayer.player.PlayerFactory;
+import com.shuyu.gsyvideoplayer.player.SystemPlayerManager;
 import com.shuyu.gsyvideoplayer.utils.OrientationUtils;
 import com.tencent.mmkv.MMKV;
+import com.ycs.servicetest.list.ItemAdapter;
+import com.ycs.servicetest.list.Items;
+import com.ycs.servicetest.utils.IosAlertDialog;
+import com.ycs.servicetest.utils.LoadingUtil;
+import com.ycs.servicetest.utils.WebUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -250,6 +254,7 @@ public class VideoActivity extends AppCompatActivity {
             mDiskCache = DiskLruCache.open(ff, 1, 1, 1024 * 1024 * 1024);
         } catch (IOException e) {
             Toast.makeText(this, "出错"+e.getMessage(), Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
             Log.e(TAG, e.getMessage() );
         }
         LoadingUtil.Loading_show(this);
@@ -369,7 +374,7 @@ public class VideoActivity extends AppCompatActivity {
         kv = MMKV.defaultMMKV();
         kv_text=MMKV.mmkvWithID("text");
         detailPlayer = findViewById(R.id.detail_player);
-
+        PlayerFactory.setPlayManager(SystemPlayerManager.class);
         detailPlayer.getVibrate(vibrator);
         detailPlayer.getTitleTextView().setVisibility(View.GONE);
         detailPlayer.getBackButton().setVisibility(View.GONE);
@@ -517,24 +522,21 @@ public class VideoActivity extends AppCompatActivity {
         }
         adapter = new ItemAdapter(itemsList);
         recyclerView.setAdapter(adapter);
-        adapter.setOnItemClickListener(new ItemAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int postion) {
-                position = postion;
-                if (!canChange) {
-                    isPlay = true;
-                    title.setVisibility(View.GONE);
-                    canChange = true;
-                    detailPlayer.setUp(itemsList.get(postion).getUrl(), true, itemsList.get(postion).getTwittertext());
-                    changList();
+        adapter.setOnItemClickListener((view, postion) -> {
+            position = postion;
+            if (!canChange) {
+                isPlay = true;
+                title.setVisibility(View.GONE);
+                canChange = true;
+                detailPlayer.setUp(itemsList.get(postion).getUrl(), true, itemsList.get(postion).getTwittertext());
+                changList();
 //                    vv.setVideoPath(srcList.get(postion));
-                } else {
-                    isPlay = true;
-                    detailPlayer.getCurrentPlayer().release();
-                    detailPlayer.setUp(itemsList.get(postion).getUrl(), true, itemsList.get(postion).getTwittertext());
-                    detailPlayer.startPlay();
+            } else {
+                isPlay = true;
+                detailPlayer.getCurrentPlayer().release();
+                detailPlayer.setUp(itemsList.get(postion).getUrl(), true, itemsList.get(postion).getTwittertext());
+                detailPlayer.startPlay();
 
-                }
             }
         });
         adapter.setOnItemLongClickListener((view, postion) ->
@@ -1166,7 +1168,7 @@ public class VideoActivity extends AppCompatActivity {
                             if (e == null) {
                                 //Log.d(TAG, "下载的文案"+object.get(0).getFilename()+object.get(0).getText()+object.get(0));
                                 for(TwitterText tt:object){
-                                    kv_text.encode(tt.getFilename(),WebUtil.reverse(tt.getText()));
+                                    kv_text.encode(tt.getFilename(), WebUtil.reverse(tt.getText()));
                                 }
                                 twitterIsEmpty=true;
                                 startScan();

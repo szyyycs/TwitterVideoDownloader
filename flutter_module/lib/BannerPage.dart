@@ -47,7 +47,7 @@ class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin{
 
 
   void play(){
-    player.loop('happy.mp3');
+    player.loop('newyear.mp3');
   }
   void pause(){
     audioPlayer.pause();
@@ -112,12 +112,12 @@ class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin{
       maxAngleX: 40,
       maxAngleY: 60,
       height:MediaQuery.of(context).size.height,
+      // middleScale: 1,
+      // foregroundScale: 1.1,
+      // backgroundScale: 1.2,
       middleScale: 1,
       foregroundScale: 1.1,
       backgroundScale: 1.2,
-      // middleScale: 1,
-      // foregroundScale: 1.05,
-      // backgroundScale: 1.1,
       backgroundWidget: backgroundWiget(),
       foregroundWidget: foregroundWiget(),
       middleWidget: middleWiget(),
@@ -127,19 +127,19 @@ class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin{
   Widget backgroundWiget() {
     return Container(
        child: getImage('background.png'),
-      //child: getImage('back.png'),
+      //child: getImage('one.png'),
     );
   }
   Widget foregroundWiget() {
     return Container(
        child: getImage('foreground.png'),
-      //child: getImage('fore.png'),
+      //child: getImage('three.png'),
     );
   }
   Widget middleWiget() {
     return Container(
       child: getImage('middle.png'),
-     // child: getImage('mid.png'),
+      //child: getImage('two.png'),
     );
   }
   Image getImage(String s) {
@@ -147,8 +147,8 @@ class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin{
       "assets/$s",
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height,
-      fit: BoxFit.fill,
-      scale: 3.0,
+      fit: BoxFit.fitHeight,
+      scale: 1.0,
     );
   }
 

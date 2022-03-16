@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.ycs.servicetest.list.RecyclerItemNormalHolder;
+
 import java.util.List;
 
 public class ViewPagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
