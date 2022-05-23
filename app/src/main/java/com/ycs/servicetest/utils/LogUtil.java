@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class LogUtil {
-     static void writeLog() {
+     public static void writeLog() {
          new Thread(new Runnable() {
              @Override
              public void run() {

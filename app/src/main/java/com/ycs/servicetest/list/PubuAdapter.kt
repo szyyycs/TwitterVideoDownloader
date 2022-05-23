@@ -143,14 +143,14 @@ class PubuAdapter(dataList: MutableList<ImageModel>) : RecyclerView.Adapter<Pubu
     fun getScreenWidth(context: Context): Int {
         val windowManager: WindowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val displayMetrics = DisplayMetrics()
-        windowManager.getDefaultDisplay().getMetrics(displayMetrics)
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
         return displayMetrics.widthPixels
     }
 
     fun getScreenHeight(context: Context): Int {
         val windowManager: WindowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val displayMetrics = DisplayMetrics()
-        windowManager.getDefaultDisplay().getRealMetrics(displayMetrics)
+        windowManager.defaultDisplay.getRealMetrics(displayMetrics)
         return displayMetrics.heightPixels
     }
 }

@@ -30,9 +30,10 @@
         android:testOnly="false"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".PubuActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-            ></activity>
+        <activity android:name=".ShowVideoActivity"></activity>
+        <activity
+            android:name=".PubuActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name="io.flutter.embedding.android.FlutterActivity"
             android:theme="@style/FlutterPageTheme">
@@ -62,9 +63,6 @@
             android:name=".MainService"
             android:enabled="true"
             android:exported="true" />
-        <service
-            android:name=".MainIntentService"
-            android:exported="false" />
         <service
             android:name=".FloatWindowService"
             android:exported="false" />
@@ -102,8 +100,7 @@
         </provider>
         <provider
             android:name="cn.bmob.v3.util.BmobContentProvider"
-            android:authorities="com.ycs.servicetest.BmobContentProvider">
-        </provider>
+            android:authorities="com.ycs.servicetest.BmobContentProvider"></provider>
     </application>
 
 </manifest>

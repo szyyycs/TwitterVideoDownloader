@@ -27,7 +27,6 @@ class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin{
 
   initState() {
     super.initState();
-    print("dispose222");
     player =new AudioCache(fixedPlayer: audioPlayer);
     src="play";
     controller = AnimationController(duration: const Duration(milliseconds: 4000), vsync: this);
@@ -42,12 +41,12 @@ class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin{
     audioPlayer.dispose();
     controller.dispose();
     super.dispose();
-    print("dispose4");
+
   }
 
 
   void play(){
-    player.loop('newyear.mp3');
+    player.loop('happy.mp3');
   }
   void pause(){
     audioPlayer.pause();
@@ -112,12 +111,9 @@ class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin{
       maxAngleX: 40,
       maxAngleY: 60,
       height:MediaQuery.of(context).size.height,
-      // middleScale: 1,
-      // foregroundScale: 1.1,
-      // backgroundScale: 1.2,
       middleScale: 1,
-      foregroundScale: 1.1,
-      backgroundScale: 1.2,
+      foregroundScale: 1.05,
+      backgroundScale: 1.1,
       backgroundWidget: backgroundWiget(),
       foregroundWidget: foregroundWiget(),
       middleWidget: middleWiget(),
@@ -127,19 +123,16 @@ class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin{
   Widget backgroundWiget() {
     return Container(
        child: getImage('background.png'),
-      //child: getImage('one.png'),
     );
   }
   Widget foregroundWiget() {
     return Container(
        child: getImage('foreground.png'),
-      //child: getImage('three.png'),
     );
   }
   Widget middleWiget() {
     return Container(
       child: getImage('middle.png'),
-      //child: getImage('two.png'),
     );
   }
   Image getImage(String s) {

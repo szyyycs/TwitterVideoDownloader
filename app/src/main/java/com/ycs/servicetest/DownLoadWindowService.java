@@ -215,13 +215,19 @@ public class DownLoadWindowService extends Service {
         }
     };
     public static void updateProgress(int progress){
-        ircleProgressBar.setVisibility(View.VISIBLE);
+        if (ircleProgressBar != null) {
+            ircleProgressBar.setVisibility(View.VISIBLE);
+            ircleProgressBar.setProgress(progress);
+        }
+
         civ.setVisibility(View.GONE);
-        ircleProgressBar.setProgress(progress);
+
         windowManager.updateViewLayout(view,layoutParams);
     }
     public static void recover(){
-        ircleProgressBar.setVisibility(View.GONE);
+        if(ircleProgressBar!=null){
+            ircleProgressBar.setVisibility(View.GONE);
+        }
         civ.setVisibility(View.VISIBLE);
     }
     private void fade(View view){

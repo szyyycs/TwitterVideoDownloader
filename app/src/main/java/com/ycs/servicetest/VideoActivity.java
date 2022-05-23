@@ -38,6 +38,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
@@ -52,6 +53,7 @@ import com.shuyu.gsyvideoplayer.player.PlayerFactory;
 import com.shuyu.gsyvideoplayer.player.SystemPlayerManager;
 import com.shuyu.gsyvideoplayer.utils.OrientationUtils;
 import com.tencent.mmkv.MMKV;
+import com.ycs.servicetest.list.DiffUtilCallBack;
 import com.ycs.servicetest.list.ItemAdapter;
 import com.ycs.servicetest.list.Items;
 import com.ycs.servicetest.utils.IosAlertDialog;
@@ -99,7 +101,7 @@ public class VideoActivity extends AppCompatActivity {
     private CustomLinearLayoutManager layoutManager;
     private RecyclerView recyclerView;
     private ArrayList<Items> itemsList = new ArrayList<>();
-    private ArrayList<Items> newItemsList = new ArrayList<>();
+    private final ArrayList<Items> newItemsList = new ArrayList<>();
     //private ArrayList<String> srcList=new ArrayList<>();
     //private VideoView vv;
     private MyVideoPlayer detailPlayer;
@@ -133,10 +135,10 @@ public class VideoActivity extends AppCompatActivity {
     private Boolean twitterIsEmpty=false;
     private Boolean isNull = true;
     private int position = 0;
-    int i[] = {0, 0, 0};
+    int[] i = {0, 0, 0};
     static final String TAG = "yyy";
-    private int nowPlayPosition = 0;
-    private Handler handler = new Handler() {
+    private final int nowPlayPosition = 0;
+    private final Handler handler = new Handler() {
         @SuppressLint("HandlerLeak")
         @Override
         public void handleMessage(@NonNull Message msg) {
@@ -163,8 +165,10 @@ public class VideoActivity extends AppCompatActivity {
                     toScan.setVisibility(View.VISIBLE);
                     scanNum.setVisibility(View.INVISIBLE);
                     if(kv_text.count()!=0){
+                        Log.d(TAG, "长度为"+kv_text.count());
                         loadPic();
                     }else{
+                        Log.d(TAG, "长度为0");
                         loadTwitterText();
                     }
                     break;
@@ -207,7 +211,7 @@ public class VideoActivity extends AppCompatActivity {
     private int num = 0;
     private MMKV kv;
     private MMKV kv_text;
-    private boolean isSavedPic = true;
+   // private boolean isSavedPic = true;
     private Vibrator vibrator;
 
     @Override
@@ -217,16 +221,12 @@ public class VideoActivity extends AppCompatActivity {
         getSupportActionBar().hide();
         setStatusBarColor();
         vibrator = (Vibrator)getSystemService(VIBRATOR_SERVICE) ;
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
-
-        }
         SharedPreferences spp = getSharedPreferences("url", Context.MODE_PRIVATE);
         if (!spp.getString("url", "").equals("")) {
             if (url != spp.getString("url", "")) {
                 url = spp.getString("url", "");
-                isSavedPic = false;
+               // isSavedPic = false;
             }
-
         }
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
             if (Environment.isExternalStorageManager()) {
@@ -322,12 +322,7 @@ public class VideoActivity extends AppCompatActivity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
         sortImage = findViewById(R.id.sort);
         sortImage.setOnClickListener(v -> {
-            /*
-            我的拿手好戏
-            你要得意一点呢
-            我的拿~手~好~戏~
-            对，你不会姐会！
-            * */
+
             //Toast.makeText(VideoActivity.this, "点了", Toast.LENGTH_SHORT).show();
             new XPopup.Builder(VideoActivity.this)
                     .atView(sortImage)  // 依附于所点击的View，内部会自动判断在上方或者下方显示
@@ -506,7 +501,7 @@ public class VideoActivity extends AppCompatActivity {
         });
 //
         blank = findViewById(R.id.blank_layout);
-        r = findViewById(R.id.r);
+        //r = findViewById(R.id.r);
         recyclerView = findViewById(R.id.recyclerview);
         layoutManager = new CustomLinearLayoutManager(this);
         layoutManager.setScrollEnabled(true);
@@ -517,7 +512,6 @@ public class VideoActivity extends AppCompatActivity {
         if (itemsList.size() != 0) {
             HaveList = true;
             isScaning = false;
-            //loadPic();
             LoadingUtil.Loading_close();
         }
         adapter = new ItemAdapter(itemsList);
@@ -616,7 +610,7 @@ public class VideoActivity extends AppCompatActivity {
                 if (!s.endsWith(".mp4")) {
                     continue;
                 }
-                if (!s.substring(s.length() - 4, s.length()).equals(".mp4")) {
+                if (!s.startsWith(".mp4", s.length() - 4)) {
                     continue;
                 }
                 String uu = url + s;
@@ -683,6 +677,7 @@ public class VideoActivity extends AppCompatActivity {
             }
             if (HaveList) {
                 //之前扫描过，存在有list
+                //DiffUtil.calculateDiff(new DiffUtilCallBack(newItemsList,itemsList),true);
                 if (itemsList.size() != newItemsList.size()) {
                     //list长度不一致，需要更新
                     sort(newItemsList);
@@ -793,9 +788,6 @@ public class VideoActivity extends AppCompatActivity {
                 if (!s.endsWith(".mp4")) {
                     continue;
                 }
-                if (!s.substring(s.length() - 4, s.length()).equals(".mp4")) {
-                    continue;
-                }
                 String uu = url + s;
                 String text = kv_text.decodeString(s, "");
                 final Items i = new Items();
@@ -859,7 +851,7 @@ public class VideoActivity extends AppCompatActivity {
                         adapter.update(itemsList);
                     });
                     loadPic();
-                    //惊呆了老铁铁，这是什么操作，从来没见过，真是让我开了眼。
+
                     twitterIsEmpty=false;
                 }
                 handler.sendEmptyMessage(NO_UPDATE_LIST);
@@ -1166,7 +1158,7 @@ public class VideoActivity extends AppCompatActivity {
                         @Override
                         public void done(List<TwitterText> object, BmobException e) {
                             if (e == null) {
-                                //Log.d(TAG, "下载的文案"+object.get(0).getFilename()+object.get(0).getText()+object.get(0));
+                                Log.d(TAG, "下载的文案"+object.get(0).getFilename()+object.get(0).getText()+object.get(0));
                                 for(TwitterText tt:object){
                                     kv_text.encode(tt.getFilename(), WebUtil.reverse(tt.getText()));
                                 }

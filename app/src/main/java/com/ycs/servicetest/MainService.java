@@ -133,6 +133,7 @@ public class MainService extends Service {
                             }else{
                                 Toast.makeText(MainService.this, "已在下载队列中", Toast.LENGTH_SHORT).show();
                                 Log.e("yyy", "analyzeList的值："+analyzeList.toString() );
+                                //它熹了推娘娘！
                             }
                             return;
                         }

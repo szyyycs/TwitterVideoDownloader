@@ -28,9 +28,8 @@ import com.lxj.xpopup.interfaces.OnSelectListener;
 import com.lxj.xpopup.util.XPopupUtils;
 import com.ycs.smartcanteen.R;
 import com.ycs.smartcanteen.ui.Bean;
-import com.ycs.smartcanteen.ui.CustomLinearLayoutManager;
+
 import com.ycs.smartcanteen.ui.adapter.CookAdapter;
-import com.ycs.smartcanteen.ui.cookbook.CookbookFragment;
 import com.ycs.smartcanteen.ui.cookbook.CookbookViewModel;
 import com.ycs.smartcanteen.util.MyViewPager;
 import com.ycs.smartcanteen.util.WindowsUtil;

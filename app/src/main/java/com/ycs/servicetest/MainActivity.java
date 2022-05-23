@@ -1,6 +1,7 @@
 package com.ycs.servicetest;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -99,12 +100,24 @@ public class MainActivity extends AppCompatActivity {
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH)+1;
         int day = calendar.get(Calendar.DAY_OF_MONTH);
-        if(month==12&&day==10){
-            handler.postDelayed(() -> showDialog(),2000);
+        MMKV kv=MMKV.mmkvWithID("time");
+        if(kv.count()==0){
+            kv.encode("sun","12.10");
+            kv.encode("yang","5.26");
         }
-        if(month==2&&day==1){
-            handler.postDelayed(() -> showDialog(),2000);
+        for(String key :kv.allKeys()){
+            String val=kv.decodeString(key);
+            Log.d(TAG, val);
+            String[] vals=val.split("\\.");
+            int month_saved=Integer.valueOf(vals[0]);
+            int day_saved=Integer.valueOf(vals[1]);
+           // Log.d(TAG, "checkTime: "+month_saved+":"+day_saved);
+            if(month==month_saved&&day==day_saved){
+                handler.postDelayed(() -> showDialog(),2000);
+                return;
+            }
         }
+
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
         context=getApplicationContext();
         Beta.upgradeDialogLayoutId= R.layout.layout_upgrade;
         Bugly.init(getApplicationContext(), "b0a053b5dd", false);
+        MMKV.initialize(this);
         Bmob.initialize(this, "2d24c857824e0609dd2e185bf5378acc");
         getSupportActionBar().hide();
         checkTime();
@@ -121,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
         window.setStatusBarColor(ContextCompat.getColor(this,R.color.colorIosBlue));
         PRDownloader.initialize(getApplicationContext());
         WebUtil.init(getApplicationContext());
-        String rootDir = MMKV.initialize(this);
+
         vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
         getPermission();
         showNotification();
@@ -257,6 +271,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+    @SuppressLint("NewApi")
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

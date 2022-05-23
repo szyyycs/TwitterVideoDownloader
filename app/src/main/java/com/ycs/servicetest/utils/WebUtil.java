@@ -53,7 +53,7 @@ import retrofit2.Call;
 
 import static android.util.Patterns.DOMAIN_NAME;
 import static android.util.Patterns.GOOD_IRI_CHAR;
-import static com.ycs.servicetest.MainActivity.TAG;
+
 
 public class WebUtil {
     public static int index=0;
@@ -163,7 +163,7 @@ public class WebUtil {
             public void success(Result<Tweet> result) {
                 WebUtil.isAnalyse=false;
                 Log.d(TAG, "success: "+result.data);
-                if (result.data.extendedEntities == null && result.data.entities.media == null) {
+                if (result.data.extendedEntities == null &&( result.data.entities.media == null||result.data.entities.media.size()==0) ){
                     MainService.updateNotification(context,"链接中未找到文件，下载失败");
                     Toast.makeText(context, "链接未找到文件", Toast.LENGTH_SHORT).show();
                 } else if (result.data.extendedEntities != null) {
