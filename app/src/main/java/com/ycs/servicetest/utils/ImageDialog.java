@@ -34,13 +34,9 @@ public class ImageDialog {
         image=view.findViewById(R.id.image);
         mwidth=image.getLayoutParams().width;
         mheight=image.getLayoutParams().height;
+//        dialog.setCanceledOnTouchOutside(false);
         dialog.setContentView(view);
-        image.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
+//        image.setOnClickListener(v -> dialog.dismiss());
         Window dialogWindow = dialog.getWindow();
         WindowManager.LayoutParams lp = dialogWindow.getAttributes();
         lp.width = (int) (display.getWidth() * 0.86);
@@ -91,8 +87,7 @@ public class ImageDialog {
         final AnimatorSet animatorSet = new AnimatorSet();
         final ViewWrapper wrapper = new ViewWrapper(image);
         ObjectAnimator animator4 = ObjectAnimator.ofFloat(image, "translationY", -1500,20,-10,0);
-        ObjectAnimator animator1 = ObjectAnimator.ofInt(wrapper, "width", 10,mwidth);
-        ObjectAnimator animator2 = ObjectAnimator.ofInt(wrapper, "height", 10,mheight);
+
         animatorSet.play(animator4);
         animatorSet.setDuration(600).start();
     }

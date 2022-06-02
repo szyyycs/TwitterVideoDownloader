@@ -7,7 +7,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
-
 import android.widget.TextView;
 
 import com.shuyu.gsyvideoplayer.utils.Debuger;
@@ -43,7 +42,6 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
             getCurrentPlayer().setSpeedPlaying(speed, true);
             changeSpeed.setText(""+speed);
             startDismissControlViewTimer();
-           // Log.d("yyy", "touchLongPress: up");
         }
     }
 
@@ -59,7 +57,6 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
                 getCurrentPlayer().setSpeedPlaying(2f, false);
                 changeSpeed.setText("加速");
                 cancelDismissControlViewTimer();
-              //  Log.d("yyy", "touchLongPress: down");
                 break;
             case MotionEvent.ACTION_UP:
 
@@ -74,26 +71,8 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
     }
     @SuppressLint("ClickableViewAccessibility")
     void initView(){
-        nextVideo=findViewById(R.id.next);
-        changeSpeed = (TextView) findViewById(R.id.switchSize);
-
-//        thumb.setOnTouchListener((v, event) -> {
-//            Log.d("yyy", "onTouch: 美紫紫");
-//            switch (event.getAction()){
-//                case MotionEvent.ACTION_DOWN:
-//                    changeSpeed.setText("2");
-//                    Log.d("yyy", "onTouch: 2");
-//                    getCurrentPlayer().setSpeedPlaying(2, true);
-//                    break;
-//                case MotionEvent.ACTION_UP:
-//                    changeSpeed.setText(""+speed);
-//                    getCurrentPlayer().setSpeedPlaying(speed, true);
-//                    break;
-//                default:
-//
-//            }
-//            return false;
-//        });
+        nextVideo = findViewById(R.id.next);
+        changeSpeed = findViewById(R.id.switchSize);
         changeSpeed.setOnClickListener(v -> resolveTypeUI());
 
     }

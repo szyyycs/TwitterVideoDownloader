@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
     //显示倒计时dialog
     void showDialog(){
         ImageDialog d=new ImageDialog(MainActivity.this).builder();
+
         d.show();
         handler.postDelayed(() -> runOnUiThread(() -> d.setAni(R.mipmap.two)),1000);
         handler.postDelayed(() -> runOnUiThread(() -> d.setAni(R.mipmap.one)),2000);
@@ -154,9 +155,11 @@ public class MainActivity extends AppCompatActivity {
             startActivity(i);
         });
         tv.setOnLongClickListener(v -> {
-            startActivity(
-                    FlutterActivity.createDefaultIntent(context)
-            );
+//            startActivity(
+//                    FlutterActivity.createDefaultIntent(context)
+//            );
+            Intent i = new Intent(MainActivity.this, ShowVideoActivity.class);
+            startActivity(i);
             return false;
         });
         btn.setOnClickListener(v -> {

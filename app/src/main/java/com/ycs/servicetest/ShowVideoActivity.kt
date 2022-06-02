@@ -4,20 +4,23 @@ import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Vibrator
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewModelScope
 import com.lxj.xpopup.XPopup
+import com.shuyu.gsyvideoplayer.GSYVideoManager
 import com.shuyu.gsyvideoplayer.builder.GSYVideoOptionBuilder
 import com.shuyu.gsyvideoplayer.listener.GSYSampleCallBack
 import com.shuyu.gsyvideoplayer.player.PlayerFactory
@@ -27,23 +30,28 @@ import com.ycs.servicetest.list.ItemAdapter
 import com.ycs.servicetest.list.Items
 import com.ycs.servicetest.utils.IosAlertDialog
 import kotlinx.android.synthetic.main.activity_show_video.*
+import kotlinx.coroutines.cancel
 import java.io.File
 import java.util.*
 
 class ShowVideoActivity : AppCompatActivity() {
-    private var isNull: Boolean=false
+    companion object {
+        const val TAG = "yyy"
+    }
+
     private var vibrator: Vibrator? = null
-    private var isScaning = false
     private var itemsList = mutableListOf<Items>()
     private var position = 0
-    private var HaveList = false
-
+    var sortArray = intArrayOf(0, 0, 0)
     private var orientationUtils: OrientationUtils? = null
     private var isPlay = false
+    private var isPause = false
     lateinit var adapter: ItemAdapter
     private var canChange = false
     private val viewModel by lazy {
-        ViewModelProvider((this as ViewModelStoreOwner?)!!).get(VideoViewModel::class.java)
+        ViewModelProvider(this,
+                ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+        ).get(VideoViewModel::class.java)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,7 +71,7 @@ class ShowVideoActivity : AppCompatActivity() {
         detail_player.titleTextView.visibility = View.GONE
         detail_player.backButton.visibility = View.GONE
         orientationUtils = OrientationUtils(this, detail_player)
-        orientationUtils!!.isEnable = false
+        orientationUtils?.isEnable = false
         val gsyVideoOption = GSYVideoOptionBuilder()
         gsyVideoOption
                 .setIsTouchWiget(true)
@@ -158,25 +166,29 @@ class ShowVideoActivity : AppCompatActivity() {
 
     private fun initData() {
         initViewModel()
+        viewModel.startScan()
     }
     private fun initViewModel(){
         viewModel.itemsList.observe(this) {
             if (it == null) {
                 return@observe
             }
+            Log.d(TAG, "itemsList.observe: ${it}")
             if (it.size == 0) {
                 viewModel.isNull.value=true
                 viewModel.isScaning.value=false
-                //return@observe
+                return@observe
             }
-            itemsList=it
-            adapter?.update(it as ArrayList<Items>?)
+            viewModel.isNull.value = false
+            itemsList = it
+            adapter.update(it as ArrayList<Items>?)
         }
         viewModel.isNull.observe(this){
             if(it){
                 viewModel.isScaning.value=false
                 setBlankUI()
             }else{
+                viewModel.isScaning.value = false
                 showNormal()
             }
         }
@@ -185,14 +197,31 @@ class ShowVideoActivity : AppCompatActivity() {
                 scan.visibility = View.INVISIBLE
                 toScan.visibility = View.VISIBLE
                 scanNum.visibility = View.INVISIBLE
-            }else{
+            } else {
                 scan.visibility = View.VISIBLE
                 toScan.visibility = View.INVISIBLE
                 scanNum.visibility = View.VISIBLE
             }
         }
-        viewModel.num.observe(this){
+        viewModel.num.observe(this) {
             scanNum.text = it.toString()
+        }
+        viewModel.index.observe(this) {
+            Log.d(TAG, "index.observe:${it}")
+            if (itemsList != null) {
+                itemsList[it].video_len = viewModel.len
+                adapter.updateOnepic(it)
+            }
+        }
+        viewModel.indexUploadTweet.observe(this) {
+            if (itemsList != null && itemsList.size != 0) {
+                if (it == -1) {
+                    viewModel.setDataList(viewModel.url, itemsList as ArrayList<Items>)
+                    return@observe
+                }
+                itemsList[it].twittertext = viewModel.tweet
+                adapter.updateOnepic(it)
+            }
         }
 
     }
@@ -241,9 +270,9 @@ class ShowVideoActivity : AppCompatActivity() {
         var layoutManager = CustomLinearLayoutManager(this)
         layoutManager.setScrollEnabled(true)
         recyclerView.layoutManager = layoutManager
-        adapter = ItemAdapter(itemsList as ArrayList<Items>?)
+        adapter = ItemAdapter(itemsList as ArrayList<Items>)
         recyclerView.adapter = adapter
-        adapter!!.setOnItemClickListener { view, postion ->
+        adapter.setOnItemClickListener { view, postion ->
             position = postion
             if (!canChange) {
                 isPlay = true
@@ -258,7 +287,7 @@ class ShowVideoActivity : AppCompatActivity() {
                 detail_player.startPlay()
             }
         }
-        adapter!!.setOnItemLongClickListener { view: View?, postion: Int ->
+        adapter.setOnItemLongClickListener { _: View?, postion: Int ->
             IosAlertDialog(this).builder()
                     .setTitle("提示")
                     .setMsg("确认删除" + itemsList[postion].text + "吗？")
@@ -277,10 +306,10 @@ class ShowVideoActivity : AppCompatActivity() {
         }
     }
     private fun setBlankUI() {
-        blank.visibility = View.VISIBLE
+        blank_layout.visibility = View.VISIBLE
     }
     private fun showNormal() {
-        blank.visibility = View.GONE
+        blank_layout.visibility = View.GONE
     }
     private fun hideStatusBar() {
         window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
@@ -309,49 +338,58 @@ class ShowVideoActivity : AppCompatActivity() {
             override fun onAnimationRepeat(animation: Animator) {}
         })
     }
+
     private fun selectSortType() {
         XPopup.Builder(this)
                 .atView(sort) // 依附于所点击的View，内部会自动判断在上方或者下方显示
                 .asAttachList(arrayOf("按下载时间排序", "按视频时长排序", "按描述长度排序"),
                         intArrayOf(R.mipmap.downloadtime, R.mipmap.video, R.mipmap.miaoshu)
                 ) { position: Int, text: String? ->
-//                        if (position == 0) {
-//                            isScaning = false
-//                            if (i.get(position) % 2 == 0) {
-//                                deSort(itemsList)
-//                            } else {
-//                                sort(itemsList)
-//                            }
-//                            i.get(position)++
-//                            adapter.update(itemsList)
-//                            handler.sendEmptyMessage(VideoActivity.AFTER_SORT_SCAN)
-//                        } else if (position == 1) {
-//                            isScaning = false
-//                            if (i.get(position) % 2 == 0) {
-//                                desortByLarge(itemsList)
-//                            } else {
-//                                sortByLarge(itemsList)
-//                            }
-//                            i.get(position)++
-//                            adapter.update(itemsList)
-//                            handler.sendEmptyMessage(VideoActivity.AFTER_SORT_SCAN)
-//                        } else if (position == 2) {
-//                            isScaning = false
-//                            if (i.get(position) % 2 == 0) {
-//                                deSortByComment(itemsList)
-//                            } else {
-//                                sortByComment(itemsList)
-//                            }
-//                            i.get(position)++
-//                            adapter.update(itemsList)
-//                            handler.sendEmptyMessage(VideoActivity.AFTER_SORT_SCAN)
-//                        }
+                    if (viewModel.isScaning.value == true) {
+                        Toast.makeText(this, "正在扫描中，请稍后再试", Toast.LENGTH_SHORT).show()
+                        return@asAttachList;
+                    }
+                    when (position) {
+                        0 -> {
+
+                            if (sortArray[position] % 2 == 0) {
+                                viewModel.deSort(itemsList as ArrayList<Items>)
+                            } else {
+                                viewModel.sort(itemsList)
+                            }
+                            sortArray[position]++
+                            viewModel.itemsList.value = itemsList
+
+
+                        }
+                        1 -> {
+
+                            if (sortArray[position] % 2 == 0) {
+                                viewModel.desortByLarge(itemsList as ArrayList<Items>)
+                            } else {
+                                viewModel.sortByLarge(itemsList as ArrayList<Items>)
+                            }
+                            sortArray[position]++
+                            viewModel.itemsList.value = itemsList
+
+                        }
+                        2 -> {
+
+                            if (sortArray[position] % 2 == 0) {
+                                viewModel.deSortByComment(itemsList as ArrayList<Items>)
+                            } else {
+                                viewModel.sortByComment(itemsList as ArrayList<Items>)
+                            }
+                            sortArray[position]++
+                            viewModel.itemsList.value = itemsList
+                        }
+                    }
                 }
                 .show()
     }
 
     private fun intoTiktok(isOrder: Boolean){
-        if (isNull) {
+        if (viewModel.isNull.value == true) {
             Toast.makeText(this, "您视频列表为空，请下载视频后再进入抖音模式哦！", Toast.LENGTH_SHORT).show()
             return
         }
@@ -373,10 +411,100 @@ class ShowVideoActivity : AppCompatActivity() {
         intent.setClass(this, tiktok::class.java)
         startActivity(intent)
     }
+
     private fun setStatusBarColor() {
         val window = window
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
         window.statusBarColor = ContextCompat.getColor(this, R.color.white)
         getWindow().decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
     }
+
+    override fun onPause() {
+        detail_player.currentPlayer.onVideoPause()
+        super.onPause()
+        isPause = true
+    }
+
+    override fun onResume() {
+        detail_player.currentPlayer.onVideoResume(false)
+        super.onResume()
+        isPause = false
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (isPlay) {
+            detail_player.currentPlayer.release()
+        }
+        itemsList.clear()
+        if (orientationUtils != null) orientationUtils!!.releaseListener()
+        viewModel.viewModelScope.cancel()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        //如果旋转了就全屏
+        if (isPlay && !isPause) {
+            detail_player.onConfigurationChanged(this, newConfig, orientationUtils, true, true)
+        }
+    }
+
+    override fun onBackPressed() {
+        if (orientationUtils != null) {
+            orientationUtils?.backToProtVideo()
+        }
+        if (GSYVideoManager.backFromWindowFull(this)) {
+            Log.e(VideoActivity.TAG, "退出全屏")
+            return
+        }
+        if (canChange) {
+            if (isPlay) {
+                detail_player.getCurrentPlayer().release()
+                isPlay = false
+            }
+            reChangeList()
+            canChange = false
+            return
+        } else {
+            super.onBackPressed()
+            //Toast.makeText(this, "222", Toast.LENGTH_SHORT).show();
+            finish()
+        }
+        super.onBackPressed()
+    }
+
+    private fun showStatusBar() {
+        window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        val attrs = window.attributes
+        attrs.flags = attrs.flags and WindowManager.LayoutParams.FLAG_FULLSCREEN.inv()
+        window.attributes = attrs
+    }
+
+    private fun reChangeList() {
+        showStatusBar()
+        val screenHeight = windowManager.defaultDisplay.height // 屏幕高（像素，如：800p）
+        val animatorSet = AnimatorSet()
+        val params = recyclerView.layoutParams
+        params.height = screenHeight
+        recyclerView.layoutParams = params
+        toolBar.visibility = View.VISIBLE
+        val animator4 = ObjectAnimator.ofFloat(recyclerView, "translationY", 0f)
+        animatorSet.play(animator4)
+        animatorSet.setDuration(500).start()
+        animatorSet.addListener(object : Animator.AnimatorListener {
+            override fun onAnimationStart(animation: Animator) {}
+            override fun onAnimationEnd(animation: Animator) {
+                detail_player.currentPlayer.onVideoPause()
+                isPause = true
+                if (isPlay) {
+                    isPlay = false
+                    detail_player.currentPlayer.release()
+                }
+            }
+
+            override fun onAnimationCancel(animation: Animator) {}
+            override fun onAnimationRepeat(animation: Animator) {}
+        })
+    }
+
 }

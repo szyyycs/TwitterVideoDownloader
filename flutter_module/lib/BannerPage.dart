@@ -107,13 +107,20 @@ class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin{
   }
   Widget banner(){
     return InteractionalWidget(
-      width: MediaQuery.of(context).size.width,//屏幕长度
+      width: MediaQuery
+          .of(context)
+          .size
+          .width,
+      //屏幕长度
       maxAngleX: 40,
       maxAngleY: 60,
-      height:MediaQuery.of(context).size.height,
+      height: MediaQuery
+          .of(context)
+          .size
+          .height,
       middleScale: 1,
-      foregroundScale: 1.05,
-      backgroundScale: 1.1,
+      foregroundScale: 1.1,
+      backgroundScale: 1.2,
       backgroundWidget: backgroundWiget(),
       foregroundWidget: foregroundWiget(),
       middleWidget: middleWiget(),
@@ -138,10 +145,16 @@ class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin{
   Image getImage(String s) {
     return Image.asset(
       "assets/$s",
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height,
-      fit: BoxFit.fitHeight,
-      scale: 1.0,
+      width: MediaQuery
+          .of(context)
+          .size
+          .width,
+      height: MediaQuery
+          .of(context)
+          .size
+          .height,
+      fit: BoxFit.fill,
+      scale: 3.0,
     );
   }
 

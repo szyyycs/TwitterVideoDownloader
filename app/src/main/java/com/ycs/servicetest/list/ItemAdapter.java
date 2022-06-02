@@ -142,5 +142,5 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
     public Items getItem(int position){
         return itemslist.get(position);
 
-    };
+    }
 }

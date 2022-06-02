@@ -38,7 +38,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
@@ -53,7 +52,6 @@ import com.shuyu.gsyvideoplayer.player.PlayerFactory;
 import com.shuyu.gsyvideoplayer.player.SystemPlayerManager;
 import com.shuyu.gsyvideoplayer.utils.OrientationUtils;
 import com.tencent.mmkv.MMKV;
-import com.ycs.servicetest.list.DiffUtilCallBack;
 import com.ycs.servicetest.list.ItemAdapter;
 import com.ycs.servicetest.list.Items;
 import com.ycs.servicetest.utils.IosAlertDialog;
@@ -911,7 +909,6 @@ public class VideoActivity extends AppCompatActivity {
         HaveList=true;
         if (null == datalist || datalist.size() <= 0)
             return;
-
         Gson gson = new Gson();
         //转换成json数据，再保存
         String strJson = gson.toJson(datalist);

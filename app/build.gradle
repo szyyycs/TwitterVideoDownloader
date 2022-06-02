@@ -4,6 +4,14 @@ apply plugin:'kotlin-android-extensions'
 
 android {
 
+    signingConfigs {
+        release {
+            storeFile file('F:\\appley20220526.jks')
+            storePassword '123456'
+            keyAlias 'key'
+            keyPassword '123456'
+        }
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -22,6 +30,7 @@ android {
         ndk {
             abiFilters  "armeabi-v7a"//,"armeabi", "x86", "mips"
         }
+
     }
     sourceSets {
         main {
@@ -32,6 +41,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     dexOptions {
@@ -93,7 +103,6 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
-
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.9.1'
 }
 repositories {
