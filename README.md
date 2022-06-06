@@ -1,2 +1,3 @@
 # NotificationTest/serviceTest
-twitterdown下载器，视频播放器，flutter实战
+推特视频下载器
+集成推特视频下载，本地视频播放，多种视频流查看视频，推特文案保存等功能
