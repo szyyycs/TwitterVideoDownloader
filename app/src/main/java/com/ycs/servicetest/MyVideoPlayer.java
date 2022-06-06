@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.shuyu.gsyvideoplayer.player.PlayerFactory;
+import com.shuyu.gsyvideoplayer.player.SystemPlayerManager;
 import com.shuyu.gsyvideoplayer.utils.Debuger;
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer;
 
@@ -32,6 +34,7 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
     protected void init(Context context) {
         super.init(context);
         initView();
+
     }
 
     @Override
@@ -40,7 +43,7 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
         if(mSpeed){
             mSpeed=false;
             getCurrentPlayer().setSpeedPlaying(speed, true);
-            changeSpeed.setText(""+speed);
+            changeSpeed.setText(String.valueOf(speed));
             startDismissControlViewTimer();
         }
     }
@@ -66,15 +69,23 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
         }
 
     }
-    public void getVibrate(Vibrator vibrator){
-        this.vi=vibrator;
+
+    public void getVibrate(Vibrator vibrator) {
+        this.vi = vibrator;
     }
+
     @SuppressLint("ClickableViewAccessibility")
-    void initView(){
+    void initView() {
         nextVideo = findViewById(R.id.next);
         changeSpeed = findViewById(R.id.switchSize);
         changeSpeed.setOnClickListener(v -> resolveTypeUI());
-
+        PlayerFactory.setPlayManager(SystemPlayerManager.class);
+        //        //EXOPlayer内核，支持格式更多
+        //        PlayerFactory.setPlayManager(Exo2PlayerManager.class);
+        ////系统内核模式
+        //        PlayerFactory.setPlayManager(SystemPlayerManager.class);
+        ////ijk内核，默认模式
+        //        PlayerFactory.setPlayManager(IjkPlayerManager.class);
     }
     public ImageView getNextVideo(){
         return nextVideo;
@@ -92,7 +103,7 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
         } else if (speed == 0.5f) {
             speed = 1;
         }
-        changeSpeed.setText(""+speed);
+        changeSpeed.setText(String.valueOf(speed));
         getCurrentPlayer().setSpeedPlaying(speed, true);
     }
     @Override
@@ -204,7 +215,7 @@ public class MyVideoPlayer extends StandardGSYVideoPlayer {
 
     public void startPlay(){
         getStartButton().performClick();
-        postDelayed(() -> hideAllWidget(), 400);
+        postDelayed(this::hideAllWidget, 400);
     }
 
 }
