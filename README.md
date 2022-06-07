@@ -7,10 +7,10 @@
 - 生日彩蛋（flutter实现，目前添加5.26和12.10两个日期）
 
 ## 技术栈关键词
-- Flutter
 - GSYVideoPlayer
 - Bugly/应用升级
 - Kotlin
+- Flutter
 - MVVM
 - Tiktok模式
 - MMKV
