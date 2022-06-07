@@ -169,8 +169,10 @@ public class IosAlertDialog {
         dialog.setOnKeyListener(onKeyListener);
     }
 
-    public void setCanceledOnTouchOutside(boolean b) {
+    public IosAlertDialog setCanceledOnTouchOutside(boolean b) {
         dialog.setCanceledOnTouchOutside(b);
+        return this;
+
     }
 
     private void setLayout() {

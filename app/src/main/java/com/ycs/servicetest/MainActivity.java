@@ -45,43 +45,54 @@ import java.util.Calendar;
 import cn.bmob.v3.Bmob;
 import io.flutter.embedding.android.FlutterActivity;
 
+import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
+import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
 import static com.ycs.servicetest.Constant.REQUEST_CODE;
 import static com.ycs.servicetest.utils.WebUtil.analyzeList;
 import static com.ycs.servicetest.utils.WebUtil.isAnalyse;
 import static com.ycs.servicetest.utils.WebUtil.isDownloading;
 import static com.ycs.servicetest.utils.WebUtil.isHttpUrl;
 
+//import com.hjq.permissions.OnPermissionCallback;
+//import com.hjq.permissions.Permission;
+//import com.hjq.permissions.XXPermissions;
+
 //import io.flutter.embedding.android.FlutterActivity;
 //import io.flutter.embedding.android.FlutterView;
 
 public class MainActivity extends AppCompatActivity {
-    final static String TAG="yyy";
-    final static int GOTO_DOWNLOAD=1;
+    final static String TAG = "yyy";
+    final static int GOTO_DOWNLOAD = 1;
 
     private RelativeLayout floatWindow;
     private Button btn;
     private Context context;
     private EditText etInput;
-    private Boolean isFloatWindowsshow=false;
-    private String[] permissions = {Manifest.permission.SYSTEM_ALERT_WINDOW,Manifest.permission.WRITE_EXTERNAL_STORAGE,
+    private Boolean isFloatWindowsshow = false;
+    private String[] permissions = {SYSTEM_ALERT_WINDOW,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE};
+    private String[] xpermissions = {
+            SYSTEM_ALERT_WINDOW,
+            MANAGE_EXTERNAL_STORAGE
+    };
     private ImageView iv;
     private Vibrator vibrator;
     //跳到下载
     private Handler handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                if(msg.what==GOTO_DOWNLOAD){
-                    //WebUtil.isAnalyse=true;
-                    MainService.updateNotification(MainActivity.this,"链接正在解析中...");
-                    Intent i=new Intent(MainActivity.this,WebService.class);
-                    i.putExtra("url",msg.obj.toString());
-                    startService(i);
-                }
-
-                super.handleMessage(msg);
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == GOTO_DOWNLOAD) {
+                //WebUtil.isAnalyse=true;
+                MainService.updateNotification(MainActivity.this, "链接正在解析中...");
+                Intent i = new Intent(MainActivity.this, WebService.class);
+                i.putExtra("url", msg.obj.toString());
+                startService(i);
             }
-        };
+
+            super.handleMessage(msg);
+        }
+    };
     //显示倒计时dialog
     void showDialog(){
         ImageDialog d=new ImageDialog(MainActivity.this).builder();
@@ -137,21 +148,54 @@ public class MainActivity extends AppCompatActivity {
         PRDownloader.initialize(getApplicationContext());
         WebUtil.init(getApplicationContext());
 
-        vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         getPermission();
+        //getXXPermission();
         showNotification();
         initView();
         showFloatWindows();
         checkPermission();
     }
-    public void initView(){
-        TextView tv=findViewById(R.id.btn);
-        iv=findViewById(R.id.download);
-        btn=findViewById(R.id.confirm);
-        etInput=findViewById(R.id.input);
-        floatWindow=findViewById(R.id.floatWindow);
+
+    //    public void getXXPermission(){
+//        if(!XXPermissions.isGranted(context,permissions)){
+//            Toast.makeText(context, "请授权悬浮窗以及存储权限", Toast.LENGTH_SHORT).show();
+//            XXPermissions.with(this)
+//                    .permission(Permission.SYSTEM_ALERT_WINDOW)
+//                    .permission(Permission.MANAGE_EXTERNAL_STORAGE)
+//                    .request(new OnPermissionCallback() {
+//                        @Override
+//                        public void onGranted(List<String> permissions, boolean all) {
+//                            if (!Settings.canDrawOverlays(context)) {
+//                                //Toast.makeText(context, "未允许权限，同意后才可以使用本APP，请同意权限", Toast.LENGTH_SHORT).show();
+//                                XXPermissions.startPermissionActivity(MainActivity.this, permissions);
+//                                Toast.makeText(context, "悬浮窗授权失败", Toast.LENGTH_SHORT).show();
+//                            } else {
+//                                Toast.makeText(context, "授权成功", Toast.LENGTH_SHORT).show();
+//                            }
+//                        }
+//
+//                        @Override
+//                        public void onDenied(List<String> permissions, boolean never) {
+//                            if (never) {
+//                                Toast.makeText(context, "未允许权限，同意后才可以使用本APP，请同意权限", Toast.LENGTH_SHORT).show();
+//                                XXPermissions.startPermissionActivity(MainActivity.this, permissions);
+//                            } else {
+//                                getXXPermission();
+//                            }
+//                        }
+//                    });
+//        }
+//
+//    }
+    public void initView() {
+        TextView tv = findViewById(R.id.btn);
+        iv = findViewById(R.id.download);
+        btn = findViewById(R.id.confirm);
+        etInput = findViewById(R.id.input);
+        floatWindow = findViewById(R.id.floatWindow);
         iv.setOnClickListener(v -> {
-            Intent i=new Intent(MainActivity.this, VideoActivity.class);
+            Intent i = new Intent(MainActivity.this, VideoActivity.class);
             startActivity(i);
         });
         tv.setOnLongClickListener(v -> {
@@ -282,9 +326,12 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == 0) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (!Settings.canDrawOverlays(this)) {
-                    Toast.makeText(this, "授权失败", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "授权失败，请重新授权", Toast.LENGTH_SHORT).show();
+                    getPermission();
                 } else {
                     Toast.makeText(this, "授权成功", Toast.LENGTH_SHORT).show();
+                    isFloatWindowsshow = false;
+                    showFloatWindows();
                     //startService(new Intent(MainActivity.this, MainService.class));
                 }
             }
@@ -346,12 +393,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void getPermission(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
             if (!Settings.canDrawOverlays(this)) {
 //                Toast.makeText(this, "请允许悬浮窗权限", Toast.LENGTH_SHORT);
                 new IosAlertDialog(this)
                         .builder()
+                        .setCancelable(false)
+                        .setCanceledOnTouchOutside(false)
                         .setTitle("前往获取悬浮窗权限")
+                        .setMsg("请在应用列表中找到VideoDownload，并允许显示在其他应用上层")
                         .setPositiveButton("立即跳转", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
