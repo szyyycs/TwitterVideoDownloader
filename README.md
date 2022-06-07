@@ -8,19 +8,19 @@
 
 ## 技术栈关键词
 - Flutter
-- 裸眼3D悬浮
-- 瀑布流 
 - GSYVideoPlayer
-- 推特SDK
-- 自定义通知栏进度条
-- 悬浮窗
-- Bmob
 - Bugly/应用升级
 - Kotlin
 - MVVM
 - Tiktok模式
 - MMKV
 - Glide
+- Bmob
+- 推特SDK
+- 裸眼3D悬浮
+- 瀑布流 
+- 自定义通知栏进度条
+- 悬浮窗
 - ...
 
 > 提示：个人学习项目，想到啥写啥，想到啥加啥
