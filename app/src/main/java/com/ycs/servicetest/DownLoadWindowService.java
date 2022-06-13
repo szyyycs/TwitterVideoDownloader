@@ -89,7 +89,7 @@ public class DownLoadWindowService extends Service {
 //            layoutParams.height = 200;
             //layoutParams.gravity = Gravity.RIGHT;
             layoutParams.x = windowManager.getDefaultDisplay().getWidth();
-            layoutParams.y = -300;
+            layoutParams.y = -getResources().getDimensionPixelSize(R.dimen.dp_100);
             layoutParams.width = getResources().getDimensionPixelSize(R.dimen.dp_40);
             layoutParams.height = getResources().getDimensionPixelSize(R.dimen.dp_40);
             windowManager.addView(view, layoutParams);

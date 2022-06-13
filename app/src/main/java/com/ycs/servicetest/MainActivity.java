@@ -31,6 +31,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.app.hubert.guide.NewbieGuide;
+import com.app.hubert.guide.core.Controller;
+import com.app.hubert.guide.listener.OnGuideChangedListener;
+import com.app.hubert.guide.listener.OnPageChangedListener;
+import com.app.hubert.guide.model.GuidePage;
+import com.app.hubert.guide.model.HighLight;
 import com.downloader.PRDownloader;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
@@ -155,6 +161,42 @@ public class MainActivity extends AppCompatActivity {
         initView();
         showFloatWindows();
         checkPermission();
+        showGuide();
+    }
+
+    private void showGuide() {
+        NewbieGuide.with(MainActivity.this)
+                .setLabel("guide1")
+                .setShowCounts(1)//控制次数
+                .addGuidePage(
+                        GuidePage.newInstance()
+                                .addHighLight(etInput, HighLight.Shape.ROUND_RECTANGLE, 50, 15, null)
+                                .setLayoutRes(R.layout.tip_btn)
+                )
+                .addGuidePage(GuidePage.newInstance()
+                        .addHighLight(iv, HighLight.Shape.CIRCLE, 0, 5, null)
+                        .setLayoutRes(R.layout.tip_download))
+                .setOnGuideChangedListener(new OnGuideChangedListener() {
+                    @Override
+                    public void onShowed(Controller controller) {
+                        Window window = getWindow();
+                        window.setStatusBarColor(ContextCompat.getColor(MainActivity.this, R.color.colorIosBlueDark));
+                    }
+
+                    @Override
+                    public void onRemoved(Controller controller) {
+                        Window window = getWindow();
+                        window.setStatusBarColor(ContextCompat.getColor(MainActivity.this, R.color.colorIosBlue));
+                    }
+                })
+                .setOnPageChangedListener(new OnPageChangedListener() {
+                    @Override
+                    public void onPageChanged(int page) {
+
+                    }
+                })
+                .show();
+
     }
 
     //    public void getXXPermission(){
@@ -195,37 +237,37 @@ public class MainActivity extends AppCompatActivity {
         etInput = findViewById(R.id.input);
         floatWindow = findViewById(R.id.floatWindow);
         iv.setOnClickListener(v -> {
-            Intent i = new Intent(MainActivity.this, VideoActivity.class);
-            startActivity(i);
-        });
-        tv.setOnLongClickListener(v -> {
-//            startActivity(
-//                    FlutterActivity.createDefaultIntent(context)
-//            );
             Intent i = new Intent(MainActivity.this, ShowVideoActivity.class);
             startActivity(i);
-            return false;
         });
+//        tv.setOnLongClickListener(v -> {
+////            startActivity(
+////                    FlutterActivity.createDefaultIntent(context)
+////            );
+//            Intent i = new Intent(MainActivity.this, ShowVideoActivity.class);
+//            startActivity(i);
+//            return false;
+//        });
         btn.setOnClickListener(v -> {
-            String text=etInput.getText().toString();
-            if(text.isEmpty()){
-                text=etInput.getHint().toString();
+            String text = etInput.getText().toString();
+            if (text.isEmpty()) {
+                text = etInput.getHint().toString();
             }
 
-            if(!WebUtil.isNetworkConnected(MainActivity.this)){
+            if (!WebUtil.isNetworkConnected(MainActivity.this)) {
                 Toast.makeText(MainActivity.this, "网络未打开", Toast.LENGTH_SHORT).show();
-            }else if(isHttpUrl(text)&&text.contains("twitter")){
-                if(isAnalyse||isDownloading){
-                    if(!analyzeList.contains(text)){
+            } else if (isHttpUrl(text) && text.contains("twitter")) {
+                if (isAnalyse || isDownloading) {
+                    if (!analyzeList.contains(text)) {
                         WebUtil.analyzeList.add(text);
-                        Log.e(TAG, "analyzeList的值："+analyzeList.toString() );
+                        Log.e(TAG, "analyzeList的值：" + analyzeList.toString());
                         Toast.makeText(MainActivity.this, "已加入下载列表", Toast.LENGTH_SHORT).show();
-                    }else{
-                        Log.e(TAG, "analyzeList的值："+analyzeList.toString() );
+                    } else {
+                        Log.e(TAG, "analyzeList的值：" + analyzeList.toString());
                         Toast.makeText(MainActivity.this, "已在下载列表中", Toast.LENGTH_SHORT).show();
                     }
 
-                }else{
+                } else {
                     Message ms=new Message();
                     ms.what=GOTO_DOWNLOAD;
                     ms.obj=text;
@@ -393,30 +435,32 @@ public class MainActivity extends AppCompatActivity {
 
     private void getPermission(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.canDrawOverlays(this)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                if (!Settings.canDrawOverlays(this)) {
 //                Toast.makeText(this, "请允许悬浮窗权限", Toast.LENGTH_SHORT);
-                new IosAlertDialog(this)
-                        .builder()
-                        .setCancelable(false)
-                        .setCanceledOnTouchOutside(false)
-                        .setTitle("前往获取悬浮窗权限")
-                        .setMsg("请在应用列表中找到VideoDownload，并允许显示在其他应用上层")
-                        .setPositiveButton("立即跳转", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                        Uri.parse("package:" + getPackageName())), 0);
-                            }
-                        })
+                    new IosAlertDialog(this)
+                            .builder()
+                            .setCancelable(false)
+                            .setCanceledOnTouchOutside(false)
+                            .setTitle("前往获取悬浮窗权限")
+                            .setMsg("请在应用列表中找到VideoDownload，并允许显示在其他应用上层")
+                            .setPositiveButton("立即跳转", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                            Uri.parse("package:" + getPackageName())), 0);
+                                }
+                            })
 
-                        .show();
+                            .show();
 
+                }
             }
+
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED)
-            {
-                ActivityCompat.requestPermissions(this, permissions,111);
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, permissions, 111);
             }
         }
     }

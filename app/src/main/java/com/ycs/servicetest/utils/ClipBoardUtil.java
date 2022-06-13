@@ -1,6 +1,5 @@
 package com.ycs.servicetest.utils;
 
-import android.app.Application;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -11,15 +10,17 @@ import android.text.TextUtils;
  */
 public class ClipBoardUtil {
     Context mcontext;
-    public ClipBoardUtil(Context context){
-        this.mcontext=context;
+    ClipboardManager manager;
+    public ClipBoardUtil(Context context) {
+        this.mcontext = context;
+        manager = (ClipboardManager) mcontext.getSystemService(Context.CLIPBOARD_SERVICE);
     }
+
     /**
      * 获取剪切板内容
      * @return
      */
     public String paste(){
-        ClipboardManager manager = (ClipboardManager) mcontext.getSystemService(Context.CLIPBOARD_SERVICE);
         if (manager != null) {
             if (manager.hasPrimaryClip() && manager.getPrimaryClip().getItemCount() > 0) {
                 CharSequence addedText = manager.getPrimaryClip().getItemAt(0).getText();
@@ -36,7 +37,6 @@ public class ClipBoardUtil {
      * 清空剪切板
      */
     public void clear(){
-        ClipboardManager manager = (ClipboardManager)mcontext.getSystemService(Context.CLIPBOARD_SERVICE);
         if (manager != null) {
             try {
                 manager.setPrimaryClip(manager.getPrimaryClip());

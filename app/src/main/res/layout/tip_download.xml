@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/dp_50"
+        android:gravity="center"
+        android:text="下载的视频在这"
+        android:textColor="#fff"
+        android:textSize="@dimen/sp_15"
+        android:id="@+id/tv_tip2"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="@dimen/dp_90"
+        android:layout_marginTop="@dimen/dp_40" />
+
+    <ImageView
+        android:layout_width="@dimen/dp_20"
+        android:layout_height="@dimen/dp_20"
+        android:src="@mipmap/arrow"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="@dimen/dp_60"
+        android:layout_marginTop="@dimen/dp_50" />
+
+
+</RelativeLayout>

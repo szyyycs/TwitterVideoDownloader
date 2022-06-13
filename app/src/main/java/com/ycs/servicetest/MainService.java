@@ -191,7 +191,7 @@ public class MainService extends Service {
             views.setViewVisibility(R.id.input, View.GONE);
             views.setViewVisibility(R.id.pb, View.VISIBLE);
             if(percent>50){
-                views.setTextColor(R.id.progress_num,context.getColor(R.color.colorwhite));
+                views.setTextColor(R.id.progress_num, context.getColor(R.color.colorWhite));
             }
             views.setProgressBar(R.id.pb,100,percent,false);
         }

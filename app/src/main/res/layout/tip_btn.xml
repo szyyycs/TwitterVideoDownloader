@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    >
+
+    <TextView
+        android:layout_width="@dimen/dp_150"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:textColor="#fff"
+        android:textSize="@dimen/sp_15"
+        android:gravity="center"
+        android:id="@+id/tipp"
+        android:text="链接粘贴到这或到悬浮图标中下载"
+        android:paddingBottom="@dimen/dp_250" />
+
+    <ImageView
+
+        android:layout_width="@dimen/dp_20"
+        android:layout_height="@dimen/dp_200"
+        android:src="@mipmap/arrow1"
+        android:layout_centerInParent="true"
+        android:paddingBottom="@dimen/dp_180"
+
+        />
+
+    <ImageView
+
+        android:layout_width="@dimen/dp_20"
+        android:layout_height="@dimen/dp_300"
+        android:src="@mipmap/arrow2"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/tipp"
+        android:layout_marginLeft="@dimen/dp_20"
+        android:paddingBottom="@dimen/dp_250"
+
+        />
+
+    <TextView
+        android:layout_width="@dimen/dp_200"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+
+        android:textColor="#fff"
+        android:textSize="15sp"
+        android:text="系统在Android10以下版本可以自动识别剪切板内容，10以及以上的需要粘贴链接到框里下载"
+        android:layout_marginBottom="@dimen/dp_20" />
+</RelativeLayout>

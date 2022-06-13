@@ -251,7 +251,7 @@ class ShowVideoActivity : AppCompatActivity() {
         scanNum.text = "0"
         back.setOnClickListener { finish() }
         intoTiktok.setOnClickListener {
-            intoTiktok(true)
+            selectPlayType()
         }
         intoTiktok.setOnLongClickListener {
             intoTiktok(false)
@@ -337,6 +337,25 @@ class ShowVideoActivity : AppCompatActivity() {
             override fun onAnimationCancel(animation: Animator) {}
             override fun onAnimationRepeat(animation: Animator) {}
         })
+    }
+
+    private fun selectPlayType() {
+        XPopup.Builder(this)
+                .atView(intoTiktok) // 依附于所点击的View，内部会自动判断在上方或者下方显示
+                .asAttachList(arrayOf("瀑布流", "抖音流"),
+                        intArrayOf(R.mipmap.pubulist, R.mipmap.tiktok)
+                ) { position: Int, text: String? ->
+                    when (position) {
+                        0 -> {
+                            startActivity(Intent(this@ShowVideoActivity, PubuActivity::class.java))
+                            finish()
+                        }
+                        1 -> {
+                            intoTiktok(false)
+                        }
+                    }
+                }
+                .show()
     }
 
     private fun selectSortType() {

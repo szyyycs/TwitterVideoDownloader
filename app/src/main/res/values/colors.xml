@@ -6,10 +6,11 @@
     <color name="colorRed">#E75A48</color>
     <color name="colorBlack">#444</color>
     <color name="colorIosBlue">#1b9bfc</color>
+    <color name="colorIosBlueDark">#082f4c</color>
     <color name="colorIosBlue2">#0a8aeb</color>
     <color name="colorIosBlue1">#2caced</color>
     <color name="colorBlue">#296Df2</color>
-    <color name="colorwhite">#fff3f3f3</color>
+    <color name="colorWhite">#fff3f3f3</color>
     <color name="colorGreen">#4CAF50</color>
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>

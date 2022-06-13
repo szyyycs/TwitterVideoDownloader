@@ -66,6 +66,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:maxWidth="@dimen/dp_300"
+        android:visibility="invisible"
         android:text="Android10以下版本可自动识别剪切板内容，以上则需手动输入网址下载"
         android:textColor="#aaa"
         android:id="@+id/btn"
