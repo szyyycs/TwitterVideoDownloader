@@ -30,7 +30,8 @@
         android:testOnly="false"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".ShowVideoActivity"></activity>
+        <activity android:name=".TiktokActivity"></activity>
+        <activity android:name=".ShowVideoActivity" />
         <activity
             android:name=".PubuActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
@@ -68,7 +69,7 @@
             android:exported="false" />
 
         <activity android:name=".FloatActivity" />
-        <activity android:name=".tiktok" />
+        <activity android:name=".Tiktok" />
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTask">
@@ -100,7 +101,7 @@
         </provider>
         <provider
             android:name="cn.bmob.v3.util.BmobContentProvider"
-            android:authorities="com.ycs.servicetest.BmobContentProvider"></provider>
+            android:authorities="com.ycs.servicetest.BmobContentProvider" />
     </application>
 
 </manifest>

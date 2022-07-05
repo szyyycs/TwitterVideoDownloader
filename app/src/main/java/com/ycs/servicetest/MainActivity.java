@@ -140,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         //CrashReport.initCrashReport(getApplicationContext(), "b0a053b5dd", true);
         context=getApplicationContext();
@@ -180,13 +181,13 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onShowed(Controller controller) {
                         Window window = getWindow();
-                        window.setStatusBarColor(ContextCompat.getColor(MainActivity.this, R.color.colorIosBlueDark));
+                        window.setStatusBarColor(ContextCompat.getColor(getApplicationContext(), R.color.colorIosBlueDark));
                     }
 
                     @Override
                     public void onRemoved(Controller controller) {
                         Window window = getWindow();
-                        window.setStatusBarColor(ContextCompat.getColor(MainActivity.this, R.color.colorIosBlue));
+                        window.setStatusBarColor(ContextCompat.getColor(getApplicationContext(), R.color.colorIosBlue));
                     }
                 })
                 .setOnPageChangedListener(new OnPageChangedListener() {
@@ -254,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
                 text = etInput.getHint().toString();
             }
 
-            if (!WebUtil.isNetworkConnected(MainActivity.this)) {
+            if (!WebUtil.isNetworkConnected(getApplicationContext())) {
                 Toast.makeText(MainActivity.this, "网络未打开", Toast.LENGTH_SHORT).show();
             } else if (isHttpUrl(text) && text.contains("twitter")) {
                 if (isAnalyse || isDownloading) {
@@ -280,6 +281,7 @@ public class MainActivity extends AppCompatActivity {
         });
         btn.setOnLongClickListener(v -> {
             startActivity(new Intent(MainActivity.this,PubuActivity.class));
+            //startActivity(new Intent(MainActivity.this,TestActivity.class));
             return false;
         });
         etInput.addTextChangedListener(new TextWatcher() {
@@ -414,7 +416,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 getWindow().getDecorView().post(() -> {
-                    String paste=new ClipBoardUtil(MainActivity.this).paste();
+                    String paste = new ClipBoardUtil(getApplicationContext()).paste();
                     etInput.setHint(paste);
                     if(etInput.getHint().toString().equals("在这粘贴链接")){
                         btn.setText("粘贴");

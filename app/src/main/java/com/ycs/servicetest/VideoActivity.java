@@ -264,58 +264,50 @@ public class VideoActivity extends AppCompatActivity {
         scan.setVisibility(View.VISIBLE);
         scanNum = findViewById(R.id.scanNum);
         scanNum.setText("0");
-        iv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        iv.setOnClickListener(v -> finish());
         iv_intotiktok = findViewById(R.id.intoTiktok);
 
-        iv_intotiktok.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isNull) {
-                    Toast.makeText(VideoActivity.this, "您视频列表为空，请下载视频后再进入抖音模式哦！", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                Intent intent = new Intent();
-                ArrayList<VideoModel> vm = new ArrayList<>();
-                for (Items ii : itemsList) {
-                    VideoModel vvv = new VideoModel();
-                    vvv.setUrl(ii.getUrl());
-                    vm.add(vvv);
-                }
-                Collections.shuffle(vm);
-                intent.putExtra("list", vm);
-                Toast.makeText(VideoActivity.this, "随机模式", Toast.LENGTH_SHORT).show();
-                intent.putExtra("i", position);
-                intent.setClass(VideoActivity.this, tiktok.class);
-                startActivity(intent);
+        iv_intotiktok.setOnClickListener(v -> {
+            if (isNull) {
+                Toast.makeText(VideoActivity.this, "您视频列表为空，请下载视频后再进入抖音模式哦！", Toast.LENGTH_SHORT).show();
+                return;
             }
-        });
-        iv_intotiktok.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                if (isNull) {
-                    Toast.makeText(VideoActivity.this, "您视频列表为空，请下载视频后再进入抖音模式哦！", Toast.LENGTH_SHORT).show();
-                    return false;
-                }
-                Intent intent = new Intent();
-                ArrayList<VideoModel> vm = new ArrayList<>();
-                for (Items ii : itemsList) {
-                    VideoModel vvv = new VideoModel();
-                    vvv.setUrl(ii.getUrl());
-                    vm.add(vvv);
-                }
-                Toast.makeText(VideoActivity.this, "顺序模式", Toast.LENGTH_SHORT).show();
-                intent.putExtra("list", vm);
+            Intent intent = new Intent();
+            ArrayList<VideoModel> vm = new ArrayList<>();
+            for (Items ii : itemsList) {
+                VideoModel vvv = new VideoModel();
+                vvv.setUrl(ii.getUrl());
+                vm.add(vvv);
+            }
+            Collections.shuffle(vm);
+            intent.putExtra("list", vm);
+            Toast.makeText(VideoActivity.this, "随机模式", Toast.LENGTH_SHORT).show();
+            intent.putExtra("i", position);
+            intent.setClass(VideoActivity.this, TiktokActivity.class);
+            startActivity(intent);
+            runOnUiThread(() -> {
 
-                intent.putExtra("i", position);
-                intent.setClass(VideoActivity.this, tiktok.class);
-                startActivity(intent);
+            });
+        });
+        iv_intotiktok.setOnLongClickListener(v -> {
+            if (isNull) {
+                Toast.makeText(VideoActivity.this, "您视频列表为空，请下载视频后再进入抖音模式哦！", Toast.LENGTH_SHORT).show();
                 return false;
             }
+            Intent intent = new Intent();
+            ArrayList<VideoModel> vm = new ArrayList<>();
+            for (Items ii : itemsList) {
+                VideoModel vvv = new VideoModel();
+                vvv.setUrl(ii.getUrl());
+                vm.add(vvv);
+            }
+            Toast.makeText(VideoActivity.this, "顺序模式", Toast.LENGTH_SHORT).show();
+            intent.putExtra("list", vm);
+
+            intent.putExtra("i", position);
+            intent.setClass(VideoActivity.this, Tiktok.class);
+            startActivity(intent);
+            return false;
         });
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
         sortImage = findViewById(R.id.sort);

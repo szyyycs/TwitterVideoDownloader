@@ -102,7 +102,7 @@ public class MainService extends Service {
         final PendingIntent pi = PendingIntent.getBroadcast(this, 0, intentInput, PendingIntent.FLAG_UPDATE_CURRENT);
         notification = builder.build();
         if (Build.VERSION.SDK_INT < 29) {
-            views.setTextViewText(R.id.input, new ClipBoardUtil(MainService.this).paste());
+            views.setTextViewText(R.id.input, new ClipBoardUtil(getApplicationContext()).paste());
             notification.bigContentView = views;
         } else {
             notification.contentView = views;

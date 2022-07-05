@@ -6,13 +6,17 @@ import android.graphics.Point;
 import android.media.ThumbnailUtils;
 import android.provider.MediaStore;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.shuyu.gsyvideoplayer.player.PlayerFactory;
 import com.shuyu.gsyvideoplayer.utils.CommonUtil;
 import com.shuyu.gsyvideoplayer.utils.Debuger;
 import com.shuyu.gsyvideoplayer.utils.GSYVideoType;
@@ -20,13 +24,17 @@ import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer;
 import com.shuyu.gsyvideoplayer.video.base.GSYBaseVideoPlayer;
 
 import moe.codeest.enviews.ENDownloadView;
+import tv.danmaku.ijk.media.exo2.Exo2PlayerManager;
 
 public class SampleCoverVideo extends StandardGSYVideoPlayer {
     ImageView mCoverImage;
 
     String mCoverOriginUrl;
 
-    int  mCoverOriginId = 0;
+    TextView speedTv;
+//    ProgressBar pb_bottom;
+
+    int mCoverOriginId = 0;
 
     int mDefaultRes;
 
@@ -46,7 +54,38 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
     protected void init(Context context) {
         super.init(context);
         mCoverImage = (ImageView) findViewById(R.id.thumbImage);
-
+        // PlayerFactory.setPlayManager(SystemPlayerManager.class);
+        PlayerFactory.setPlayManager(Exo2PlayerManager.class);//EXO模式
+        //PlayerFactory.setPlayManager(IjkPlayerManager.class);//ijk模式
+        speedTv = findViewById(R.id.speed_tv);
+//        pb_bottom=findViewById(R.id.bottom_progressbar);
+//        pb_bottom.setOnTouchListener((v, event) -> {
+//            switch (event.getAction()) {
+//                case MotionEvent.ACTION_DOWN:
+//                    setViewShowState(mBottomContainer, VISIBLE);
+//                    setViewShowState(mStartButton, INVISIBLE);
+//                    cancelDismissControlViewTimer();
+//                case MotionEvent.ACTION_MOVE:
+//                    cancelProgressTimer();
+//                    ViewParent vpdown = getParent();
+//                    while (vpdown != null) {
+//                        vpdown.requestDisallowInterceptTouchEvent(true);
+//                        vpdown = vpdown.getParent();
+//                    }
+//                    break;
+//                case MotionEvent.ACTION_UP:
+//                    startDismissControlViewTimer();
+//                    startProgressTimer();
+//                    ViewParent vpup = getParent();
+//                    while (vpup != null) {
+//                        vpup.requestDisallowInterceptTouchEvent(false);
+//                        vpup = vpup.getParent();
+//                    }
+//                    mBrightnessData = -1f;
+//                    break;
+//            }
+//            return false;
+//        });
         if (mThumbImageViewLayout != null &&
                 (mCurrentState == -1 || mCurrentState == CURRENT_STATE_NORMAL || mCurrentState == CURRENT_STATE_ERROR)) {
             mThumbImageViewLayout.setVisibility(VISIBLE);
@@ -102,6 +141,13 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
     }
 
 
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        super.onStopTrackingTouch(seekBar);
+        Toast.makeText(mContext, "放开", Toast.LENGTH_SHORT).show();
+        startPlay();
+    }
+
     /**
      * 退出window层播放全屏效果
      */
@@ -146,7 +192,42 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
         }
 
     }
-    public void restart(){
+
+    @Override
+    protected void touchSurfaceUp() {
+        super.touchSurfaceUp();
+        getCurrentPlayer().setSpeedPlaying(1f, true);
+        startDismissControlViewTimer();
+        speedTv.setVisibility(GONE);
+    }
+
+    @Override
+    protected void touchLongPress(MotionEvent e) {
+        super.touchLongPress(e);
+        switch (e.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                if (mCurrentState == CURRENT_STATE_PAUSE) {
+                    break;
+                }
+                speedTv.setVisibility(VISIBLE);
+                getCurrentPlayer().setSpeedPlaying(2f, false);
+                // Toast.makeText(mContext, "×2", Toast.LENGTH_SHORT).show();
+                cancelDismissControlViewTimer();
+
+                break;
+            case MotionEvent.ACTION_UP:
+                if (mCurrentState == CURRENT_STATE_PAUSE) {
+                    break;
+                }
+                getCurrentPlayer().setSpeedPlaying(1f, false);
+                break;
+            default:
+
+        }
+
+    }
+
+    public void restart() {
         mStartButton.setVisibility(INVISIBLE);
         setViewShowState(mLockScreen, GONE);
         hideAllWidget();
@@ -154,15 +235,12 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
         startPlay();
 
     }
+
     public void startPlay() {
         getStartButton().performClick();
-        postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                hideAllWidget();
-            }
-        }, 400);
+        postDelayed(() -> hideAllWidget(), 400);
     }
+
     @Override
     protected void changeUiToPlayingShow() {
         Debuger.printfLog("changeUiToPlayingShow");
@@ -181,32 +259,37 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
 
     @Override
     protected void onClickUiToggle() {
-        if (mIfCurrentIsFullscreen && mLockCurScreen && mNeedLockFull) {
-            setViewShowState(mLockScreen, VISIBLE);
-            return;
-        }
+//        if (mIfCurrentIsFullscreen && mLockCurScreen && mNeedLockFull) {
+//            setViewShowState(mLockScreen, VISIBLE);
+//            return;
+//        }
         if (mCurrentState == CURRENT_STATE_PREPAREING) {
             if (mBottomContainer != null) {
                 if (mBottomContainer.getVisibility() == View.VISIBLE) {
                     changeUiToPrepareingClear();
                 } else {
                     changeUiToPreparingShow();
+
                 }
             }
         } else if (mCurrentState == CURRENT_STATE_PLAYING) {
             if (mBottomContainer != null) {
+                getStartButton().performClick();
                 if (mBottomContainer.getVisibility() == View.VISIBLE) {
-                    changeUiToPlayingClear();
+                    //changeUiToPlayingClear();
+                    changeUiToPauseShow();
                 } else {
-                    changeUiToPlayingPause();
+                    //changeUiToPlayingPause();
+                    changeUiToPauseShow();
                 }
             }
         } else if (mCurrentState == CURRENT_STATE_PAUSE) {
             if (mBottomContainer != null) {
+                getStartButton().performClick();
                 if (mBottomContainer.getVisibility() == View.VISIBLE) {
                     changeUiToPauseClear();
                 } else {
-                    changeUiToPauseShow();
+                    changeUiToPlayingClear();
                 }
             }
         } else if (mCurrentState == CURRENT_STATE_AUTO_COMPLETE) {
@@ -228,6 +311,39 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
         }
     }
 
+    @Override
+    protected void changeUiToPauseShow() {
+        Debuger.printfLog("changeUiToPauseShow");
+
+        setViewShowState(mTopContainer, VISIBLE);
+        setViewShowState(mBottomContainer, VISIBLE);
+        setViewShowState(mStartButton, VISIBLE);
+        setViewShowState(mLoadingProgressBar, INVISIBLE);
+        setViewShowState(mThumbImageViewLayout, INVISIBLE);
+        setViewShowState(mBottomProgressBar, INVISIBLE);
+        setViewShowState(mLockScreen, (mIfCurrentIsFullscreen && mNeedLockFull) ? VISIBLE : GONE);
+
+        if (mLoadingProgressBar instanceof ENDownloadView) {
+            ((ENDownloadView) mLoadingProgressBar).reset();
+        }
+        updateStartImage();
+        // updatePauseCover();
+    }
+
+    protected void updateStartImage() {
+        if (mStartButton instanceof ImageView) {
+            ImageView imageView = (ImageView) mStartButton;
+            if (mCurrentState == CURRENT_STATE_PLAYING) {
+                imageView.setImageResource(R.drawable.video_click_pause_selector);
+            } else if (mCurrentState == CURRENT_STATE_ERROR) {
+                imageView.setImageResource(R.drawable.video_click_error_selector);
+            } else {
+                imageView.setImageResource(R.mipmap.play);
+                imageView.setImageAlpha(70);
+            }
+        }
+    }
+
     protected void changeUiToPlayingPause() {
         Debuger.printfLog("changeUiToPlayingShow");
 
@@ -243,6 +359,7 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
             ((ENDownloadView) mLoadingProgressBar).reset();
         }
         updateStartImage();
+        // startPlay();
     }
     @Override
     protected void changeUiToNormal() {

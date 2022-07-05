@@ -109,7 +109,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_400"
+        android:layout_height="match_parent"
         android:visibility="visible"
         android:background="#222"
         android:id="@+id/r"
@@ -167,8 +167,5 @@
             />
     </RelativeLayout>
 
-    <androidx.constraintlayout.widget.Group
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+
 </RelativeLayout>

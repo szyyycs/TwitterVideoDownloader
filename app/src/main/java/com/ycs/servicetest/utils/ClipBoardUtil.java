@@ -5,15 +5,21 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.text.TextUtils;
 
+import java.lang.ref.WeakReference;
+
 /**
  * 剪切板读写工具
  */
 public class ClipBoardUtil {
-    Context mcontext;
+    WeakReference<Context> mcontext;
     ClipboardManager manager;
+
     public ClipBoardUtil(Context context) {
-        this.mcontext = context;
-        manager = (ClipboardManager) mcontext.getSystemService(Context.CLIPBOARD_SERVICE);
+        this.mcontext = new WeakReference<>(context);
+        if (mcontext.get() != null) {
+            manager = (ClipboardManager) mcontext.get().getSystemService(Context.CLIPBOARD_SERVICE);
+        }
+
     }
 
     /**

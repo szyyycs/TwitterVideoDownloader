@@ -4,14 +4,13 @@ import android.app.Application
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.Environment
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.*
 import cn.bmob.v3.BmobQuery
 import cn.bmob.v3.exception.BmobException
+import cn.bmob.v3.listener.CountListener
 import cn.bmob.v3.listener.FindListener
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -41,9 +40,12 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
     var isNull = MutableLiveData<Boolean>()
     var num = MutableLiveData<Int>()
     var index = MutableLiveData<Int>()
+    var loadTweetNum = MutableLiveData<Int>()
+    var tweetNum = 0
     var indexUploadTweet = MutableLiveData<Int>()
     var tweet: String = ""
     var len: String = ""
+    var tweetCountIndex = -1
     var isScaning = MutableLiveData<Boolean>()
     var context: Application = getApplication()
 
@@ -57,6 +59,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
     init {
         getSPUrl()
         num.value = 0
+        loadTweetNum.value = 0
         isNull.value = true
         isScaning.value = false
         itemsList.value = getDataList(url)
@@ -178,7 +181,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
 
     override fun onCleared() {
         super.onCleared()
-        Log.d("yyy", "onCleared: ${kv_text.decodeInt("len", 0)}")
+        // Log.d("yyy", "onCleared: ${kv_text.decodeInt("len", 0)}")
         viewModelScope.cancel()
     }
 
@@ -190,7 +193,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                     for (i in list.indices) {
                         if (list != null && list.size != 0) {
                             len = loadVideoLen(list[i]?.url)
-                            Log.d("yyy", "loadVideoDuration:len$len ")
+                            //Log.d("yyy", "loadVideoDuration:len$len ")
                             if (list.isEmpty()) {
                                 return@async null
                             }
@@ -206,10 +209,10 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
             }
             val result = updateIndex.await()
             // Log.d("yyy", "result: $result")
-            GlobalScope.launch(Dispatchers.Main) { //启动一个协程，运行在主线程
+            viewModelScope.launch(Dispatchers.Main) { //启动一个协程，运行在主线程
                 result?.let {
                     itemsList.value = result
-                    if (kv_text.count() == 0L || kv_text.decodeInt("len", 0) < 400) {
+                    if (kv_text.count() == 0L || kv_text.decodeInt("len", 0) < 500) {
                         loadTweet()
                     } else {
                         setDataList(url, result as ArrayList<Items>)
@@ -223,50 +226,51 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
 
     }
 
+    @Synchronized
     private fun handleTwitterList(list: List<TwitterText>) {
-        kv_text.encode("len", list.size)
+        kv_text.encode("len", list.size + kv.decodeInt("len", 0))
         Log.d("yyy", "len${list.size}")
         for (tt in list.indices) {
             kv_text.encode(list[tt].filename, WebUtil.reverse(list[tt].text))
             tweet = list[tt].text
-            indexUploadTweet.value == tt
+            indexUploadTweet.setValue(tt)
         }
+        loadTweetNum.value = loadTweetNum.value?.plus(1)
+    }
+
+
+    private fun queryFindList(query: BmobQuery<TwitterText>, skip: Int) {
+        val query = BmobQuery<TwitterText>()
+        query.order("createdAt")
+                .setLimit(500)
+                .setSkip(skip * 500)
+                .findObjects(object : FindListener<TwitterText>() {
+                    override fun done(list: MutableList<TwitterText>?, e: BmobException?) {
+                        if (e == null && list != null) {
+                            Log.d("yyy", "skip done: ${list.size}")
+                            handleTwitterList(list)
+                        }
+                    }
+                })
     }
 
     private fun loadTweet() {
         val query = BmobQuery<TwitterText>()
         query.order("createdAt")
-                .setLimit(500)
-                .findObjects(object : FindListener<TwitterText>() {
-                    override fun done(list: List<TwitterText>?, e: BmobException?) {
-                        if (e == null && list != null) {
-                            handleTwitterList(list)
-                            if (list.size == 500) {
-                                query.setSkip(500)
-                                        .findObjects(object : FindListener<TwitterText>() {
-                                            override fun done(list1: List<TwitterText>?, e: BmobException?) {
-                                                if (e == null && list1 != null) {
-                                                    handleTwitterList(list1)
-                                                    Handler(Looper.getMainLooper()).post {
-                                                        Toast.makeText(context, "加载了${list.size}条文案", Toast.LENGTH_SHORT).show()
-                                                        indexUploadTweet.value = -1
-                                                        isNull.value = false
-                                                    }
-                                                }
-                                            }
-                                        })
-                            } else {
-                                Handler(Looper.getMainLooper()).post {
-                                    Toast.makeText(context, "加载了${list.size}条文案", Toast.LENGTH_SHORT).show()
-                                    indexUploadTweet.value = -1
-                                    isNull.value = false
-                                }
+                .count(TwitterText::class.java, object : CountListener() {
+                    override fun done(p0: Int?, p1: BmobException?) {
+                        if (p0 != null) {
+                            tweetNum = p0;
+                            Log.d("yyy", "done:${p0} ")
+                            tweetCountIndex = p0?.div(500) + 1
+                            var num = 0
+                            while (num < tweetCountIndex) {
+                                queryFindList(query, num)
+                                num++
                             }
-
                         }
                     }
                 })
-
     }
 
     fun deSort(stus: ArrayList<Items>) {

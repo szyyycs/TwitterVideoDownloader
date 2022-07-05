@@ -17,9 +17,7 @@ import androidx.core.content.FileProvider;
 
 import com.downloader.Error;
 import com.downloader.OnDownloadListener;
-import com.downloader.OnPauseListener;
 import com.downloader.OnProgressListener;
-import com.downloader.OnStartOrResumeListener;
 import com.downloader.PRDownloader;
 import com.downloader.Progress;
 import com.tencent.mmkv.MMKV;
@@ -247,7 +245,7 @@ public class WebUtil {
     }
     private static void downloadVideo(String url, Context context, Handler handler,String text) {
         if(!isDownloading){
-            String filename=WebUtil.genearteFileName();
+            String filename = WebUtil.generateFileName();
 //            SharedPreferences sp=context.getSharedPreferences("twitter", Context.MODE_PRIVATE);
             MMKV kv_text=MMKV.mmkvWithID("text");
 //            SharedPreferences.Editor e = sp.edit();
@@ -300,19 +298,11 @@ public class WebUtil {
     }
     public synchronized static void download(final Handler handler, final String url, final String path, final String filename, final Context context){
         isDownloading=true;
-        downloadId = PRDownloader.download(url,path,filename)
+        downloadId = PRDownloader.download(url, path, filename)
                 .build()
-                .setOnStartOrResumeListener(new OnStartOrResumeListener() {
-                    @Override
-                    public void onStartOrResume() {
-                        isDownloading=true;
-                    }
-                })
-                .setOnPauseListener(new OnPauseListener() {
-                    @Override
-                    public void onPause() {
+                .setOnStartOrResumeListener(() -> isDownloading = true)
+                .setOnPauseListener(() -> {
 
-                    }
                 })
                 .setOnProgressListener(new OnProgressListener() {
                     private boolean is=true;
@@ -413,17 +403,17 @@ public class WebUtil {
                 });
     }
 
-    public static String genearteFileName(){
-        Timestamp t=new Timestamp(new Date().getTime());
-        String time=t.toString();
-        time=time.replace(".","");
-        time=time.replace(" ","");
-        time=time.replace("-","");
-        time=time.replace(":","");
-        char [] arr = {'a','b','c','d','e'};
-        char rand = arr[index%5];
+    public static String generateFileName() {
+        Timestamp t = new Timestamp(new Date().getTime());
+        String time = t.toString();
+        time = time.replace(".", "");
+        time = time.replace(" ", "");
+        time = time.replace("-", "");
+        time = time.replace(":", "");
+        char[] arr = {'a', 'b', 'c', 'd', 'e'};
+        char rand = arr[index % 5];
         index++;
-        return time+rand+".mp4";
+        return time + rand + ".mp4";
     }
     public static Bitmap createVideoThumbnail(String filePath) {
         Bitmap bitmap = null;

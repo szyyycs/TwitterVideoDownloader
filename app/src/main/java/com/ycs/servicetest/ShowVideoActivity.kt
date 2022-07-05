@@ -4,7 +4,6 @@ import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Intent
-import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -67,7 +66,6 @@ class ShowVideoActivity : AppCompatActivity() {
     private fun initPlay() {
         detail_player.getVibrate(vibrator)
         PlayerFactory.setPlayManager(SystemPlayerManager::class.java)
-        detail_player.getVibrate(vibrator)
         detail_player.titleTextView.visibility = View.GONE
         detail_player.backButton.visibility = View.GONE
         orientationUtils = OrientationUtils(this, detail_player)
@@ -83,12 +81,11 @@ class ShowVideoActivity : AppCompatActivity() {
                 .setLooping(true) //.setUrl(url)
                 .setOnlyRotateLand(true) //.setRotateWithSystem(true)
                 .setCacheWithPlay(true)
-                .setVideoTitle("这里是一个竖直方向的视频")
                 .setSeekRatio(1f)
                 .setVideoAllCallBack(object : GSYSampleCallBack() {
                     override fun onPrepared(url: String, vararg objects: Any) {
                         super.onPrepared(url, *objects)
-                        orientationUtils!!.isEnable = detail_player.isRotateWithSystem()
+                        orientationUtils!!.isEnable = detail_player.isRotateWithSystem
                         isPlay = true
                     }
 
@@ -166,6 +163,7 @@ class ShowVideoActivity : AppCompatActivity() {
 
     private fun initData() {
         initViewModel()
+
         viewModel.startScan()
     }
     private fun initViewModel(){
@@ -206,6 +204,14 @@ class ShowVideoActivity : AppCompatActivity() {
         viewModel.num.observe(this) {
             scanNum.text = it.toString()
         }
+        viewModel.loadTweetNum.observe(this) {
+            if (viewModel.loadTweetNum.value == viewModel.tweetCountIndex) {
+                Log.d(TAG, "initViewModel: ")
+                Toast.makeText(this, "加载了${viewModel.tweetNum}条文案", Toast.LENGTH_SHORT).show()
+                viewModel.indexUploadTweet.value = -1
+                viewModel.isNull.value = false
+            }
+        }
         viewModel.index.observe(this) {
             Log.d(TAG, "index.observe:${it}")
             if (itemsList != null) {
@@ -244,7 +250,7 @@ class ShowVideoActivity : AppCompatActivity() {
     }
 
     private fun initView() {
-        supportActionBar!!.hide()
+        supportActionBar?.hide()
         setStatusBarColor()
         toScan.visibility = View.INVISIBLE
         scan.visibility = View.VISIBLE
@@ -319,8 +325,12 @@ class ShowVideoActivity : AppCompatActivity() {
     }
     private fun changList() {
         val i = resources.getDimensionPixelSize(R.dimen.dp_400)
+        //            layoutParams.width = 300;
+//            layoutParams.height = 200;
+        //layoutParams.gravity = Gravity.RIGHT;
+        val height = windowManager.defaultDisplay.height * 3 / 4
         val animatorSet = AnimatorSet()
-        val animator4 = ObjectAnimator.ofFloat(recyclerView, "translationY", resources.getDimensionPixelSize(R.dimen.dp_400).toFloat())
+        val animator4 = ObjectAnimator.ofFloat(recyclerView, "translationY", height.toFloat())
         animatorSet.play(animator4)
         animatorSet.setDuration(500).start()
         animatorSet.addListener(object : Animator.AnimatorListener {
@@ -329,9 +339,13 @@ class ShowVideoActivity : AppCompatActivity() {
                 hideStatusBar()
                 val params = recyclerView.layoutParams
                 val screenHeight = windowManager.defaultDisplay.height // 屏幕高（像素，如：800p）
-                params.height = screenHeight - i + resources.getDimensionPixelSize(R.dimen.dp_40)
+                params.height = screenHeight - height + resources.getDimensionPixelSize(R.dimen.dp_40)
                 recyclerView.layoutParams = params
+                val playerParam = detail_player.layoutParams
+                playerParam.height = height
+                detail_player.layoutParams = playerParam
                 detail_player.startPlay()
+
             }
 
             override fun onAnimationCancel(animation: Animator) {}
@@ -427,7 +441,7 @@ class ShowVideoActivity : AppCompatActivity() {
         }
         intent.putExtra("list", vm)
         intent.putExtra("i", position)
-        intent.setClass(this, tiktok::class.java)
+        intent.setClass(this, TiktokActivity::class.java)
         startActivity(intent)
     }
 
@@ -452,21 +466,19 @@ class ShowVideoActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (isPlay) {
-            detail_player.currentPlayer.release()
-        }
+        detail_player.currentPlayer.release()
         itemsList.clear()
         if (orientationUtils != null) orientationUtils!!.releaseListener()
         viewModel.viewModelScope.cancel()
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        //如果旋转了就全屏
-        if (isPlay && !isPause) {
-            detail_player.onConfigurationChanged(this, newConfig, orientationUtils, true, true)
-        }
-    }
+//    override fun onConfigurationChanged(newConfig: Configuration) {
+//        super.onConfigurationChanged(newConfig)
+//        //如果旋转了就全屏
+//        if (isPlay && !isPause) {
+//            detail_player.onConfigurationChanged(this, newConfig, orientationUtils, true, true)
+//        }
+//    }
 
     override fun onBackPressed() {
         if (orientationUtils != null) {
@@ -478,7 +490,7 @@ class ShowVideoActivity : AppCompatActivity() {
         }
         if (canChange) {
             if (isPlay) {
-                detail_player.getCurrentPlayer().release()
+                detail_player.currentPlayer.release()
                 isPlay = false
             }
             reChangeList()
