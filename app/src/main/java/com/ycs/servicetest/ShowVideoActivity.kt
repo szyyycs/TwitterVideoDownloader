@@ -171,7 +171,6 @@ class ShowVideoActivity : AppCompatActivity() {
             if (it == null) {
                 return@observe
             }
-            Log.d(TAG, "itemsList.observe: ${it}")
             if (it.size == 0) {
                 viewModel.isNull.value=true
                 viewModel.isScaning.value=false
@@ -206,14 +205,12 @@ class ShowVideoActivity : AppCompatActivity() {
         }
         viewModel.loadTweetNum.observe(this) {
             if (viewModel.loadTweetNum.value == viewModel.tweetCountIndex) {
-                Log.d(TAG, "initViewModel: ")
                 Toast.makeText(this, "加载了${viewModel.tweetNum}条文案", Toast.LENGTH_SHORT).show()
                 viewModel.indexUploadTweet.value = -1
                 viewModel.isNull.value = false
             }
         }
         viewModel.index.observe(this) {
-            Log.d(TAG, "index.observe:${it}")
             if (itemsList != null) {
                 itemsList[it].video_len = viewModel.len
                 adapter.updateOnepic(it)
@@ -430,7 +427,8 @@ class ShowVideoActivity : AppCompatActivity() {
         val vm = ArrayList<VideoModel?>()
         for (ii in itemsList) {
             val vvv = VideoModel()
-            vvv.setUrl(ii.url)
+            vvv.url = ii.url
+            vvv.tweet = ii.twittertext
             vm.add(vvv)
         }
         if(!isOrder){

@@ -169,7 +169,6 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
             GlobalScope.launch(Dispatchers.Main) { //启动一个协程，运行在主线程
                 Toast.makeText(context, "共找到${num.value}个视频", Toast.LENGTH_SHORT).show()
                 isNull.value = false
-                Log.d("yyy", "response:${response} ")
                 itemsList.value = response
                 isScaning.value = false
                 loadVideoDuration()
@@ -181,7 +180,6 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
 
     override fun onCleared() {
         super.onCleared()
-        // Log.d("yyy", "onCleared: ${kv_text.decodeInt("len", 0)}")
         viewModelScope.cancel()
     }
 
@@ -193,7 +191,6 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                     for (i in list.indices) {
                         if (list != null && list.size != 0) {
                             len = loadVideoLen(list[i]?.url)
-                            //Log.d("yyy", "loadVideoDuration:len$len ")
                             if (list.isEmpty()) {
                                 return@async null
                             }
@@ -208,7 +205,6 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                 list
             }
             val result = updateIndex.await()
-            // Log.d("yyy", "result: $result")
             viewModelScope.launch(Dispatchers.Main) { //启动一个协程，运行在主线程
                 result?.let {
                     itemsList.value = result
@@ -229,7 +225,6 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
     @Synchronized
     private fun handleTwitterList(list: List<TwitterText>) {
         kv_text.encode("len", list.size + kv.decodeInt("len", 0))
-        Log.d("yyy", "len${list.size}")
         for (tt in list.indices) {
             kv_text.encode(list[tt].filename, WebUtil.reverse(list[tt].text))
             tweet = list[tt].text
@@ -239,7 +234,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 
-    private fun queryFindList(query: BmobQuery<TwitterText>, skip: Int) {
+    private fun queryFindList(skip: Int) {
         val query = BmobQuery<TwitterText>()
         query.order("createdAt")
                 .setLimit(500)
@@ -247,7 +242,6 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                 .findObjects(object : FindListener<TwitterText>() {
                     override fun done(list: MutableList<TwitterText>?, e: BmobException?) {
                         if (e == null && list != null) {
-                            Log.d("yyy", "skip done: ${list.size}")
                             handleTwitterList(list)
                         }
                     }
@@ -261,11 +255,10 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                     override fun done(p0: Int?, p1: BmobException?) {
                         if (p0 != null) {
                             tweetNum = p0;
-                            Log.d("yyy", "done:${p0} ")
                             tweetCountIndex = p0?.div(500) + 1
                             var num = 0
                             while (num < tweetCountIndex) {
-                                queryFindList(query, num)
+                                queryFindList(num)
                                 num++
                             }
                         }

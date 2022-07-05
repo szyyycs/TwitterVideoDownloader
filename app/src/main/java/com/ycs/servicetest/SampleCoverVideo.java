@@ -2,10 +2,7 @@ package com.ycs.servicetest;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Point;
-import android.media.ThumbnailUtils;
-import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -30,16 +27,8 @@ import tv.danmaku.ijk.media.exo2.Exo2PlayerManager;
 
 public class SampleCoverVideo extends StandardGSYVideoPlayer {
     ImageView mCoverImage;
-
-    String mCoverOriginUrl;
-
+    TextView tweetTv;
     TextView speedTv;
-//    ProgressBar pb_bottom;
-
-    int mCoverOriginId = 0;
-
-    int mDefaultRes;
-
     public SampleCoverVideo(Context context, Boolean fullFlag) {
         super(context, fullFlag);
     }
@@ -56,38 +45,11 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
     protected void init(Context context) {
         super.init(context);
         mCoverImage = (ImageView) findViewById(R.id.thumbImage);
+        tweetTv = findViewById(R.id.text);
         // PlayerFactory.setPlayManager(SystemPlayerManager.class);
         PlayerFactory.setPlayManager(Exo2PlayerManager.class);//EXO模式
         //PlayerFactory.setPlayManager(IjkPlayerManager.class);//ijk模式
         speedTv = findViewById(R.id.speed_tv);
-//        pb_bottom=findViewById(R.id.bottom_progressbar);
-//        pb_bottom.setOnTouchListener((v, event) -> {
-//            switch (event.getAction()) {
-//                case MotionEvent.ACTION_DOWN:
-//                    setViewShowState(mBottomContainer, VISIBLE);
-//                    setViewShowState(mStartButton, INVISIBLE);
-//                    cancelDismissControlViewTimer();
-//                case MotionEvent.ACTION_MOVE:
-//                    cancelProgressTimer();
-//                    ViewParent vpdown = getParent();
-//                    while (vpdown != null) {
-//                        vpdown.requestDisallowInterceptTouchEvent(true);
-//                        vpdown = vpdown.getParent();
-//                    }
-//                    break;
-//                case MotionEvent.ACTION_UP:
-//                    startDismissControlViewTimer();
-//                    startProgressTimer();
-//                    ViewParent vpup = getParent();
-//                    while (vpup != null) {
-//                        vpup.requestDisallowInterceptTouchEvent(false);
-//                        vpup = vpup.getParent();
-//                    }
-//                    mBrightnessData = -1f;
-//                    break;
-//            }
-//            return false;
-//        });
         if (mThumbImageViewLayout != null &&
                 (mCurrentState == -1 || mCurrentState == CURRENT_STATE_NORMAL || mCurrentState == CURRENT_STATE_ERROR)) {
             mThumbImageViewLayout.setVisibility(VISIBLE);
@@ -97,31 +59,6 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
     @Override
     public int getLayoutId() {
         return R.layout.video_layout_cover;
-    }
-
-    public void loadCoverImage(String url, int res) {
-        mCoverOriginUrl = url;
-        mDefaultRes = res;
-        Bitmap b = ThumbnailUtils.createVideoThumbnail(url, MediaStore.Images.Thumbnails.MINI_KIND);
-        mCoverImage.setImageBitmap(b);
-    }
-
-    public void loadCoverImageBy(int id, int res) {
-        mCoverOriginId = id;
-        mDefaultRes = res;
-        mCoverImage.setImageResource(id);
-    }
-
-    @Override
-    public GSYBaseVideoPlayer startWindowFullscreen(Context context, boolean actionBar, boolean statusBar) {
-        GSYBaseVideoPlayer gsyBaseVideoPlayer = super.startWindowFullscreen(context, actionBar, statusBar);
-        SampleCoverVideo sampleCoverVideo = (SampleCoverVideo) gsyBaseVideoPlayer;
-        if(mCoverOriginUrl != null) {
-            sampleCoverVideo.loadCoverImage(mCoverOriginUrl, mDefaultRes);
-        } else  if(mCoverOriginId != 0) {
-            sampleCoverVideo.loadCoverImageBy(mCoverOriginId, mDefaultRes);
-        }
-        return gsyBaseVideoPlayer;
     }
 
 
@@ -254,6 +191,7 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
         setViewShowState(mLoadingProgressBar, INVISIBLE);
         setViewShowState(mThumbImageViewLayout, INVISIBLE);
         setViewShowState(mBottomProgressBar, VISIBLE);
+        setViewShowState(tweetTv, VISIBLE);
         setViewShowState(mLockScreen, (mIfCurrentIsFullscreen && mNeedLockFull) ? VISIBLE : GONE);
         if (mLoadingProgressBar instanceof ENDownloadView) {
             ((ENDownloadView) mLoadingProgressBar).reset();
@@ -263,10 +201,6 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
 
     @Override
     protected void onClickUiToggle() {
-//        if (mIfCurrentIsFullscreen && mLockCurScreen && mNeedLockFull) {
-//            setViewShowState(mLockScreen, VISIBLE);
-//            return;
-//        }
         if (mCurrentState == CURRENT_STATE_PREPAREING) {
             if (mBottomContainer != null) {
                 if (mBottomContainer.getVisibility() == View.VISIBLE) {
@@ -325,6 +259,7 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
         setViewShowState(mLoadingProgressBar, INVISIBLE);
         setViewShowState(mThumbImageViewLayout, INVISIBLE);
         setViewShowState(mBottomProgressBar, INVISIBLE);
+        setViewShowState(tweetTv, INVISIBLE);
         setViewShowState(mLockScreen, (mIfCurrentIsFullscreen && mNeedLockFull) ? VISIBLE : GONE);
 
         if (mLoadingProgressBar instanceof ENDownloadView) {
@@ -350,7 +285,7 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
 
     protected void changeUiToPlayingPause() {
         Debuger.printfLog("changeUiToPlayingShow");
-
+        setViewShowState(tweetTv, INVISIBLE);
         setViewShowState(mTopContainer, VISIBLE);
         setViewShowState(mBottomContainer, VISIBLE);
         setViewShowState(mStartButton, VISIBLE);
@@ -372,7 +307,7 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
         setViewShowState(mTopContainer, VISIBLE);
         setViewShowState(mBottomContainer, INVISIBLE);
         setViewShowState(mStartButton, INVISIBLE);
-
+        setViewShowState(tweetTv, VISIBLE);
         setViewShowState(mLoadingProgressBar, INVISIBLE);
         setViewShowState(mThumbImageViewLayout, VISIBLE);
         setViewShowState(mBottomProgressBar, INVISIBLE);
@@ -435,6 +370,7 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
         setViewShowState(mBottomContainer, INVISIBLE);
         setViewShowState(mStartButton, INVISIBLE);
         setViewShowState(mLoadingProgressBar, INVISIBLE);
+        setViewShowState(tweetTv, VISIBLE);
     }
 
     @Override
@@ -444,6 +380,7 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
         if (!byStartedClick) {
             setViewShowState(mBottomContainer, INVISIBLE);
             setViewShowState(mStartButton, INVISIBLE);
+            setViewShowState(tweetTv, VISIBLE);
         }
     }
 
@@ -463,7 +400,7 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
         Debuger.printfLog("Sample startAfterPrepared");
         setViewShowState(mBottomContainer, INVISIBLE);
         setViewShowState(mStartButton, INVISIBLE);
-
+        setViewShowState(tweetTv, VISIBLE);
         setViewShowState(mBottomProgressBar, VISIBLE);
     }
 
@@ -526,5 +463,13 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
     public void onStartTrackingTouch(SeekBar seekBar) {
         byStartedClick = true;
         super.onStartTrackingTouch(seekBar);
+    }
+
+    public String getTweetText() {
+        return tweetTv.getText().toString();
+    }
+
+    public void setTweetTv(String text) {
+        tweetTv.setText(text);
     }
 }

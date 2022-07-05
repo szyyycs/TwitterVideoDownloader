@@ -57,7 +57,6 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder {
                         public void onPrepared(String url, Object... objects) {
                             super.onPrepared(url, objects);
                             imageView = null;
-                            Log.e(TAG, "image=null");
                             if (!gsyVideoPlayer.isIfCurrentIsFullscreen()) {
                                 //非静音
                                 GSYVideoManager.instance().setNeedMute(false);
@@ -79,6 +78,10 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder {
                     })
                     .build(gsyVideoPlayer);
             gsyVideoPlayer.setUp(vm.getUrl(), false, "");
+            if (vm.getTweet() != null) {
+                gsyVideoPlayer.setTweetTv(vm.getTweet());
+            }
+
         }
 
     /**

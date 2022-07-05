@@ -16,14 +16,13 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="2.0×"
+        android:text="2.0倍速中"
+        android:padding="10dp"
         android:textColor="#fff"
         android:textSize="25sp"
         android:id="@+id/speed_tv"
         android:visibility="gone"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="45dp"
-        android:layout_marginLeft="30dp" />
+        android:layout_above="@+id/text" />
 
     <RelativeLayout
 
@@ -44,11 +43,22 @@
             android:scaleType="centerCrop"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"
-            />
+            android:visibility="gone" />
 
 
     </RelativeLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/text"
+        android:textColor="#ffff"
+        android:padding="10dp"
+        android:visibility="invisible"
+        android:text=""
+
+        />
 
     <LinearLayout
         android:id="@+id/layout_bottom"

@@ -128,11 +128,9 @@ public class MainService extends Service {
                         if(isDownloading|| WebUtil.isAnalyse){
                             if(!analyzeList.contains(msg)){
                                 WebUtil.analyzeList.add(msg);
-                                Log.e("yyy", "analyzeList的值："+analyzeList.toString() );
                                 Toast.makeText(MainService.this, "已加入下载列表", Toast.LENGTH_SHORT).show();
                             }else{
                                 Toast.makeText(MainService.this, "已在下载队列中", Toast.LENGTH_SHORT).show();
-                                Log.e("yyy", "analyzeList的值："+analyzeList.toString() );
                                 //它熹了推娘娘！
                             }
                             return;
