@@ -7,7 +7,6 @@ import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.shuyu.gsyvideoplayer.GSYVideoManager
@@ -35,7 +34,7 @@ class TiktokActivity : AppCompatActivity() {
         // view_pager2.setOffscreenPageLimit(1)
         view_pager2.setOrientation(ViewPager2.ORIENTATION_VERTICAL)
         view_pager2.setAdapter(viewPagerAdapter)
-        setSupportsChangeAnimations(view_pager2, false)
+
         view_pager2.registerOnPageChangeCallback(object : OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
@@ -60,6 +59,7 @@ class TiktokActivity : AppCompatActivity() {
                 super.onPageScrollStateChanged(state)
             }
         })
+
         view_pager2.post(Runnable {
             playPosition(0)
             Log.d("kadun", "playPosition(0)")
@@ -89,18 +89,18 @@ class TiktokActivity : AppCompatActivity() {
         GSYVideoManager.releaseAllVideos()
     }
 
-    private fun setSupportsChangeAnimations(viewPager: ViewPager2?, enable: Boolean) {
-        for (i in 0 until viewPager!!.childCount) {
-            val view = viewPager.getChildAt(i)
-            if (view is RecyclerView) {
-                val animator = view.itemAnimator
-                if (animator != null) {
-                    (animator as SimpleItemAnimator).supportsChangeAnimations = enable
-                }
-                break
-            }
-        }
-    }
+//    private fun setSupportsChangeAnimations(viewPager: ViewPager2?, enable: Boolean) {
+//        for (i in 0 until viewPager!!.childCount) {
+//            val view = viewPager.getChildAt(i)
+//            if (view is RecyclerView) {
+//                val animator = view.itemAnimator
+//                if (animator != null) {
+//                    (animator as SimpleItemAnimator).supportsChangeAnimations = enable
+//                }
+//                break
+//            }
+//        }
+//    }
 
     private fun resolveData() {
         if (viewPagerAdapter != null) viewPagerAdapter!!.notifyDataSetChanged()

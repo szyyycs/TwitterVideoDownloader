@@ -1,11 +1,13 @@
 package com.ycs.servicetest;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.media.ThumbnailUtils;
 import android.provider.MediaStore;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
@@ -198,7 +200,9 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
         super.touchSurfaceUp();
         getCurrentPlayer().setSpeedPlaying(1f, true);
         startDismissControlViewTimer();
+        dismissProgressDialog();
         speedTv.setVisibility(GONE);
+
     }
 
     @Override
@@ -461,6 +465,61 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
         setViewShowState(mStartButton, INVISIBLE);
 
         setViewShowState(mBottomProgressBar, VISIBLE);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        float x = event.getX();
+        float y = event.getY();
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN: {
+                mDownX = x;
+                mDownY = y;
+                // 禁止parent拦截down事件
+                getParent().requestDisallowInterceptTouchEvent(true);
+                break;
+            }
+            case MotionEvent.ACTION_MOVE: {
+                float deltaX = x - mDownX;
+                float deltaY = y - mDownY;
+                float absDeltaX = Math.abs(deltaX);
+                float absDeltaY = Math.abs(deltaY);
+                if (absDeltaY > 2 * absDeltaX) { // 根据需求条件来决定是否让Parent View拦截事件。
+                    getParent().requestDisallowInterceptTouchEvent(false);//上滑
+                    Log.d("yyyy", "dispatchTouchEvent: false");
+                } else {
+                    getParent().requestDisallowInterceptTouchEvent(true);//左右
+                    Log.d("yyyy", "dispatchTouchEvent: true");
+                }
+                break;
+            }
+            case MotionEvent.ACTION_UP: {
+                dismissProgressDialog();
+                break;
+            }
+            default:
+                break;
+        }
+        return super.dispatchTouchEvent(event);
+    }
+
+    @Override
+    protected void touchSurfaceMove(float deltaX, float deltaY, float y) {
+        int curWidth = 0;
+        int curHeight = 0;
+        if (getActivityContext() != null) {
+            curWidth = CommonUtil.getCurrentScreenLand((Activity) getActivityContext()) ? mScreenHeight : mScreenWidth;
+            curHeight = CommonUtil.getCurrentScreenLand((Activity) getActivityContext()) ? mScreenWidth : mScreenHeight;
+        }
+        if (mChangePosition) {
+            int totalTimeDuration = getDuration();
+            mSeekTimePosition = (int) (mDownPosition + (deltaX * totalTimeDuration / curWidth) / mSeekRatio);
+            if (mSeekTimePosition > totalTimeDuration)
+                mSeekTimePosition = totalTimeDuration;
+            String seekTime = CommonUtil.stringForTime(mSeekTimePosition);
+            String totalTime = CommonUtil.stringForTime(totalTimeDuration);
+            showProgressDialog(deltaX, seekTime, mSeekTimePosition, totalTime, totalTimeDuration);
+        }
     }
 
     @Override

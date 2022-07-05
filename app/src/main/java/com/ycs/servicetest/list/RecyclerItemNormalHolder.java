@@ -45,7 +45,7 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder {
                         .into(imageView);
             }
             gsyVideoOptionBuilder
-                    .setIsTouchWiget(false)
+                    //.setIsTouchWiget(false)
                     .setThumbImageView(imageView)
                     .setCacheWithPlay(true)
                     .setPlayTag(TAG)
