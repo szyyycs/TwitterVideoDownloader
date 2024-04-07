@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -47,9 +48,10 @@ import com.ycs.servicetest.utils.IosAlertDialog;
 import com.ycs.servicetest.utils.WebUtil;
 
 import java.util.Calendar;
+import java.util.Objects;
 
 import cn.bmob.v3.Bmob;
-import io.flutter.embedding.android.FlutterActivity;
+//import io.flutter.embedding.android.FlutterActivity;
 
 import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
@@ -70,22 +72,20 @@ public class MainActivity extends AppCompatActivity {
     final static String TAG = "yyy";
     final static int GOTO_DOWNLOAD = 1;
 
-    private RelativeLayout floatWindow;
     private Button btn;
-    private Context context;
     private EditText etInput;
     private Boolean isFloatWindowsshow = false;
-    private String[] permissions = {SYSTEM_ALERT_WINDOW,
+    private final String[] permissions = {SYSTEM_ALERT_WINDOW,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE};
-    private String[] xpermissions = {
+    private final String[] xpermissions = {
             SYSTEM_ALERT_WINDOW,
             MANAGE_EXTERNAL_STORAGE
     };
     private ImageView iv;
     private Vibrator vibrator;
     //跳到下载
-    private Handler handler = new Handler() {
+    private final Handler handler = new Handler(Looper.myLooper()) {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == GOTO_DOWNLOAD) {
@@ -106,10 +106,11 @@ public class MainActivity extends AppCompatActivity {
         d.show();
         handler.postDelayed(() -> runOnUiThread(() -> d.setAni(R.mipmap.two)),1000);
         handler.postDelayed(() -> runOnUiThread(() -> d.setAni(R.mipmap.one)),2000);
-        handler.postDelayed(() -> startActivity(
-                FlutterActivity.createDefaultIntent(context)
-        ),3000);
-        handler.postDelayed(() -> d.dismiss(),4000);
+//        handler.postDelayed(() -> startActivity(
+//                //FlutterActivity.createDefaultIntent(context)
+//                Toast.makeText(MainActivity.this,"wqe",Toast.LENGTH_SHORT).show()
+//        ),3000);
+        handler.postDelayed(d::dismiss,4000);
 
     }
     //检查时间
@@ -127,11 +128,11 @@ public class MainActivity extends AppCompatActivity {
             String val=kv.decodeString(key);
             Log.d(TAG, val);
             String[] vals=val.split("\\.");
-            int month_saved=Integer.valueOf(vals[0]);
-            int day_saved=Integer.valueOf(vals[1]);
+            int month_saved=Integer.parseInt(vals[0]);
+            int day_saved=Integer.parseInt(vals[1]);
            // Log.d(TAG, "checkTime: "+month_saved+":"+day_saved);
             if(month==month_saved&&day==day_saved){
-                handler.postDelayed(() -> showDialog(),2000);
+                handler.postDelayed(this::showDialog,2000);
                 return;
             }
         }
@@ -143,12 +144,12 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
         //CrashReport.initCrashReport(getApplicationContext(), "b0a053b5dd", true);
-        context=getApplicationContext();
+
         Beta.upgradeDialogLayoutId= R.layout.layout_upgrade;
         Bugly.init(getApplicationContext(), "b0a053b5dd", false);
         MMKV.initialize(this);
         Bmob.initialize(this, "2d24c857824e0609dd2e185bf5378acc");
-        getSupportActionBar().hide();
+        Objects.requireNonNull(getSupportActionBar()).hide();
         checkTime();
         Window window = getWindow();
         window.setStatusBarColor(ContextCompat.getColor(this,R.color.colorIosBlue));
@@ -232,11 +233,10 @@ public class MainActivity extends AppCompatActivity {
 //
 //    }
     public void initView() {
-        TextView tv = findViewById(R.id.btn);
         iv = findViewById(R.id.download);
         btn = findViewById(R.id.confirm);
         etInput = findViewById(R.id.input);
-        floatWindow = findViewById(R.id.floatWindow);
+
         iv.setOnClickListener(v -> {
             Intent i = new Intent(MainActivity.this, ShowVideoActivity.class);
             startActivity(i);
@@ -318,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
                         if(!dialog.getEditText().isEmpty()){
                             SharedPreferences.Editor e=ssp.edit();
                             e.putString("url",Environment.getExternalStorageDirectory() +"/"+dialog.getEditText()+"/");
-                            e.commit();
+                            e.apply();
                         }
 
                     })
@@ -340,7 +340,7 @@ public class MainActivity extends AppCompatActivity {
     public void checkPermission(){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
             if (Environment.isExternalStorageManager()) {
-                //Toast.makeText(MainActivity.this, "已获得所有权限", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "已获得所有权限", Toast.LENGTH_SHORT).show();
             } else {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
                 intent.setData(Uri.parse("package:" + getPackageName()));
@@ -355,7 +355,7 @@ public class MainActivity extends AppCompatActivity {
                 try{
                     startService(i);
                     isFloatWindowsshow=true;
-                }catch (Exception e){
+                }catch (Exception ignored){
 
                 }
 
@@ -368,16 +368,14 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         Log.e(TAG, "onActivityResult: 一次" );
         if (requestCode == 0) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (!Settings.canDrawOverlays(this)) {
-                    Toast.makeText(this, "授权失败，请重新授权", Toast.LENGTH_SHORT).show();
-                    getPermission();
-                } else {
-                    Toast.makeText(this, "授权成功", Toast.LENGTH_SHORT).show();
-                    isFloatWindowsshow = false;
-                    showFloatWindows();
-                    //startService(new Intent(MainActivity.this, MainService.class));
-                }
+            if (!Settings.canDrawOverlays(this)) {
+                Toast.makeText(this, "授权失败，请重新授权", Toast.LENGTH_SHORT).show();
+                getPermission();
+            } else {
+                Toast.makeText(this, "授权成功", Toast.LENGTH_SHORT).show();
+                isFloatWindowsshow = false;
+                showFloatWindows();
+                //startService(new Intent(MainActivity.this, MainService.class));
             }
         }else if(requestCode==REQUEST_CODE){
             if (Environment.isExternalStorageManager()) {
@@ -397,14 +395,12 @@ public class MainActivity extends AppCompatActivity {
         if(requestCode==111){
             Log.e("yyy","获取权限返回");
             //Toast.makeText(this, "yyy", Toast.LENGTH_SHORT).show();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (ContextCompat.checkSelfPermission(this,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        != PackageManager.PERMISSION_GRANTED)
-                {
-                    Toast.makeText(this, "未允许权限，同意后才可以使用本APP", Toast.LENGTH_SHORT).show();
-                    ActivityCompat.requestPermissions(this, permissions,111);
-                }
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED)
+            {
+                Toast.makeText(this, "未允许权限，同意后才可以使用本APP", Toast.LENGTH_SHORT).show();
+                ActivityCompat.requestPermissions(this, permissions,111);
             }
         }
     }
@@ -436,34 +432,32 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getPermission(){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                if (!Settings.canDrawOverlays(this)) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (!Settings.canDrawOverlays(this)) {
 //                Toast.makeText(this, "请允许悬浮窗权限", Toast.LENGTH_SHORT);
-                    new IosAlertDialog(this)
-                            .builder()
-                            .setCancelable(false)
-                            .setCanceledOnTouchOutside(false)
-                            .setTitle("前往获取悬浮窗权限")
-                            .setMsg("请在应用列表中找到VideoDownload，并允许显示在其他应用上层")
-                            .setPositiveButton("立即跳转", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                            Uri.parse("package:" + getPackageName())), 0);
-                                }
-                            })
+                new IosAlertDialog(this)
+                        .builder()
+                        .setCancelable(false)
+                        .setCanceledOnTouchOutside(false)
+                        .setTitle("前往获取悬浮窗权限")
+                        .setMsg("请在应用列表中找到VideoDownload，并允许显示在其他应用上层")
+                        .setPositiveButton("立即跳转", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                        Uri.parse("package:" + getPackageName())), 0);
+                            }
+                        })
 
-                            .show();
+                        .show();
 
-                }
             }
+        }
 
-            if (ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, permissions, 111);
-            }
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, permissions, 111);
         }
     }
 }
