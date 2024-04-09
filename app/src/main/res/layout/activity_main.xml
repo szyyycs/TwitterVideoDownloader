@@ -4,58 +4,59 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
-<RelativeLayout
-    android:id="@+id/floatWindow"
-    android:layout_width="match_parent"
-    android:layout_height="50dp"
-    android:layout_centerHorizontal="true"
-    android:background="@color/colorIosBlue"
 
-    >
-<ImageView
-    android:id="@+id/download"
-    android:layout_width="40dp"
-    android:layout_height="40dp"
-    android:src="@mipmap/download"
-    android:layout_alignParentRight="true"
-    android:layout_centerVertical="true"
-    android:background="?selectableItemBackgroundBorderless"
-    android:layout_marginRight="10dp"
-    />
+    <RelativeLayout
+        android:id="@+id/floatWindow"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_centerHorizontal="true"
+        android:background="@color/colorIosBlue"
+
+        >
+
+        <ImageView
+            android:id="@+id/download"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:src="@mipmap/download" />
 
 
-</RelativeLayout>
+    </RelativeLayout>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        >
+        android:layout_centerInParent="true">
 
         <EditText
             android:id="@+id/input"
             android:layout_width="match_parent"
-            android:layout_marginLeft="@dimen/dp_50"
             android:layout_height="@dimen/dp_80"
-            android:hint="在这粘贴链接"
-            android:gravity="left"
-            android:textCursorDrawable="@drawable/edittext_shape"
-            android:background="@drawable/shape_ddd"
-            android:textColorLink="@color/colorBlue"
             android:layout_centerHorizontal="true"
-            />
-        <Button
-            android:layout_width="match_parent"
             android:layout_marginLeft="@dimen/dp_50"
+            android:background="@drawable/shape_ddd"
+            android:gravity="left"
+            android:hint="在这粘贴链接"
+            android:textColorLink="@color/colorBlue"
+            android:textCursorDrawable="@drawable/edittext_shape" />
+
+        <Button
+            android:id="@+id/confirm"
+            android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_below="@+id/input"
-            android:text="粘贴"
-            android:textColor="#fff"
-            android:id="@+id/confirm"
-            android:textSize="23sp"
-            android:textStyle="bold"
             android:layout_centerHorizontal="true"
+            android:layout_marginLeft="@dimen/dp_50"
             android:layout_marginTop="@dimen/dp_10"
             android:background="@drawable/btn_ripple"
+            android:text="粘贴"
+            android:textColor="#fff"
+            android:textSize="23sp"
+            android:textStyle="bold"
 
             />
 
@@ -63,18 +64,25 @@
     </RelativeLayout>
 
     <TextView
+        android:id="@+id/btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/dp_30"
+        android:gravity="center"
         android:maxWidth="@dimen/dp_300"
-        android:visibility="invisible"
         android:text="Android10以下版本可自动识别剪切板内容，以上则需手动输入网址下载"
         android:textColor="#aaa"
-        android:id="@+id/btn"
-        android:gravity="center"
         android:textSize="20sp"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="@dimen/dp_30"
-        />
+        android:visibility="invisible" />
+
+<!--    <WebView-->
+<!--        android:id="@+id/webview"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="@dimen/dp_10"-->
+<!--        android:layout_alignParentBottom="true"-->
+
+<!--        />-->
 
 </RelativeLayout>
