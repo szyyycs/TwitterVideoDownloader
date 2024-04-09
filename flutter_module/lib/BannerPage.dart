@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_interactional_widget/flutter_interactional_widget.dart';
 
 class BannerPage extends StatefulWidget {
+  const BannerPage({super.key});
+
   @override
   _BannerPageState createState() => _BannerPageState();
 }
@@ -14,32 +16,40 @@ class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin {
   late AnimationController controller;
 
   late String src;
-  AudioPlayer audioPlayer = AudioPlayer();
+  final audioPlayer = AudioPlayer();
+  //late AudioCache audioCache;
 
-  late AudioCache audioCache;
-
+  @override
   initState() {
     super.initState();
-    audioCache = audioPlayer.audioCache;
     src = "play";
+    //audioCache = AudioCache(fixedPlayer: audioPlayer);
     controller = AnimationController(
         duration: const Duration(milliseconds: 4000), vsync: this);
     animation = Tween(begin: 0.0, end: 1.0).animate(controller);
     controller.repeat();
-    play();
+    // audioPlayer.setReleaseMode(ReleaseMode.release);
+    // audioPlayer.play(AssetSource('happy.mp3'));
+    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) async{
+    //   // await audioPlayer.setSource(AssetSource('happy.mp3'));
+    //   // await audioPlayer.resume();
+    //   await
+    // });
+    audioPlayer.play(AssetSource('assets/happy.mp3'));
   }
 
   @override
   void dispose() {
-    audioCache.clearAll();
-    audioPlayer.stop();
+   // audioCache.clearAll();
     audioPlayer.dispose();
     controller.dispose();
     super.dispose();
   }
 
-  void play() {
-    audioCache.load('happy.mp3');
+  void play(){
+
+    audioPlayer.resume();
+    //audioCache.loop('happy.mp3');
   }
 
   void pause() {
@@ -50,7 +60,6 @@ class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        // print("dispose");
         dispose();
         return true;
       },
@@ -79,7 +88,6 @@ class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin {
                           src = "pause";
                         });
                       }
-                      // Fluttertoast.showToast(msg:"111");
                     },
                     child: RotationTransition(
                       turns: animation,
@@ -105,25 +113,25 @@ class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin {
       middleScale: 1,
       foregroundScale: 1.1,
       backgroundScale: 1.2,
-      backgroundWidget: backgroundWiget(),
-      foregroundWidget: foregroundWiget(),
-      middleWidget: middleWiget(),
+      backgroundWidget: backgroundWidget(),
+      foregroundWidget: foregroundWidget(),
+      middleWidget: middleWidget(),
     );
   }
 
-  Widget backgroundWiget() {
+  Widget backgroundWidget() {
     return Container(
       child: getImage('background.png'),
     );
   }
 
-  Widget foregroundWiget() {
+  Widget foregroundWidget() {
     return Container(
       child: getImage('foreground.png'),
     );
   }
 
-  Widget middleWiget() {
+  Widget middleWidget() {
     return Container(
       child: getImage('middle.png'),
     );
