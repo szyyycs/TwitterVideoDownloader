@@ -402,7 +402,7 @@ object WebUtil {
                         TAG,
                         "下载失败！错误信息为连接错误：" + error.isConnectionError + "服务错误：" + error.isServerError
                     )
-                    showInformationToUser("下载失败！$error")
+                    showInformationToUser("下载失败！连接错误：${error.isConnectionError};服务错误：${error.isServerError}")
                     DownLoadWindowService.recover()
                     if (downloadMap.containsKey(url)) {
                         downloadMap.remove(url)
