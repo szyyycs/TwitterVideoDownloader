@@ -1,5 +1,5 @@
 name: flutter_module
-description: A new Flutter module.
+description: "A new Flutter module project."
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -18,23 +18,24 @@ description: A new Flutter module.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: '>=3.2.6 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  nayuta_sensors: "^1.0.0"
-  flutter_interactional_widget: 1.0.0
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
-  audioplayers: ^0.20.1
-  fluttertoast: ^3.1.3
+  audioplayers: ^3.0.1
+  sensors_plus: "^2.0.5"
+  flutter_interactional_widget:
+    path: flutter_interactional_widget-1.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^1.0.0
+  flutter_lints: ^2.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -44,6 +45,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  plugin:
+    androidPackage: 'io.flutter.plugins.flutter_plugin'
+
   assets:
     - assets/
   # To add Flutter specific assets to your application, add an assets section,
@@ -53,7 +57,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
-  # https://flutter.dev/assets-and-images/#resolution-aware.
+  # https://flutter.dev/assets-and-images/#resolution-aware
 
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/assets-and-images/#from-packages

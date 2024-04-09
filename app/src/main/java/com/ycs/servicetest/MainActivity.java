@@ -28,7 +28,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
-import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -45,9 +44,6 @@ import com.app.hubert.guide.listener.OnGuideChangedListener;
 import com.app.hubert.guide.listener.OnPageChangedListener;
 import com.app.hubert.guide.model.GuidePage;
 import com.app.hubert.guide.model.HighLight;
-import com.downloader.PRDownloader;
-import com.tencent.bugly.Bugly;
-import com.tencent.bugly.beta.Beta;
 import com.tencent.mmkv.MMKV;
 import com.ycs.servicetest.utils.ClipBoardUtil;
 import com.ycs.servicetest.utils.ImageDialog;
@@ -57,14 +53,13 @@ import com.ycs.servicetest.utils.WebUtil;
 import java.util.Calendar;
 import java.util.Objects;
 
-import cn.bmob.v3.Bmob;
+import io.flutter.embedding.android.FlutterActivity;
 
 //import com.hjq.permissions.OnPermissionCallback;
 //import com.hjq.permissions.Permission;
 //import com.hjq.permissions.XXPermissions;
 
-//import io.flutter.embedding.android.FlutterActivity;
-//import io.flutter.embedding.android.FlutterView;
+
 
 public class MainActivity extends AppCompatActivity {
     final static String TAG = "yyy";
@@ -81,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
             SYSTEM_ALERT_WINDOW,
             MANAGE_EXTERNAL_STORAGE
     };
-    private ImageView iv;
+    private ImageView ivDownloadFile;
     private Vibrator vibrator;
     //跳到下载
     private final Handler handler = new Handler(Looper.myLooper()) {
@@ -106,10 +101,9 @@ public class MainActivity extends AppCompatActivity {
         d.show();
         handler.postDelayed(() -> runOnUiThread(() -> d.setAni(R.mipmap.two)), 1000);
         handler.postDelayed(() -> runOnUiThread(() -> d.setAni(R.mipmap.one)), 2000);
-//        handler.postDelayed(() -> startActivity(
-//                //FlutterActivity.createDefaultIntent(context)
-//                Toast.makeText(MainActivity.this,"wqe",Toast.LENGTH_SHORT).show()
-//        ),3000);
+        handler.postDelayed(() -> startActivity(
+                FlutterActivity.createDefaultIntent(Objects.requireNonNull(MainApplication.Companion.getAppContext()))
+        ),3000);
         handler.postDelayed(d::dismiss, 4000);
 
     }
@@ -126,12 +120,10 @@ public class MainActivity extends AppCompatActivity {
             kv.encode("yang", "5.26");
         }
         for (String key : kv.allKeys()) {
-            String val = kv.decodeString(key);
-            Log.d(TAG, val);
-            String[] vals = val.split("\\.");
-            int month_saved = Integer.parseInt(vals[0]);
-            int day_saved = Integer.parseInt(vals[1]);
-            // Log.d(TAG, "checkTime: "+month_saved+":"+day_saved);
+            String value = kv.decodeString(key);
+            String[] values = value.split("\\.");
+            int month_saved = Integer.parseInt(values[0]);
+            int day_saved = Integer.parseInt(values[1]);
             if (month == month_saved && day == day_saved) {
                 handler.postDelayed(this::showDialog, 2000);
                 return;
@@ -199,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
                                 .setLayoutRes(R.layout.tip_btn)
                 )
                 .addGuidePage(GuidePage.newInstance()
-                        .addHighLight(iv, HighLight.Shape.CIRCLE, 0, 5, null)
+                        .addHighLight(ivDownloadFile, HighLight.Shape.CIRCLE, 0, 5, null)
                         .setLayoutRes(R.layout.tip_download))
                 .setOnGuideChangedListener(new OnGuideChangedListener() {
                     @Override
@@ -256,22 +248,15 @@ public class MainActivity extends AppCompatActivity {
 //
 //    }
     public void initView() {
-        iv = findViewById(R.id.download);
+        ivDownloadFile = findViewById(R.id.download);
         btn = findViewById(R.id.confirm);
         etInput = findViewById(R.id.input);
 
-        iv.setOnClickListener(v -> {
+        ivDownloadFile.setOnClickListener(v -> {
             Intent i = new Intent(MainActivity.this, ShowVideoActivity.class);
             startActivity(i);
         });
-//        tv.setOnLongClickListener(v -> {
-////            startActivity(
-////                    FlutterActivity.createDefaultIntent(context)
-////            );
-//            Intent i = new Intent(MainActivity.this, ShowVideoActivity.class);
-//            startActivity(i);
-//            return false;
-//        });
+
         btn.setOnClickListener(v -> {
             String text = etInput.getText().toString();
             if (text.isEmpty()) {
@@ -303,9 +288,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         btn.setOnLongClickListener(v -> {
-            startActivity(new Intent(MainActivity.this, PubuActivity.class));
-            //startActivity(new Intent(MainActivity.this,TestActivity.class));
-            return false;
+          //  startActivity(new Intent(MainActivity.this, PubuActivity.class));
+            startActivity(FlutterActivity.createDefaultIntent(MainActivity.this));
+            Log.d(TAG, "initView: 长安了");
+            return true;
         });
         etInput.addTextChangedListener(new TextWatcher() {
             @Override
@@ -328,7 +314,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        iv.setOnLongClickListener(v -> {
+        ivDownloadFile.setOnLongClickListener(v -> {
             IosAlertDialog dialog = new IosAlertDialog(MainActivity.this).builder();
             SharedPreferences ssp = getSharedPreferences("url", Context.MODE_PRIVATE);
             String url = ssp.getString("url", "");

@@ -31,21 +31,21 @@
         android:testOnly="false"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".TiktokActivity"></activity>
+        <activity android:name=".TiktokActivity" />
         <activity android:name=".ShowVideoActivity" />
         <activity
             android:name=".PubuActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-<!--        <activity-->
-<!--            android:name="io.flutter.embedding.android.FlutterActivity"-->
-<!--            android:theme="@style/FlutterPageTheme">-->
-<!--            <meta-data-->
-<!--                android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"-->
-<!--                android:value="true" />-->
-<!--            <meta-data-->
-<!--                android:name="io.flutter.embedding.android.SplashScreenDrawable"-->
-<!--                android:resource="@drawable/launch_background" />-->
-<!--        </activity>-->
+        <activity
+            android:name="io.flutter.embedding.android.FlutterActivity"
+            android:theme="@style/FlutterPageTheme">
+            <meta-data
+                android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
+                android:value="true" />
+            <meta-data
+                android:name="io.flutter.embedding.android.SplashScreenDrawable"
+                android:resource="@drawable/launch_background" />
+        </activity>
         <activity android:name=".TestActivity" />
 
         <service
