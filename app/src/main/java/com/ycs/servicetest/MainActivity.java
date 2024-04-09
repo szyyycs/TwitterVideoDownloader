@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button btn;
     private EditText etInput;
-    private WebView webView;
+    //private WebView webView;
     private Boolean isFloatWindowsshow = false;
     private final String[] permissions = {SYSTEM_ALERT_WINDOW,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -454,9 +454,9 @@ public class MainActivity extends AppCompatActivity {
         stopService(new Intent(MainActivity.this, DownLoadWindowService.class));
         stopService(new Intent(MainActivity.this, MainService.class));
 
-        webView.clearCache(true);
-        webView.clearHistory();
-        webView.destroy();
+//        webView.clearCache(true);
+//        webView.clearHistory();
+//        webView.destroy();
     }
 
     private void getPermission() {

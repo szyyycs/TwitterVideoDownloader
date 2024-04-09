@@ -77,13 +77,13 @@ public class MainService extends Service {
         }
         builder.setContentIntent(
                         PendingIntent.getActivity(MainService.this, 0,
-                                it, PendingIntent.FLAG_UPDATE_CURRENT))
+                                it, PendingIntent.FLAG_IMMUTABLE))
                 .setContentTitle("提示")
                 .setSmallIcon(R.mipmap.app_icon)
                 .setWhen(System.currentTimeMillis());
         final Intent intentInput = new Intent(this, DialogReceiver.class);
         final PendingIntent pi = PendingIntent.getBroadcast(this, 0,
-                intentInput, PendingIntent.FLAG_UPDATE_CURRENT);
+                intentInput, PendingIntent.FLAG_IMMUTABLE);
         notification = builder.build();
         if (Build.VERSION.SDK_INT < 29) {
             views.setTextViewText(R.id.input, new ClipBoardUtil(getApplicationContext()).paste());
@@ -94,7 +94,7 @@ public class MainService extends Service {
         Intent ii = new Intent(MainService.this, MainActivity.class);
         ii.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pii = PendingIntent.getActivity(this, 2,
-                ii, PendingIntent.FLAG_UPDATE_CURRENT);
+                ii, PendingIntent.FLAG_IMMUTABLE);
         views.setOnClickPendingIntent(R.id.small_icon, pii);
         views.setOnClickPendingIntent(R.id.input, pi);
         notification.contentIntent = pi;
