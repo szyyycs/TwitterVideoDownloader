@@ -1,6 +1,10 @@
 package com.ycs.servicetest;
 
 
+import static com.ycs.servicetest.utils.WebUtil.analyzeList;
+import static com.ycs.servicetest.utils.WebUtil.isDownloading;
+import static com.ycs.servicetest.utils.WebUtil.isHttpUrl;
+
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -11,43 +15,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
-import android.os.Handler;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.RelativeLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.RequiresApi;
-
 import com.ycs.servicetest.utils.ClipBoardUtil;
 import com.ycs.servicetest.utils.WebUtil;
 
-import java.util.Timer;
-
-import static com.ycs.servicetest.utils.WebUtil.analyzeList;
-import static com.ycs.servicetest.utils.WebUtil.isDownloading;
-import static com.ycs.servicetest.utils.WebUtil.isHttpUrl;
-
 
 public class MainService extends Service {
-    private ClipboardManager manager;
-    private Handler h = new Handler();
-    private String oldStr = "";
     static Notification notification;
     static RemoteViews views;
-    private Runnable r;
-    private RelativeLayout view;
-    private TextView tv;
-    private WindowManager windowManager;
-    private final Timer timer = new Timer();
-    private WindowManager.LayoutParams layoutParams;
     public static NotificationManager nm;
-    private DialogReceiver dialogReceiver;
 
     public MainService() {
 
@@ -65,12 +48,11 @@ public class MainService extends Service {
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String CHANNEL_ONE_ID = "com.ycs.cn";
         String CHANNEL_ONE_NAME = "Channel One";
-        NotificationChannel notificationChannel = null;
+        NotificationChannel notificationChannel;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             notificationChannel = new NotificationChannel(CHANNEL_ONE_ID,
                     CHANNEL_ONE_NAME, NotificationManager.IMPORTANCE_HIGH);
@@ -81,7 +63,7 @@ public class MainService extends Service {
             NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             manager.createNotificationChannel(notificationChannel);
         }
-        nm= (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Notification.Builder builder = new Notification.Builder(MainService.this.getApplicationContext());
         Intent it = new Intent(MainService.this, MainActivity.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -93,13 +75,15 @@ public class MainService extends Service {
         } else {
             views = new RemoteViews(getPackageName(), R.layout.notification_view_10);
         }
-        builder.setContentIntent(PendingIntent.getActivity(MainService.this, 0, it,
-                0))
+        builder.setContentIntent(
+                        PendingIntent.getActivity(MainService.this, 0,
+                                it, PendingIntent.FLAG_UPDATE_CURRENT))
                 .setContentTitle("提示")
                 .setSmallIcon(R.mipmap.app_icon)
                 .setWhen(System.currentTimeMillis());
         final Intent intentInput = new Intent(this, DialogReceiver.class);
-        final PendingIntent pi = PendingIntent.getBroadcast(this, 0, intentInput, PendingIntent.FLAG_UPDATE_CURRENT);
+        final PendingIntent pi = PendingIntent.getBroadcast(this, 0,
+                intentInput, PendingIntent.FLAG_UPDATE_CURRENT);
         notification = builder.build();
         if (Build.VERSION.SDK_INT < 29) {
             views.setTextViewText(R.id.input, new ClipBoardUtil(getApplicationContext()).paste());
@@ -107,38 +91,36 @@ public class MainService extends Service {
         } else {
             notification.contentView = views;
         }
-        Intent ii=new Intent(MainService.this,MainActivity.class);
+        Intent ii = new Intent(MainService.this, MainActivity.class);
         ii.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pii=PendingIntent.getActivity(this,2,ii,PendingIntent.FLAG_UPDATE_CURRENT);
-        views.setOnClickPendingIntent(R.id.small_icon,pii);
+        PendingIntent pii = PendingIntent.getActivity(this, 2,
+                ii, PendingIntent.FLAG_UPDATE_CURRENT);
+        views.setOnClickPendingIntent(R.id.small_icon, pii);
         views.setOnClickPendingIntent(R.id.input, pi);
         notification.contentIntent = pi;
         notification.iconLevel = 1000;
         startForeground(110, notification);
         if (Build.VERSION.SDK_INT < 29) {
-            manager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            manager.addPrimaryClipChangedListener(new ClipboardManager.OnPrimaryClipChangedListener() {
-                @Override
-                public void onPrimaryClipChanged() {
-                    String msg = new ClipBoardUtil(MainService.this).paste();
-                    views.setTextViewText(R.id.input, new ClipBoardUtil(MainService.this).paste());
-                    NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                    nm.notify(110, notification);
-                    if (isHttpUrl(msg)&&msg.contains("twitter")) {
-                        if(isDownloading|| WebUtil.isAnalyse){
-                            if(!analyzeList.contains(msg)){
-                                WebUtil.analyzeList.add(msg);
-                                Toast.makeText(MainService.this, "已加入下载列表", Toast.LENGTH_SHORT).show();
-                            }else{
-                                Toast.makeText(MainService.this, "已在下载队列中", Toast.LENGTH_SHORT).show();
-                                //它熹了推娘娘！
-                            }
-                            return;
+            ClipboardManager manager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            manager.addPrimaryClipChangedListener(() -> {
+                String msg = new ClipBoardUtil(MainService.this).paste();
+                views.setTextViewText(R.id.input, new ClipBoardUtil(MainService.this).paste());
+                NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                nm.notify(110, notification);
+                if (isHttpUrl(msg) && msg.contains("twitter")) {
+                    if (isDownloading || WebUtil.isAnalyse) {
+                        if (!analyzeList.contains(msg)) {
+                            WebUtil.analyzeList.add(msg);
+                            Toast.makeText(MainService.this, "已加入下载列表", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(MainService.this, "已在下载队列中", Toast.LENGTH_SHORT).show();
+                            //它熹了推娘娘！
                         }
-                        Intent i = new Intent(MainService.this, WebService.class);
-                        i.putExtra("url",msg);
-                        startService(i);
+                        return;
                     }
+                    Intent i = new Intent(MainService.this, WebService.class);
+                    i.putExtra("url", msg);
+                    startService(i);
                 }
             });
         } else {
@@ -149,7 +131,6 @@ public class MainService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
-//
 
     public static RemoteViews getContentView(Context context, Notification notification) {
         if (notification.contentView != null)
@@ -164,52 +145,52 @@ public class MainService extends Service {
         views.setTextViewText(R.id.input, msg);
         nm.notify(110, notification);
     }
-    public static void updateTitle( String msg) {
+
+    public static void updateTitle(String msg) {
         views.setTextViewText(R.id.title, msg);
         nm.notify(110, notification);
     }
-    static int progress=0;
-    public synchronized static void updateProgress(Context context, int percent,String now) {
-        if(progress==percent){
+
+    static int progress = 0;
+
+    public synchronized static void updateProgress(Context context, int percent, String now) {
+        if (progress == percent) {
             return;
         }
-        progress=percent;
-        if(percent%2==1){
+        progress = percent;
+        if (percent % 2 == 1) {
             return;
         }
-        if(percent==100){
-            Log.e("yyu","成功");
+        if (percent == 100) {
+            Log.e("yyu", "成功");
             views.setViewVisibility(R.id.input, View.VISIBLE);
-            views.setTextViewText(R.id.input,"下载已完成");
+            views.setTextViewText(R.id.input, "下载已完成");
             views.setViewVisibility(R.id.pb, View.GONE);
-            views.setViewVisibility(R.id.progress_num,View.GONE);
-        }else {
-            views.setViewVisibility(R.id.progress_num,View.VISIBLE);
-            views.setTextViewText(R.id.progress_num,now);
+            views.setViewVisibility(R.id.progress_num, View.GONE);
+        } else {
+            views.setViewVisibility(R.id.progress_num, View.VISIBLE);
+            views.setTextViewText(R.id.progress_num, now);
             views.setViewVisibility(R.id.input, View.GONE);
             views.setViewVisibility(R.id.pb, View.VISIBLE);
-            if(percent>50){
+            if (percent > 50) {
                 views.setTextColor(R.id.progress_num, context.getColor(R.color.colorWhite));
             }
-            views.setProgressBar(R.id.pb,100,percent,false);
+            views.setProgressBar(R.id.pb, 100, percent, false);
         }
         nm.notify(110, notification);
     }
-    public synchronized static void update(String msg){
+
+    public synchronized static void update(String msg) {
         views.setViewVisibility(R.id.input, View.VISIBLE);
         views.setViewVisibility(R.id.pb, View.GONE);
-        views.setViewVisibility(R.id.progress_num,View.GONE);
-        views.setTextViewText(R.id.input,msg);
+        views.setViewVisibility(R.id.progress_num, View.GONE);
+        views.setTextViewText(R.id.input, msg);
         nm.notify(110, notification);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(dialogReceiver!=null){
-            unregisterReceiver(dialogReceiver);
-        }
-
     }
 
     public static void setTextMarquee(TextView textView) {
@@ -221,5 +202,5 @@ public class MainService extends Service {
             textView.setFocusableInTouchMode(true);
         }
     }
-    
+
 }

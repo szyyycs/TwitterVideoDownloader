@@ -1,5 +1,7 @@
 package com.ycs.servicetest;
 
+import static com.ycs.servicetest.MainActivity.TAG;
+
 import android.animation.ObjectAnimator;
 import android.app.Service;
 import android.content.Intent;
@@ -21,19 +23,14 @@ import androidx.annotation.Nullable;
 
 import com.dinuscxj.progressbar.CircleProgressBar;
 
-import static com.ycs.servicetest.MainActivity.TAG;
-
 public class DownLoadWindowService extends Service {
     private static RelativeLayout view;
-    private RelativeLayout view2;
     private static ImageView civ;
-    private TextView y;
-    private int Y=0;
-    private Handler handler=new Handler();
-    private Boolean flag=true;
+    private final Handler handler = new Handler();
     public static CircleProgressBar ircleProgressBar;
     private static WindowManager windowManager;
     private static WindowManager.LayoutParams layoutParams;
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -42,10 +39,7 @@ public class DownLoadWindowService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //Log.e("yyy", "1112" );
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            showFloatingWindow();
-        }
+        showFloatingWindow();
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -53,7 +47,7 @@ public class DownLoadWindowService extends Service {
     public void onDestroy() {
         super.onDestroy();
         stopSelf();
-        if(windowManager!=null){
+        if (windowManager != null) {
             windowManager.removeView(view);
         }
     }
@@ -65,15 +59,15 @@ public class DownLoadWindowService extends Service {
             // 新建悬浮窗控件
             LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
             view = (RelativeLayout) inflater.inflate(R.layout.float_download, null);
-            civ=view.findViewById(R.id.civ);
-            ircleProgressBar=view.findViewById(R.id.progress);
+            civ = view.findViewById(R.id.civ);
+            ircleProgressBar = view.findViewById(R.id.progress);
             ircleProgressBar.setProgress(80);
             ircleProgressBar.setVisibility(View.GONE);
             view.setOnTouchListener(new FloatingOnTouchListener());
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    sendBroadcast(new Intent(DownLoadWindowService.this,DialogReceiver.class));
+                    sendBroadcast(new Intent(DownLoadWindowService.this, DialogReceiver.class));
                 }
             });
             // 设置LayoutParam
@@ -85,9 +79,6 @@ public class DownLoadWindowService extends Service {
             }
             layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
             layoutParams.format = PixelFormat.RGBA_8888;
-//            layoutParams.width = 300;
-//            layoutParams.height = 200;
-            //layoutParams.gravity = Gravity.RIGHT;
             layoutParams.x = windowManager.getDefaultDisplay().getWidth();
             layoutParams.y = -getResources().getDimensionPixelSize(R.dimen.dp_100);
             layoutParams.width = getResources().getDimensionPixelSize(R.dimen.dp_40);
@@ -97,51 +88,37 @@ public class DownLoadWindowService extends Service {
             setViewFade();
         }
     }
+
     private class FloatingOnTouchListener implements View.OnTouchListener {
         private int x;
         private int y;
         private int xx;
         private int yy;
         private boolean isLeft;
-        TextView tvRight=view.findViewById(R.id.right);
-        TextView tvLeft=view.findViewById(R.id.left);
-        private long[] mHits = new long[2];
-        private Runnable click=new Runnable() {
-            @Override
-            public void run() {
-                sendBroadcast(new Intent(DownLoadWindowService.this,DialogReceiver.class));
-                setViewFade();
-                if(isLeft){
-                    tvLeft.setVisibility(View.VISIBLE);
-                }else {
-                    tvRight.setVisibility(View.VISIBLE);
-                }
-            }
-        };
+        TextView tvRight = view.findViewById(R.id.right);
+        TextView tvLeft = view.findViewById(R.id.left);
+        private final long[] mHits = new long[2];
+
         @Override
         public boolean onTouch(View view, MotionEvent event) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     Log.d(TAG, "onTouch: 111");
                     x = (int) event.getRawX();
-                    xx=x;
-                    yy= (int) event.getRawY();
+                    xx = x;
+                    yy = (int) event.getRawY();
                     y = (int) event.getRawY();
                     view.setAlpha(1);
                     handler.removeCallbacks(runnable);
-                    if(tvLeft.getVisibility()==View.VISIBLE){
-                        isLeft=true;
-                    }else {
-                        isLeft=false;
-                    }
+                    isLeft = tvLeft.getVisibility() == View.VISIBLE;
                     tvLeft.setVisibility(View.GONE);
                     tvRight.setVisibility(View.GONE);
                     break;
                 case MotionEvent.ACTION_MOVE:
                     Log.d(TAG, "onTouch: 222");
-                    int nowX =(int) event.getRawX();
+                    int nowX = (int) event.getRawX();
                     int nowY = (int) event.getRawY();
-                    int movedX = nowX - windowManager.getDefaultDisplay().getWidth()/2;
+                    int movedX = nowX - windowManager.getDefaultDisplay().getWidth() / 2;
                     int movedY = nowY - y;
                     x = nowX;
                     y = nowY;
@@ -160,37 +137,23 @@ public class DownLoadWindowService extends Service {
                     int mX = X - x;
 
                     x = X;
-                    if (Math.abs(X-xx) < 1.5&&Math.abs(Y-yy) < 1.5){
+                    if (Math.abs(X - xx) < 1.5 && Math.abs(Y - yy) < 1.5) {
                         System.arraycopy(mHits, 1, mHits, 0, mHits.length - 1);
-//                        mHits[mHits.length - 1] = SystemClock.uptimeMillis();
-//                        if (mHits[0] >= (SystemClock.uptimeMillis() - 400)) {
-//                            handler.removeCallbacks(click);
-//                            setViewFade();
-//                            if(isLeft){
-//                                tvLeft.setVisibility(View.VISIBLE);
-//                            }else {
-//                                tvRight.setVisibility(View.VISIBLE);
-//                            }
-//
-//
-//
-//                            return true;
-//                        }
-//                        handler.postDelayed(click,500);
-                        sendBroadcast(new Intent(DownLoadWindowService.this,DialogReceiver.class));
+
+                        sendBroadcast(new Intent(DownLoadWindowService.this, DialogReceiver.class));
                         setViewFade();
-                        if(isLeft){
+                        if (isLeft) {
                             tvLeft.setVisibility(View.VISIBLE);
-                        }else {
+                        } else {
                             tvRight.setVisibility(View.VISIBLE);
                         }
                         return true;
                     }
-                    if(layoutParams.x + mX>0){
+                    if (layoutParams.x + mX > 0) {
                         layoutParams.x = windowManager.getDefaultDisplay().getWidth();
                         tvRight.setVisibility(View.VISIBLE);
-                    }else{
-                        layoutParams.x=-windowManager.getDefaultDisplay().getWidth();
+                    } else {
+                        layoutParams.x = -windowManager.getDefaultDisplay().getWidth();
                         tvLeft.setVisibility(View.VISIBLE);
                     }
                     layoutParams.y = layoutParams.y + mY;
@@ -201,20 +164,23 @@ public class DownLoadWindowService extends Service {
                 default:
                     break;
             }
-                return false;
+            return false;
         }
     }
-    private void setViewFade(){
+
+    private void setViewFade() {
         handler.removeCallbacks(runnable);
-        handler.postDelayed(runnable,2000);
+        handler.postDelayed(runnable, 2000);
     }
-    private Runnable runnable=new Runnable() {
+
+    private final Runnable runnable = new Runnable() {
         @Override
         public void run() {
             fade(view);
         }
     };
-    public static void updateProgress(int progress){
+
+    public static void updateProgress(int progress) {
         if (ircleProgressBar != null) {
             ircleProgressBar.setVisibility(View.VISIBLE);
             ircleProgressBar.setProgress(progress);
@@ -222,16 +188,18 @@ public class DownLoadWindowService extends Service {
 
         civ.setVisibility(View.GONE);
 
-        windowManager.updateViewLayout(view,layoutParams);
+        windowManager.updateViewLayout(view, layoutParams);
     }
-    public static void recover(){
-        if(ircleProgressBar!=null){
+
+    public static void recover() {
+        if (ircleProgressBar != null) {
             ircleProgressBar.setVisibility(View.GONE);
         }
         civ.setVisibility(View.VISIBLE);
     }
-    private void fade(View view){
-        ObjectAnimator animator = ObjectAnimator.ofFloat(view, "alpha",1,0.5f);
+
+    private void fade(View view) {
+        ObjectAnimator animator = ObjectAnimator.ofFloat(view, "alpha", 1, 0.5f);
         animator.setDuration(1000);
         animator.start();
     }

@@ -1,5 +1,13 @@
 package com.ycs.servicetest;
 
+import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
+import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
+import static com.ycs.servicetest.Constant.REQUEST_CODE;
+import static com.ycs.servicetest.utils.WebUtil.analyzeList;
+import static com.ycs.servicetest.utils.WebUtil.isAnalyse;
+import static com.ycs.servicetest.utils.WebUtil.isDownloading;
+import static com.ycs.servicetest.utils.WebUtil.isHttpUrl;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -20,11 +28,10 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -51,15 +58,6 @@ import java.util.Calendar;
 import java.util.Objects;
 
 import cn.bmob.v3.Bmob;
-//import io.flutter.embedding.android.FlutterActivity;
-
-import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
-import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
-import static com.ycs.servicetest.Constant.REQUEST_CODE;
-import static com.ycs.servicetest.utils.WebUtil.analyzeList;
-import static com.ycs.servicetest.utils.WebUtil.isAnalyse;
-import static com.ycs.servicetest.utils.WebUtil.isDownloading;
-import static com.ycs.servicetest.utils.WebUtil.isHttpUrl;
 
 //import com.hjq.permissions.OnPermissionCallback;
 //import com.hjq.permissions.Permission;
@@ -74,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button btn;
     private EditText etInput;
+    private WebView webView;
     private Boolean isFloatWindowsshow = false;
     private final String[] permissions = {SYSTEM_ALERT_WINDOW,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -99,63 +98,57 @@ public class MainActivity extends AppCompatActivity {
             super.handleMessage(msg);
         }
     };
+
     //显示倒计时dialog
-    void showDialog(){
-        ImageDialog d=new ImageDialog(MainActivity.this).builder();
+    void showDialog() {
+        ImageDialog d = new ImageDialog(MainActivity.this).builder();
 
         d.show();
-        handler.postDelayed(() -> runOnUiThread(() -> d.setAni(R.mipmap.two)),1000);
-        handler.postDelayed(() -> runOnUiThread(() -> d.setAni(R.mipmap.one)),2000);
+        handler.postDelayed(() -> runOnUiThread(() -> d.setAni(R.mipmap.two)), 1000);
+        handler.postDelayed(() -> runOnUiThread(() -> d.setAni(R.mipmap.one)), 2000);
 //        handler.postDelayed(() -> startActivity(
 //                //FlutterActivity.createDefaultIntent(context)
 //                Toast.makeText(MainActivity.this,"wqe",Toast.LENGTH_SHORT).show()
 //        ),3000);
-        handler.postDelayed(d::dismiss,4000);
+        handler.postDelayed(d::dismiss, 4000);
 
     }
+
     //检查时间
-    void checkTime(){
+    void checkTime() {
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH)+1;
+        int month = calendar.get(Calendar.MONTH) + 1;
         int day = calendar.get(Calendar.DAY_OF_MONTH);
-        MMKV kv=MMKV.mmkvWithID("time");
-        if(kv.count()==0){
-            kv.encode("sun","12.10");
-            kv.encode("yang","5.26");
+        MMKV kv = MMKV.mmkvWithID("time");
+        if (kv.count() == 0) {
+            kv.encode("sun", "12.10");
+            kv.encode("yang", "5.26");
         }
-        for(String key :kv.allKeys()){
-            String val=kv.decodeString(key);
+        for (String key : kv.allKeys()) {
+            String val = kv.decodeString(key);
             Log.d(TAG, val);
-            String[] vals=val.split("\\.");
-            int month_saved=Integer.parseInt(vals[0]);
-            int day_saved=Integer.parseInt(vals[1]);
-           // Log.d(TAG, "checkTime: "+month_saved+":"+day_saved);
-            if(month==month_saved&&day==day_saved){
-                handler.postDelayed(this::showDialog,2000);
+            String[] vals = val.split("\\.");
+            int month_saved = Integer.parseInt(vals[0]);
+            int day_saved = Integer.parseInt(vals[1]);
+            // Log.d(TAG, "checkTime: "+month_saved+":"+day_saved);
+            if (month == month_saved && day == day_saved) {
+                handler.postDelayed(this::showDialog, 2000);
                 return;
             }
         }
 
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        //CrashReport.initCrashReport(getApplicationContext(), "b0a053b5dd", true);
-
-        Beta.upgradeDialogLayoutId= R.layout.layout_upgrade;
-        Bugly.init(getApplicationContext(), "b0a053b5dd", false);
-        MMKV.initialize(this);
-        Bmob.initialize(this, "2d24c857824e0609dd2e185bf5378acc");
         Objects.requireNonNull(getSupportActionBar()).hide();
         checkTime();
         Window window = getWindow();
-        window.setStatusBarColor(ContextCompat.getColor(this,R.color.colorIosBlue));
-        PRDownloader.initialize(getApplicationContext());
-        WebUtil.init(getApplicationContext());
-
+        window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorIosBlue));
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         getPermission();
         //getXXPermission();
@@ -165,6 +158,36 @@ public class MainActivity extends AppCompatActivity {
         checkPermission();
         showGuide();
     }
+
+//    private void getVideoFromWebView() {
+//        webView = findViewById(R.id.webview);
+//
+//        webView.getSettings().setJavaScriptEnabled(true);
+//
+//        webView.getSettings().setBlockNetworkImage(true);
+//        webView.getSettings().setLoadsImagesAutomatically(false);
+//        // webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+//        webView.setWebViewClient(new WebViewClient() {
+//            @Override
+//            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+//                super.onPageStarted(view, url, favicon);
+//                Log.d(TAG, "onPageStarted: " + view.getTitle());
+//
+//            }
+//
+//            @Override
+//            public void onPageFinished(WebView view, String url) {
+//                super.onPageFinished(view, url);
+//                Log.d("yyy", "onPageFinished:" + view.getTitle());
+//                webView.evaluateJavascript(fetchData, value -> {
+//                    // 这里的value就是JavaScript代码的执行结果
+//                    Log.d("yyy", "onReceiveValue value=" + value);
+//                });
+//            }
+//        });
+//        webView.loadUrl("https://xunlangbot.com/download");
+//
+//    }
 
     private void showGuide() {
         NewbieGuide.with(MainActivity.this)
@@ -269,9 +292,9 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                 } else {
-                    Message ms=new Message();
-                    ms.what=GOTO_DOWNLOAD;
-                    ms.obj=text;
+                    Message ms = new Message();
+                    ms.what = GOTO_DOWNLOAD;
+                    ms.obj = text;
                     handler.sendMessage(ms);
 
                 }
@@ -280,7 +303,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         btn.setOnLongClickListener(v -> {
-            startActivity(new Intent(MainActivity.this,PubuActivity.class));
+            startActivity(new Intent(MainActivity.this, PubuActivity.class));
             //startActivity(new Intent(MainActivity.this,TestActivity.class));
             return false;
         });
@@ -292,9 +315,9 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(etInput.getHint()!="在这粘贴链接"){
+                if (etInput.getHint() != "在这粘贴链接") {
                     btn.setText("下载");
-                } else{
+                } else {
                     btn.setText("粘贴");
 
                 }
@@ -306,18 +329,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         iv.setOnLongClickListener(v -> {
-            IosAlertDialog dialog=new IosAlertDialog(MainActivity.this).builder();
-            SharedPreferences ssp=getSharedPreferences("url",Context.MODE_PRIVATE);
-            String url=ssp.getString("url","");
-            if(url.equals("")){
-                url= Environment.getExternalStorageDirectory() +"/.savedPic/";
+            IosAlertDialog dialog = new IosAlertDialog(MainActivity.this).builder();
+            SharedPreferences ssp = getSharedPreferences("url", Context.MODE_PRIVATE);
+            String url = ssp.getString("url", "");
+            if (url.equals("")) {
+                url = Environment.getExternalStorageDirectory() + "/.savedPic/";
             }
             dialog.setEditText(url)
                     .setTitle("设置你的下载路径")
                     .setPositiveButton("确定", v1 -> {
-                        if(!dialog.getEditText().isEmpty()){
-                            SharedPreferences.Editor e=ssp.edit();
-                            e.putString("url",Environment.getExternalStorageDirectory() +"/"+dialog.getEditText()+"/");
+                        if (!dialog.getEditText().isEmpty()) {
+                            SharedPreferences.Editor e = ssp.edit();
+                            e.putString("url", Environment.getExternalStorageDirectory() + "/" + dialog.getEditText() + "/");
                             e.apply();
                         }
 
@@ -330,43 +353,45 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
     }
-    public void showNotification(){
+
+    public void showNotification() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(new Intent(MainActivity.this, MainService.class));
-        }else{
+        } else {
             startService(new Intent(MainActivity.this, MainService.class));
         }
     }
-    public void checkPermission(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
-            if (Environment.isExternalStorageManager()) {
-                Toast.makeText(MainActivity.this, "已获得所有权限", Toast.LENGTH_SHORT).show();
-            } else {
+
+    public void checkPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
                 intent.setData(Uri.parse("package:" + getPackageName()));
                 startActivityForResult(intent, REQUEST_CODE);
             }
         }
     }
-    public void showFloatWindows(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
-            if(!isFloatWindowsshow){
-                Intent i=new Intent(MainActivity.this,DownLoadWindowService.class);
-                try{
+
+    public void showFloatWindows() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (!isFloatWindowsshow) {
+                Intent i = new Intent(MainActivity.this, DownLoadWindowService.class);
+                try {
                     startService(i);
-                    isFloatWindowsshow=true;
-                }catch (Exception ignored){
+                    isFloatWindowsshow = true;
+                } catch (Exception ignored) {
 
                 }
 
             }
         }
     }
+
     @SuppressLint("NewApi")
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.e(TAG, "onActivityResult: 一次" );
+        Log.e(TAG, "onActivityResult: 一次");
         if (requestCode == 0) {
             if (!Settings.canDrawOverlays(this)) {
                 Toast.makeText(this, "授权失败，请重新授权", Toast.LENGTH_SHORT).show();
@@ -377,7 +402,7 @@ public class MainActivity extends AppCompatActivity {
                 showFloatWindows();
                 //startService(new Intent(MainActivity.this, MainService.class));
             }
-        }else if(requestCode==REQUEST_CODE){
+        } else if (requestCode == REQUEST_CODE) {
             if (Environment.isExternalStorageManager()) {
                 Toast.makeText(this, "已获得所有权限", Toast.LENGTH_SHORT).show();
             } else {
@@ -392,15 +417,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissionss, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissionss, grantResults);
-        if(requestCode==111){
-            Log.e("yyy","获取权限返回");
+        if (requestCode == 111) {
+            Log.e("yyy", "获取权限返回");
             //Toast.makeText(this, "yyy", Toast.LENGTH_SHORT).show();
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED)
-            {
+                    != PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "未允许权限，同意后才可以使用本APP", Toast.LENGTH_SHORT).show();
-                ActivityCompat.requestPermissions(this, permissions,111);
+                ActivityCompat.requestPermissions(this, permissions, 111);
             }
         }
     }
@@ -414,9 +438,9 @@ public class MainActivity extends AppCompatActivity {
                 getWindow().getDecorView().post(() -> {
                     String paste = new ClipBoardUtil(getApplicationContext()).paste();
                     etInput.setHint(paste);
-                    if(etInput.getHint().toString().equals("在这粘贴链接")){
+                    if (etInput.getHint().toString().equals("在这粘贴链接")) {
                         btn.setText("粘贴");
-                    } else{
+                    } else {
                         btn.setText("下载");
                     }
                 });
@@ -427,11 +451,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        stopService(new Intent(MainActivity.this,DownLoadWindowService.class));
-        stopService(new Intent(MainActivity.this,MainService.class));
+        stopService(new Intent(MainActivity.this, DownLoadWindowService.class));
+        stopService(new Intent(MainActivity.this, MainService.class));
+
+        webView.clearCache(true);
+        webView.clearHistory();
+        webView.destroy();
     }
 
-    private void getPermission(){
+    private void getPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             if (!Settings.canDrawOverlays(this)) {
 //                Toast.makeText(this, "请允许悬浮窗权限", Toast.LENGTH_SHORT);
