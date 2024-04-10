@@ -1,4 +1,4 @@
-package com.ycs.servicetest;
+package com.ycs.servicetest.service;
 
 
 import static com.ycs.servicetest.utils.WebUtil.analyzeList;
@@ -23,6 +23,9 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ycs.servicetest.receiver.DialogReceiver;
+import com.ycs.servicetest.R;
+import com.ycs.servicetest.activity.MainActivity;
 import com.ycs.servicetest.utils.ClipBoardUtil;
 import com.ycs.servicetest.utils.WebUtil;
 

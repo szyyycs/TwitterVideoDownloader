@@ -1,4 +1,4 @@
-package com.ycs.servicetest.utils;
+package com.ycs.servicetest.common;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -20,10 +20,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ycs.servicetest.MainService;
+import com.ycs.servicetest.service.MainService;
 import com.ycs.servicetest.R;
 
-public class IosAlertDialog {
+public class CustomIosAlertDialog {
     private Context context;
     private Dialog dialog;
     private LinearLayout lLayout_bg;
@@ -42,7 +42,7 @@ public class IosAlertDialog {
     private boolean showPosBtn = false;
     private boolean showNegBtn = false;
 
-    public IosAlertDialog(Context context) {
+    public CustomIosAlertDialog(Context context) {
         this.context = context;
         WindowManager windowManager = (WindowManager) context.getSystemService(Context
                 .WINDOW_SERVICE);
@@ -50,7 +50,7 @@ public class IosAlertDialog {
 
     }
 
-    public IosAlertDialog builder() {
+    public CustomIosAlertDialog builder() {
         // 获取Dialog布局
         View view = LayoutInflater.from(context).inflate(R.layout.layout_dialog, null);
         // 获取自定义Dialog布局中的控件
@@ -79,7 +79,7 @@ public class IosAlertDialog {
         return this;
     }
 
-    public IosAlertDialog setTitle(String title) {
+    public CustomIosAlertDialog setTitle(String title) {
         showTitle = true;
         if ("".equals(title)) {
             txt_title.setText("标题");
@@ -94,7 +94,7 @@ public class IosAlertDialog {
     public Window getWindows(){
         return dialog.getWindow();
     }
-    public IosAlertDialog setMsg(String msg) {
+    public CustomIosAlertDialog setMsg(String msg) {
         showMsg = true;
         if ("".equals(msg)) {
             txt_msg.setText("内容");
@@ -104,7 +104,7 @@ public class IosAlertDialog {
         return this;
     }
 
-    public IosAlertDialog setCancelable(boolean cancel) {
+    public CustomIosAlertDialog setCancelable(boolean cancel) {
         dialog.setCancelable(cancel);
         return this;
     }
@@ -114,7 +114,7 @@ public class IosAlertDialog {
     public  Boolean isShowing(){
         return dialog.isShowing();
     }
-    public IosAlertDialog setPositiveButton(String text, final OnClickListener listener) {
+    public CustomIosAlertDialog setPositiveButton(String text, final OnClickListener listener) {
         showPosBtn = true;
         if ("".equals(text)) {
             btn_pos.setText("确定");
@@ -133,7 +133,7 @@ public class IosAlertDialog {
         return this;
     }
 
-    public IosAlertDialog setNegativeButton(String text, final OnClickListener listener) {
+    public CustomIosAlertDialog setNegativeButton(String text, final OnClickListener listener) {
         showNegBtn = true;
         if ("".equals(text)) {
             btn_neg.setText("取消");
@@ -151,7 +151,7 @@ public class IosAlertDialog {
         });
         return this;
     }
-    public IosAlertDialog setEditText(String hint){
+    public CustomIosAlertDialog setEditText(String hint){
         editText.setVisibility(View.VISIBLE);
         editText.setHint(hint);
         return this;
@@ -169,7 +169,7 @@ public class IosAlertDialog {
         dialog.setOnKeyListener(onKeyListener);
     }
 
-    public IosAlertDialog setCanceledOnTouchOutside(boolean b) {
+    public CustomIosAlertDialog setCanceledOnTouchOutside(boolean b) {
         dialog.setCanceledOnTouchOutside(b);
         return this;
 
@@ -225,7 +225,7 @@ public class IosAlertDialog {
 
         dialog.show();
     }
-    public IosAlertDialog setWindow(){
+    public CustomIosAlertDialog setWindow(){
         if (Build.VERSION.SDK_INT >= 26)
         {
             dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
@@ -235,7 +235,7 @@ public class IosAlertDialog {
         }
         return this;
     }
-    public IosAlertDialog setEnter(){
+    public CustomIosAlertDialog setEnter(){
         editText.setOnEditorActionListener(new EditText.OnEditorActionListener(){
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {

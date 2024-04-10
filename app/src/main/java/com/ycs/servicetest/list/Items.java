@@ -12,15 +12,15 @@ public class Items implements Serializable {
     private String video_len;
     private String url;
     private static final long serialVersionUID = 1L;
-    public String getTwittertext() {
-        return twittertext;
+    public String getTwitterText() {
+        return twitter_text;
     }
 
-    public void setTwittertext(String twittertext) {
-        this.twittertext = twittertext;
+    public void setTwitterText(String twittertext) {
+        this.twitter_text = twittertext;
     }
 
-    private String twittertext;
+    private String twitter_text;
 
     public String getUrl() {
         return url;

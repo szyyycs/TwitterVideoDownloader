@@ -17,9 +17,7 @@ import cn.bmob.v3.exception.BmobException
 import cn.bmob.v3.listener.SaveListener
 import com.downloader.Error
 import com.downloader.OnDownloadListener
-import com.downloader.OnPauseListener
 import com.downloader.OnProgressListener
-import com.downloader.OnStartOrResumeListener
 import com.downloader.PRDownloader
 import com.downloader.Progress
 import com.google.gson.Gson
@@ -32,12 +30,12 @@ import com.twitter.sdk.android.core.TwitterConfig
 import com.twitter.sdk.android.core.TwitterCore
 import com.twitter.sdk.android.core.TwitterException
 import com.twitter.sdk.android.core.models.Tweet
-import com.ycs.servicetest.Constant
-import com.ycs.servicetest.DownLoadWindowService
 import com.ycs.servicetest.MainApplication
-import com.ycs.servicetest.MainService
-import com.ycs.servicetest.TwitterText
+import com.ycs.servicetest.common.Constant
 import com.ycs.servicetest.model.DownloadResponse
+import com.ycs.servicetest.model.TwitterText
+import com.ycs.servicetest.service.DownLoadWindowService
+import com.ycs.servicetest.service.MainService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -51,6 +49,7 @@ import okhttp3.Response
 import java.io.File
 import java.io.IOException
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.sql.Timestamp
 import java.util.Date
 import java.util.regex.Pattern
@@ -137,7 +136,8 @@ object WebUtil {
             override fun success(result: Result<Tweet>) {
                 isAnalyse = false
                 Log.d(TAG, "success: " + result.data)
-                if (result.data.extendedEntities == null && (result.data.entities.media == null || result.data.entities.media.size == 0)) {
+                if (result.data.extendedEntities == null && (result.data.entities.media == null ||
+                            result.data.entities.media.size == 0)) {
                     showInformationToUser("链接中未找到文件，下载失败")
                 } else if (result.data.extendedEntities != null) {
                     Log.e(TAG, result.data.extendedEntities.media[0].type)
@@ -328,8 +328,7 @@ object WebUtil {
         isDownloading = true
         downloadId = PRDownloader.download(url, path, filename)
             .build()
-            .setOnStartOrResumeListener(OnStartOrResumeListener { isDownloading = true })
-            .setOnPauseListener(OnPauseListener {})
+            .setOnStartOrResumeListener { isDownloading = true }
             .setOnProgressListener(object : OnProgressListener {
                 private var flag = true
                 private var sum = 0.0
@@ -339,20 +338,20 @@ object WebUtil {
                     if (flag) {
                         flag = false
                         sum = BigDecimal(progress.totalBytes / (1024 * 1024.0))
-                            .setScale(2, BigDecimal.ROUND_HALF_UP).toDouble()
+                            .setScale(2,  RoundingMode.HALF_UP).toDouble()
                         val len = sum.toString() + "MB"
                         Toast.makeText(context, filename + "开始下载，共" + len, Toast.LENGTH_SHORT)
                             .show()
                     }
                     if (sum == 0.0) {
                         sum = BigDecimal(progress.totalBytes / (1024 * 1024.0))
-                            .setScale(2, BigDecimal.ROUND_HALF_UP).toDouble()
+                            .setScale(2,  RoundingMode.HALF_UP).toDouble()
                     }
                     currentBytes = BigDecimal(progress.currentBytes / (1024 * 1024.0))
-                        .setScale(2, BigDecimal.ROUND_HALF_UP).toDouble()
+                        .setScale(2,  RoundingMode.HALF_UP).toDouble()
                     percent = if (sum != 0.0) {
                         BigDecimal(currentBytes / sum)
-                            .setScale(2, BigDecimal.ROUND_HALF_UP).toDouble()
+                            .setScale(2,  RoundingMode.HALF_UP).toDouble()
                     } else {
                         0.5
                     }
@@ -366,7 +365,7 @@ object WebUtil {
                     isDownloading = false
                     Toast.makeText(context, filename + "下载成功", Toast.LENGTH_SHORT).show()
                     val uri: Uri?
-                    handler.postDelayed(Runnable {
+                    handler.postDelayed({
                         MainService.update(filename + "下载完成")
                         DownLoadWindowService.recover()
                     }, 1000)

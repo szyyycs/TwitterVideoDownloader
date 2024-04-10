@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".VideoActivity"
+    tools:context=".activity.ShowVideoActivity"
     >
 
     <RelativeLayout
@@ -121,7 +121,7 @@
         <!--            android:id="@+id/videoview"-->
         <!--            android:layout_centerInParent="true"-->
         <!--            />-->
-        <com.ycs.servicetest.MyVideoPlayer
+        <com.ycs.servicetest.common.CustomVideoPlayer
             android:id="@+id/detail_player"
             android:layout_width="match_parent"
             android:layout_height="@dimen/dp_400"

@@ -1,13 +1,14 @@
-package com.ycs.servicetest
+package com.ycs.servicetest.viewmodel
 
 import android.app.Application
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.Environment
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import cn.bmob.v3.BmobQuery
 import cn.bmob.v3.exception.BmobException
 import cn.bmob.v3.listener.CountListener
@@ -16,16 +17,25 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.tencent.mmkv.MMKV
 import com.ycs.servicetest.list.Items
+import com.ycs.servicetest.model.TwitterText
 import com.ycs.servicetest.utils.WebUtil
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.attribute.BasicFileAttributes
 import java.text.SimpleDateFormat
-import java.util.*
+import java.time.Instant
+import java.util.Collections
+import java.util.Locale
 
 /**
  * <pre>
@@ -46,10 +56,9 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
     var tweet: String = ""
     var len: String = ""
     var tweetCountIndex = -1
-    var isScaning = MutableLiveData<Boolean>()
+    var isScanning = MutableLiveData<Boolean>()
     var context: Application = getApplication()
 
-    //    val gs= GlobalScope
     var url = Environment.getExternalStorageDirectory().toString() + "/.savedPic/"
     private var kv: MMKV = MMKV.defaultMMKV()
     private val kv_text by lazy {
@@ -61,7 +70,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
         num.value = 0
         loadTweetNum.value = 0
         isNull.value = true
-        isScaning.value = false
+        isScanning.value = false
         itemsList.value = getDataList(url)
     }
 
@@ -98,14 +107,14 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
 
     fun startScan() {
         num.value = 0
-        if (isScaning.value == true) {
+        if (isScanning.value == true) {
             Toast.makeText(context, "正在扫描中，请稍后重试...", Toast.LENGTH_SHORT).show()
             return
         }
         if (checkFileIsNull()) {
             return
         }
-        isScaning.value = true
+        isScanning.value = true
         scanItemListFromFile()
     }
 
@@ -125,10 +134,10 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                     val i = Items()
                     val file = File(uu)
                     val d = BigDecimal(file.length() / (1024 * 1024.0))
-                        .setScale(2, BigDecimal.ROUND_HALF_UP).toDouble()
+                        .setScale(2, RoundingMode.HALF_UP).toDouble()
                     val fileSize = d.toString() + "MB"
                     var attr: BasicFileAttributes?
-                    var instant = null
+                    var instant: Instant? = null
                     var time: String?
                     if ((s.length == 22 || s.length == 21) && s.startsWith("20")) {
                         time = s.substring(0, 4) + "/" + s.substring(4, 6) + "/" + s.substring(
@@ -140,8 +149,11 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                             var path: Path?
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 path = file.toPath()
-                                attr = Files.readAttributes(path, BasicFileAttributes::class.java)
-                                instant = attr.creationTime().toInstant() as Nothing?
+                                attr =
+                                    withContext(Dispatchers.IO) {
+                                        Files.readAttributes(path, BasicFileAttributes::class.java)
+                                    }
+                                instant = attr.creationTime().toInstant()
                             }
                             time = if (instant != null) {
                                 val temp = instant.toString().replace("T", " ").replace("Z", "")
@@ -149,21 +161,21 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                                 temp.substring(0, temp.length - 3)
                             } else {
                                 val timeee = file.lastModified()
-                                val formatter = SimpleDateFormat("yyyy/MM/dd HH:mm")
+                                val formatter = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.CHINA)
                                 formatter.format(timeee)
                             }
                         } catch (e: Exception) {
                             val timeee = file.lastModified()
-                            val formatter = SimpleDateFormat("yyyy/MM/dd HH:mm")
+                            val formatter = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.CHINA)
                             time = formatter.format(timeee)
-                            Log.e(VideoActivity.TAG, "modifiedTime: " + time + e.message)
+
                         }
                     }
                     i.size = fileSize
                     i.text = s
                     i.time = time
                     i.url = uu
-                    i.twittertext = text
+                    i.twitterText = text
                     num.postValue(++tempNum)
                     newList.add(0, i)
                 }
@@ -171,11 +183,11 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                 newList
             }
             val response = getList.await()  //等待deferred 的返回
-            GlobalScope.launch(Dispatchers.Main) { //启动一个协程，运行在主线程
+            CoroutineScope(Dispatchers.Main).launch { //启动一个协程，运行在主线程
                 Toast.makeText(context, "共找到${num.value}个视频", Toast.LENGTH_SHORT).show()
                 isNull.value = false
                 itemsList.value = response
-                isScaning.value = false
+                isScanning.value = false
                 loadVideoDuration()
             }
 
@@ -289,22 +301,22 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
 
     fun sortByComment(stus: ArrayList<Items>) {
         stus.sortWith { o1, o2 ->
-            if (o2.twittertext == null || o1.twittertext == null) {
+            if (o2.twitterText == null || o1.twitterText == null) {
                 1
-            } else o2.twittertext.length - o1.twittertext.length
+            } else o2.twitterText.length - o1.twitterText.length
         }
     }
 
     fun deSortByComment(stus: ArrayList<Items>) {
         stus.sortWith { o1: Items, o2: Items ->
-            if (o2.twittertext == null || o1.twittertext == null) {
+            if (o2.twitterText == null || o1.twitterText == null) {
                 1
             }
-            o1.twittertext.length - o2.twittertext.length
+            o1.twitterText.length - o2.twitterText.length
         }
     }
 
-    fun desortByLarge(stus: ArrayList<Items>) {
+    fun deSortByLarge(stus: ArrayList<Items>) {
         stus.sortWith { o1: Items, o2: Items ->
             if (o2.video_len == null || o1.video_len == null) {
                 1

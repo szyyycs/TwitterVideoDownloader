@@ -1,6 +1,7 @@
-package com.ycs.servicetest;
+package com.ycs.servicetest.service;
 
-import static com.ycs.servicetest.MainActivity.TAG;
+
+import static com.ycs.servicetest.common.Constant.TAG;
 
 import android.animation.ObjectAnimator;
 import android.app.Service;
@@ -22,6 +23,8 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.dinuscxj.progressbar.CircleProgressBar;
+import com.ycs.servicetest.R;
+import com.ycs.servicetest.receiver.DialogReceiver;
 
 public class DownLoadWindowService extends Service {
     private static RelativeLayout view;
@@ -103,7 +106,6 @@ public class DownLoadWindowService extends Service {
         public boolean onTouch(View view, MotionEvent event) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    Log.d(TAG, "onTouch: 111");
                     x = (int) event.getRawX();
                     xx = x;
                     yy = (int) event.getRawY();
@@ -115,7 +117,6 @@ public class DownLoadWindowService extends Service {
                     tvRight.setVisibility(View.GONE);
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    Log.d(TAG, "onTouch: 222");
                     int nowX = (int) event.getRawX();
                     int nowY = (int) event.getRawY();
                     int movedX = nowX - windowManager.getDefaultDisplay().getWidth() / 2;

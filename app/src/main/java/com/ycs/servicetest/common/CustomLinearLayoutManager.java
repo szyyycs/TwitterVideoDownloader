@@ -1,4 +1,4 @@
-package com.ycs.servicetest;
+package com.ycs.servicetest.common;
 
 
 import android.content.Context;

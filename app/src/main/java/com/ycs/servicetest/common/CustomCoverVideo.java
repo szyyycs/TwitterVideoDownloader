@@ -1,4 +1,4 @@
-package com.ycs.servicetest;
+package com.ycs.servicetest.common;
 
 import android.app.Activity;
 import android.content.Context;
@@ -21,23 +21,24 @@ import com.shuyu.gsyvideoplayer.utils.Debuger;
 import com.shuyu.gsyvideoplayer.utils.GSYVideoType;
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer;
 import com.shuyu.gsyvideoplayer.video.base.GSYBaseVideoPlayer;
+import com.ycs.servicetest.R;
 
 import moe.codeest.enviews.ENDownloadView;
 import tv.danmaku.ijk.media.exo2.Exo2PlayerManager;
 
-public class SampleCoverVideo extends StandardGSYVideoPlayer {
+public class CustomCoverVideo extends StandardGSYVideoPlayer {
     ImageView mCoverImage;
     TextView tweetTv;
     TextView speedTv;
-    public SampleCoverVideo(Context context, Boolean fullFlag) {
+    public CustomCoverVideo(Context context, Boolean fullFlag) {
         super(context, fullFlag);
     }
 
-    public SampleCoverVideo(Context context) {
+    public CustomCoverVideo(Context context) {
         super(context);
     }
 
-    public SampleCoverVideo(Context context, AttributeSet attrs) {
+    public CustomCoverVideo(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
@@ -65,17 +66,17 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
     @Override
     public GSYBaseVideoPlayer showSmallVideo(Point size, boolean actionBar, boolean statusBar) {
         //下面这里替换成你自己的强制转化
-        SampleCoverVideo sampleCoverVideo = (SampleCoverVideo) super.showSmallVideo(size, actionBar, statusBar);
-        sampleCoverVideo.mStartButton.setVisibility(GONE);
-        sampleCoverVideo.mStartButton = null;
-        return sampleCoverVideo;
+        CustomCoverVideo customCoverVideo = (CustomCoverVideo) super.showSmallVideo(size, actionBar, statusBar);
+        customCoverVideo.mStartButton.setVisibility(GONE);
+        customCoverVideo.mStartButton = null;
+        return customCoverVideo;
     }
 
     @Override
     protected void cloneParams(GSYBaseVideoPlayer from, GSYBaseVideoPlayer to) {
         super.cloneParams(from, to);
-        SampleCoverVideo sf = (SampleCoverVideo) from;
-        SampleCoverVideo st = (SampleCoverVideo) to;
+        CustomCoverVideo sf = (CustomCoverVideo) from;
+        CustomCoverVideo st = (CustomCoverVideo) to;
         st.mShowFullAnimation = sf.mShowFullAnimation;
     }
 
@@ -115,7 +116,7 @@ public class SampleCoverVideo extends StandardGSYVideoPlayer {
         final View oldF = vp.findViewById(getFullId());
         if (oldF != null) {
             //此处fix bug#265，推出全屏的时候，虚拟按键问题
-            SampleCoverVideo gsyVideoPlayer = (SampleCoverVideo) oldF;
+            CustomCoverVideo gsyVideoPlayer = (CustomCoverVideo) oldF;
             gsyVideoPlayer.mIfCurrentIsFullscreen = false;
         }
 

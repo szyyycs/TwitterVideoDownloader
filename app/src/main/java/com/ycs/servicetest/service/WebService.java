@@ -1,6 +1,6 @@
-package com.ycs.servicetest;
+package com.ycs.servicetest.service;
 
-import static com.ycs.servicetest.MainActivity.TAG;
+import static com.ycs.servicetest.common.Constant.TAG;
 import static com.ycs.servicetest.utils.WebUtil.analyzeList;
 
 import android.app.Service;
@@ -17,7 +17,6 @@ import androidx.annotation.NonNull;
 import com.ycs.servicetest.utils.WebUtil;
 
 public class WebService extends Service {
-    private String url;
     private static final int STOPSELF = 1;
     private final Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -45,7 +44,7 @@ public class WebService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e(TAG, "服务开启");
 
-        url = intent.getStringExtra("url");
+        String url = intent.getStringExtra("url");
         if (!url.contains("http")) {
             url = "https://" + url;
         }

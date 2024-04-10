@@ -1,10 +1,11 @@
-package com.ycs.servicetest
+package com.ycs.servicetest.common
 
 import android.content.Context
 import android.util.Log
+import com.ycs.servicetest.common.Constant.TAG
 import com.ycs.servicetest.utils.LogUtil
 
-class CrashHandler public constructor(): Thread.UncaughtExceptionHandler {
+class CrashHandler constructor(): Thread.UncaughtExceptionHandler {
     private var context: Context? = null
     fun init(context: Context?) {
         this.context = context
@@ -13,7 +14,7 @@ class CrashHandler public constructor(): Thread.UncaughtExceptionHandler {
 
     override fun uncaughtException(t: Thread, e: Throwable) {
         LogUtil.writeLog()
-        Log.d(MainActivity.TAG, "开始记录")
+        Log.d(TAG, "开始记录")
     }
     companion object {
         val instance: CrashHandler by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {

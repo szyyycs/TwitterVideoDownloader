@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ycs.servicetest.R;
-import com.ycs.servicetest.VideoModel;
+import com.ycs.servicetest.model.VideoModel;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -17,13 +17,13 @@ import java.util.List;
 public class ViewPagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final static String TAG = "RecyclerBaseAdapter";
 
-    private List<VideoModel> itemDataList = null;
-    private WeakReference<Context> context = null;
-    private int selectionPosition = 0;
+    private List<VideoModel> itemDataList;
+    private final WeakReference<Context> context ;
+
 
     public ViewPagerAdapter(Context context, List<VideoModel> itemDataList) {
         this.itemDataList = itemDataList;
-        this.context = new WeakReference<Context>(context);
+        this.context = new WeakReference<>(context);
     }
 
     @NonNull
@@ -37,7 +37,7 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     @Override
-    public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, int position) {
         RecyclerItemNormalHolder recyclerItemViewHolder = (RecyclerItemNormalHolder) holder;
         recyclerItemViewHolder.setRecyclerBaseAdapter(this);
         recyclerItemViewHolder.onBind(position, itemDataList.get(position));
@@ -75,7 +75,4 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
     }
 
-    public void setSelectionPosition(int positon) {
-        selectionPosition = positon;
-    }
 }

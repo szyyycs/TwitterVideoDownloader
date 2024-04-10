@@ -1,4 +1,4 @@
-package com.ycs.servicetest.utils;
+package com.ycs.servicetest.common;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -13,27 +13,29 @@ import android.widget.ImageView;
 
 import com.ycs.servicetest.R;
 
-public class ImageDialog {
-    private Context context;
+public class CustomImageDialog {
+    private final Context context;
     private Dialog dialog;
-    private Display display;
+    private final Display display;
     private ImageView image;
     private int mwidth;
     private int mheight;
-    public ImageDialog(Context context) {
+
+    public CustomImageDialog(Context context) {
         this.context = context;
         WindowManager windowManager = (WindowManager) context.getSystemService(Context
                 .WINDOW_SERVICE);
         display = windowManager.getDefaultDisplay();
 
     }
-    public ImageDialog builder() {
+
+    public CustomImageDialog builder() {
         // 获取Dialog布局
         View view = LayoutInflater.from(context).inflate(R.layout.layout_imagedialog, null);
         dialog = new Dialog(context, R.style.AlertDialogStyle);
-        image=view.findViewById(R.id.image);
-        mwidth=image.getLayoutParams().width;
-        mheight=image.getLayoutParams().height;
+        image = view.findViewById(R.id.image);
+        mwidth = image.getLayoutParams().width;
+        mheight = image.getLayoutParams().height;
 //        dialog.setCanceledOnTouchOutside(false);
         dialog.setContentView(view);
 //        image.setOnClickListener(v -> dialog.dismiss());
@@ -42,19 +44,19 @@ public class ImageDialog {
         lp.width = (int) (display.getWidth() * 0.86);
         return this;
     }
-//    public void setImage(int id){
-//        image.setImageResource(id);
-//    }
-    public void setAni(int id){
+
+
+    public void setAni(int id) {
         image.setImageResource(id);
         final AnimatorSet animatorSet = new AnimatorSet();
         final ViewWrapper wrapper = new ViewWrapper(image);
-        ObjectAnimator animator4 = ObjectAnimator.ofFloat(image, "translationY", -1500,20,-10,0);
-        ObjectAnimator animator1 = ObjectAnimator.ofInt(wrapper, "width", 10,mwidth);
-        ObjectAnimator animator2 = ObjectAnimator.ofInt(wrapper, "height", 10,mheight);
+        ObjectAnimator animator4 = ObjectAnimator.ofFloat(image, "translationY", -1500, 20, -10, 0);
+        ObjectAnimator animator1 = ObjectAnimator.ofInt(wrapper, "width", 10, mwidth);
+        ObjectAnimator animator2 = ObjectAnimator.ofInt(wrapper, "height", 10, mheight);
         animatorSet.play(animator4);
         animatorSet.setDuration(600).start();
     }
+
     public static class ViewWrapper {
         private View mTarget;
 
@@ -70,6 +72,7 @@ public class ImageDialog {
             mTarget.getLayoutParams().width = width;
             mTarget.requestLayout();
         }
+
         public int getHeight() {
             return mTarget.getLayoutParams().width;
         }
@@ -79,14 +82,16 @@ public class ImageDialog {
             mTarget.requestLayout();
         }
     }
-    public void dismiss(){
+
+    public void dismiss() {
         dialog.dismiss();
     }
+
     public void show() {
         dialog.show();
         final AnimatorSet animatorSet = new AnimatorSet();
         final ViewWrapper wrapper = new ViewWrapper(image);
-        ObjectAnimator animator4 = ObjectAnimator.ofFloat(image, "translationY", -1500,20,-10,0);
+        ObjectAnimator animator4 = ObjectAnimator.ofFloat(image, "translationY", -1500, 20, -10, 0);
 
         animatorSet.play(animator4);
         animatorSet.setDuration(600).start();

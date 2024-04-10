@@ -1,4 +1,4 @@
-package com.ycs.servicetest
+package com.ycs.servicetest.utils
 
 import android.util.Log
 import com.tencent.mmkv.MMKV

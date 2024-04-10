@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.ycs.servicetest">
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -31,10 +32,10 @@
         android:testOnly="false"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".TiktokActivity" />
-        <activity android:name=".ShowVideoActivity" />
+        <activity android:name=".activity.TiktokActivity" />
+        <activity android:name=".activity.ShowVideoActivity" />
         <activity
-            android:name=".PubuActivity"
+            android:name=".activity.PubuActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name="io.flutter.embedding.android.FlutterActivity"
@@ -46,51 +47,37 @@
                 android:name="io.flutter.embedding.android.SplashScreenDrawable"
                 android:resource="@drawable/launch_background" />
         </activity>
-        <activity android:name=".TestActivity" />
 
         <service
-            android:name=".DownLoadWindowService"
+            android:name=".service.DownLoadWindowService"
             android:exported="false" />
         <service
-            android:name=".WebService"
+            android:name=".service.WebService"
             android:enabled="true"
-            android:exported="true" />
-
-        <activity
-            android:name=".VideoActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
-            android:screenOrientation="portrait" />
-
-        <service
-            android:name=".MainService"
-            android:enabled="true"
-            android:exported="true" />
-        <service
-            android:name=".FloatWindowService"
             android:exported="false" />
 
-        <activity android:name=".FloatActivity" />
-        <activity android:name=".Tiktok" />
+        <service
+            android:name=".service.MainService"
+            android:enabled="true"
+            android:exported="false" />
+        <service
+            android:name=".service.FloatWindowService"
+            android:exported="false" />
+
+<!--        <activity android:name=".activity.FloatActivity" />-->
+
         <activity
-            android:name=".MainActivity"
-            android:launchMode="singleTask"
-            android:exported="true">
+            android:name=".activity.MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- <meta-data -->
-            <!-- android:name="io.flutter.app.android.SplashScreenUntilFirstFrame" -->
-            <!-- android:value="true"/> -->
-
-
-            <!-- <meta-data -->
-            <!-- android:name="io.flutter.embedding.android.SplashScreenDrawable" -->
-            <!-- android:resource="@drawable/launch_background"/> -->
         </activity>
 
-        <receiver android:name=".DialogReceiver" />
+        <receiver android:name=".receiver.DialogReceiver" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -103,7 +90,8 @@
         </provider>
         <provider
             android:name="cn.bmob.v3.util.BmobContentProvider"
-            android:authorities="com.ycs.servicetest.BmobContentProvider" />
+            android:authorities="com.ycs.servicetest.BmobContentProvider"
+            android:exported="false" />
     </application>
 
 </manifest>

@@ -11,15 +11,15 @@ import com.shuyu.gsyvideoplayer.GSYVideoManager;
 import com.shuyu.gsyvideoplayer.builder.GSYVideoOptionBuilder;
 import com.shuyu.gsyvideoplayer.listener.GSYSampleCallBack;
 import com.ycs.servicetest.R;
-import com.ycs.servicetest.SampleCoverVideo;
-import com.ycs.servicetest.VideoModel;
+import com.ycs.servicetest.common.CustomCoverVideo;
+import com.ycs.servicetest.model.VideoModel;
 
 import java.lang.ref.WeakReference;
 
 public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder {
     public final static String TAG = "GSYVideoBaseManager";
     protected WeakReference<Context> context;
-    SampleCoverVideo gsyVideoPlayer;
+    CustomCoverVideo gsyVideoPlayer;
     GSYVideoOptionBuilder gsyVideoOptionBuilder;
     ImageView imageView = null;
 
@@ -87,7 +87,7 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder {
     /**
      * 全屏幕按键处理
      */
-    public SampleCoverVideo getPlayer() {
+    public CustomCoverVideo getPlayer() {
         return gsyVideoPlayer;
     }
 

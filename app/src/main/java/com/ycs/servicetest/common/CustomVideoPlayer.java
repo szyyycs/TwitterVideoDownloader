@@ -1,4 +1,4 @@
-package com.ycs.servicetest;
+package com.ycs.servicetest.common;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -13,21 +13,22 @@ import com.shuyu.gsyvideoplayer.player.PlayerFactory;
 import com.shuyu.gsyvideoplayer.player.SystemPlayerManager;
 import com.shuyu.gsyvideoplayer.utils.Debuger;
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer;
+import com.ycs.servicetest.R;
 
 import moe.codeest.enviews.ENDownloadView;
 
 
 
-public class MyVideoPlayer extends StandardGSYVideoPlayer {
+public class CustomVideoPlayer extends StandardGSYVideoPlayer {
     private float speed=1;
     TextView changeSpeed;
     ImageView nextVideo;
     private Vibrator vi;
     private boolean mSpeed=false;
-    public MyVideoPlayer(Context context) {
+    public CustomVideoPlayer(Context context) {
         super(context);
     }
-    public MyVideoPlayer(Context context, AttributeSet attrs) {
+    public CustomVideoPlayer(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
     @Override

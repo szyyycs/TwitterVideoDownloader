@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".PubuActivity">
+    tools:context=".activity.PubuActivity">
 
 <androidx.recyclerview.widget.RecyclerView
     android:id="@+id/rvv"
@@ -12,7 +12,7 @@
     android:layout_height="match_parent">
 
 </androidx.recyclerview.widget.RecyclerView>
-    <com.ycs.servicetest.MyVideoPlayer
+    <com.ycs.servicetest.common.CustomVideoPlayer
         android:id="@+id/detail_player"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

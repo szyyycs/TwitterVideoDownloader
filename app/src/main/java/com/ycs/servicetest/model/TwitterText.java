@@ -1,4 +1,4 @@
-package com.ycs.servicetest;
+package com.ycs.servicetest.model;
 
 import cn.bmob.v3.BmobObject;
 

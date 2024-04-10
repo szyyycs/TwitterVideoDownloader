@@ -55,7 +55,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         holder.size_tv.setText(items.getSize());
         holder.time_tv.setText(items.getTime());
 
-        holder.text_tv.setText(items.getTwittertext());
+        holder.text_tv.setText(items.getTwitterText());
         if(holder.text_tv.getLineCount() > 3){//判断行数大于多少时改变
             int lineEndIndex = holder.text_tv.getLayout().getLineEnd(2); //设置第4行打省略号
             String text = holder.text_tv.getText().subSequence(0, lineEndIndex-2) +"...";

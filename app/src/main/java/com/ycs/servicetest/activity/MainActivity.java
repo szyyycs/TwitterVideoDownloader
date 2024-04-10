@@ -1,8 +1,8 @@
-package com.ycs.servicetest;
+package com.ycs.servicetest.activity;
 
 import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
-import static com.ycs.servicetest.Constant.REQUEST_CODE;
+import static com.ycs.servicetest.common.Constant.REQUEST_CODE;
 import static com.ycs.servicetest.utils.WebUtil.analyzeList;
 import static com.ycs.servicetest.utils.WebUtil.isAnalyse;
 import static com.ycs.servicetest.utils.WebUtil.isDownloading;
@@ -45,9 +45,15 @@ import com.app.hubert.guide.listener.OnPageChangedListener;
 import com.app.hubert.guide.model.GuidePage;
 import com.app.hubert.guide.model.HighLight;
 import com.tencent.mmkv.MMKV;
+import com.ycs.servicetest.common.Constant;
+import com.ycs.servicetest.service.DownLoadWindowService;
+import com.ycs.servicetest.MainApplication;
+import com.ycs.servicetest.service.MainService;
+import com.ycs.servicetest.R;
+import com.ycs.servicetest.service.WebService;
 import com.ycs.servicetest.utils.ClipBoardUtil;
-import com.ycs.servicetest.utils.ImageDialog;
-import com.ycs.servicetest.utils.IosAlertDialog;
+import com.ycs.servicetest.common.CustomImageDialog;
+import com.ycs.servicetest.common.CustomIosAlertDialog;
 import com.ycs.servicetest.utils.WebUtil;
 
 import java.util.Calendar;
@@ -62,7 +68,6 @@ import io.flutter.embedding.android.FlutterActivity;
 
 
 public class MainActivity extends AppCompatActivity {
-    final static String TAG = "yyy";
     final static int GOTO_DOWNLOAD = 1;
 
     private Button btn;
@@ -96,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
 
     //显示倒计时dialog
     void showDialog() {
-        ImageDialog d = new ImageDialog(MainActivity.this).builder();
+        CustomImageDialog d = new CustomImageDialog(MainActivity.this).builder();
 
         d.show();
         handler.postDelayed(() -> runOnUiThread(() -> d.setAni(R.mipmap.two)), 1000);
@@ -269,10 +274,10 @@ public class MainActivity extends AppCompatActivity {
                 if (isAnalyse || isDownloading) {
                     if (!analyzeList.contains(text)) {
                         WebUtil.analyzeList.add(text);
-                        Log.e(TAG, "analyzeList的值：" + analyzeList.toString());
+                        Log.e(Constant.TAG, "analyzeList的值：" + analyzeList.toString());
                         Toast.makeText(MainActivity.this, "已加入下载列表", Toast.LENGTH_SHORT).show();
                     } else {
-                        Log.e(TAG, "analyzeList的值：" + analyzeList.toString());
+                        Log.e(Constant.TAG, "analyzeList的值：" + analyzeList.toString());
                         Toast.makeText(MainActivity.this, "已在下载列表中", Toast.LENGTH_SHORT).show();
                     }
 
@@ -290,7 +295,7 @@ public class MainActivity extends AppCompatActivity {
         btn.setOnLongClickListener(v -> {
           //  startActivity(new Intent(MainActivity.this, PubuActivity.class));
            startActivity(FlutterActivity.createDefaultIntent(MainActivity.this));
-            Log.d(TAG, "initView: 长安了");
+            Log.d(Constant.TAG, "initView: 长安了");
             return true;
         });
         etInput.addTextChangedListener(new TextWatcher() {
@@ -315,7 +320,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         ivDownloadFile.setOnLongClickListener(v -> {
-            IosAlertDialog dialog = new IosAlertDialog(MainActivity.this).builder();
+            CustomIosAlertDialog dialog = new CustomIosAlertDialog(MainActivity.this).builder();
             SharedPreferences ssp = getSharedPreferences("url", Context.MODE_PRIVATE);
             String url = ssp.getString("url", "");
             if (url.equals("")) {
@@ -377,7 +382,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.e(TAG, "onActivityResult: 一次");
+        Log.e(Constant.TAG, "onActivityResult: 一次");
         if (requestCode == 0) {
             if (!Settings.canDrawOverlays(this)) {
                 Toast.makeText(this, "授权失败，请重新授权", Toast.LENGTH_SHORT).show();
@@ -449,7 +454,7 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             if (!Settings.canDrawOverlays(this)) {
 //                Toast.makeText(this, "请允许悬浮窗权限", Toast.LENGTH_SHORT);
-                new IosAlertDialog(this)
+                new CustomIosAlertDialog(this)
                         .builder()
                         .setCancelable(false)
                         .setCanceledOnTouchOutside(false)
