@@ -58,7 +58,7 @@ public class CustomImageDialog {
     }
 
     public static class ViewWrapper {
-        private View mTarget;
+        private final View mTarget;
 
         public ViewWrapper(View target) {
             mTarget = target;

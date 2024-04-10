@@ -48,7 +48,7 @@ import kotlinx.android.synthetic.main.activity_show_video.toolBar
 import kotlinx.coroutines.cancel
 import java.io.File
 
-class ShowVideoActivity : AppCompatActivity() {
+class VideoListActivity : AppCompatActivity() {
 
     private var vibrator: Vibrator? = null
     private var itemsList = mutableListOf<Items>()
@@ -116,7 +116,7 @@ class ShowVideoActivity : AppCompatActivity() {
                 override fun onPlayError(url: String, vararg objects: Any) {
                     super.onPlayError(url, *objects)
                     isPlay = false
-                    Toast.makeText(this@ShowVideoActivity, "播放错误", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@VideoListActivity, "播放错误", Toast.LENGTH_SHORT).show()
                 }
 
                 override fun onQuitFullscreen(url: String, vararg objects: Any) {
@@ -157,7 +157,7 @@ class ShowVideoActivity : AppCompatActivity() {
                 p.startPlay()
             }
         })
-        detail_player.getNextVideo().setOnClickListener {
+        detail_player.nextVideo.setOnClickListener {
             if (itemsList.size <= position + 1) {
                 position = (position + 1) % itemsList.size
                 isPlay = true
@@ -372,12 +372,20 @@ class ShowVideoActivity : AppCompatActivity() {
         XPopup.Builder(this)
             .atView(intoTiktok) // 依附于所点击的View，内部会自动判断在上方或者下方显示
             .asAttachList(
-                arrayOf("瀑布流", "抖音流"),
+                arrayOf("小红书模式", "抖音模式"),
                 intArrayOf(R.mipmap.pubulist, R.mipmap.tiktok)
             ) { position: Int, text: String? ->
                 when (position) {
                     0 -> {
-                        startActivity(Intent(this@ShowVideoActivity, PubuActivity::class.java))
+                        if (viewModel.isNull.value == true) {
+                            Toast.makeText(
+                                this,
+                                "您视频列表为空，请下载视频后再进入小红书模式哦！",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            return@asAttachList
+                        }
+                        startActivity(Intent(this@VideoListActivity, PubuActivity::class.java))
                         finish()
                     }
 
@@ -398,7 +406,7 @@ class ShowVideoActivity : AppCompatActivity() {
             ) { position: Int, text: String? ->
                 if (viewModel.isScanning.value == true) {
                     Toast.makeText(this, "正在扫描中，请稍后再试", Toast.LENGTH_SHORT).show()
-                    return@asAttachList;
+                    return@asAttachList
                 }
                 when (position) {
                     0 -> {
@@ -465,6 +473,7 @@ class ShowVideoActivity : AppCompatActivity() {
         intent.putExtra("i", position)
         intent.setClass(this, TiktokActivity::class.java)
         startActivity(intent)
+        finish()
     }
 
     private fun setStatusBarColor() {

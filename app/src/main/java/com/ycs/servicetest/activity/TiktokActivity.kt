@@ -2,8 +2,6 @@ package com.ycs.servicetest.activity
 
 //import androidx.lifecycle.lifecycleScope
 import android.os.Bundle
-import android.util.Log
-import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
@@ -11,11 +9,10 @@ import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.shuyu.gsyvideoplayer.GSYVideoManager
 import com.ycs.servicetest.R
-import com.ycs.servicetest.model.VideoModel
 import com.ycs.servicetest.list.RecyclerItemNormalHolder
 import com.ycs.servicetest.list.ViewPagerAdapter
-import kotlinx.android.synthetic.main.tiktok_activity.*
-import java.util.*
+import com.ycs.servicetest.model.VideoModel
+import kotlinx.android.synthetic.main.tiktok_activity.view_pager2
 
 class TiktokActivity : AppCompatActivity() {
 
@@ -75,7 +72,6 @@ class TiktokActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d("yyy", "releaseAll")
         GSYVideoManager.releaseAllVideos()
     }
 
@@ -84,7 +80,7 @@ class TiktokActivity : AppCompatActivity() {
             (view_pager2!!.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(position)
         if (viewHolder != null) {
             val recyclerItemNormalHolder = viewHolder as RecyclerItemNormalHolder
-            recyclerItemNormalHolder.player.setUp(dataList!![position].getUrl(), false, "")
+            recyclerItemNormalHolder.player.setUp(dataList!![position].url, false, "")
             recyclerItemNormalHolder.player.startPlayLogic()
         }
     }

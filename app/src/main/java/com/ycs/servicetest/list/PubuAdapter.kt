@@ -136,25 +136,17 @@ class PubuAdapter(dataList: MutableList<ImageModel>) :
 
     override fun onViewAttachedToWindow(holder: PubuHolder) {
         super.onViewAttachedToWindow(holder)
-        val lp: ViewGroup.LayoutParams = holder.itemView.getLayoutParams()
+        val lp: ViewGroup.LayoutParams = holder.itemView.layoutParams
         if (lp is StaggeredGridLayoutManager.LayoutParams) {
             // 瀑布流的布局参数
-            val layoutParams = lp
-            layoutParams.isFullSpan = false
-            holder.itemView.layoutParams = layoutParams
+            lp.isFullSpan = false
+            holder.itemView.layoutParams = lp
 
         }
     }
 
-    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        super.onDetachedFromRecyclerView(recyclerView)
-    }
 
-    override fun onViewDetachedFromWindow(holder: PubuHolder) {
-        super.onViewDetachedFromWindow(holder)
-    }
-
-    fun getScreenWidth(context: Context): Int {
+    private fun getScreenWidth(context: Context): Int {
         val windowManager: WindowManager =
             context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val displayMetrics = DisplayMetrics()

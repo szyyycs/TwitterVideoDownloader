@@ -1,6 +1,5 @@
 package com.ycs.servicetest.service;
 
-import static com.ycs.servicetest.common.Constant.TAG;
 import static com.ycs.servicetest.utils.WebUtil.analyzeList;
 
 import android.app.Service;
@@ -9,7 +8,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,12 +15,12 @@ import androidx.annotation.NonNull;
 import com.ycs.servicetest.utils.WebUtil;
 
 public class WebService extends Service {
-    private static final int STOPSELF = 1;
+    private static final int STOP_SELF = 1;
     private final Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
-            if (msg.what == STOPSELF) {
+            if (msg.what == STOP_SELF) {
                 stopSelf();
             }
         }
@@ -36,14 +34,12 @@ public class WebService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
+
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.e(TAG, "服务开启");
-
         String url = intent.getStringExtra("url");
         if (!url.contains("http")) {
             url = "https://" + url;
@@ -56,10 +52,10 @@ public class WebService extends Service {
         if (WebUtil.isAnalyse) {
             if (!analyzeList.contains(url)) {
                 WebUtil.analyzeList.add(url);
-                Log.e("yyy", "analyzeList的值：" + analyzeList);
+//                Log.e("yyy", "analyzeList的值：" + analyzeList);
                 Toast.makeText(this, "已加入下载列表", Toast.LENGTH_SHORT).show();
             } else {
-                Log.e("yyy", "analyzeList的值：" + analyzeList);
+//                Log.e("yyy", "analyzeList的值：" + analyzeList);
                 Toast.makeText(this, "已在下载列表中", Toast.LENGTH_SHORT).show();
             }
 

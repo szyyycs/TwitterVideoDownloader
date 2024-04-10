@@ -24,7 +24,7 @@ import com.ycs.servicetest.service.MainService;
 import com.ycs.servicetest.R;
 
 public class CustomIosAlertDialog {
-    private Context context;
+    private final Context context;
     private Dialog dialog;
     private LinearLayout lLayout_bg;
     private CheckBox cb_blue;
@@ -36,7 +36,7 @@ public class CustomIosAlertDialog {
     private Button btn_pos;
     private EditText editText;
     private ImageView img_line;
-    private Display display;
+    private final Display display;
     private boolean showTitle = false;
     private boolean showMsg = false;
     private boolean showPosBtn = false;
@@ -54,16 +54,16 @@ public class CustomIosAlertDialog {
         // 获取Dialog布局
         View view = LayoutInflater.from(context).inflate(R.layout.layout_dialog, null);
         // 获取自定义Dialog布局中的控件
-        lLayout_bg = (LinearLayout) view.findViewById(R.id.lLayout_bg);
-        txt_title = (TextView) view.findViewById(R.id.txt_title);
+        lLayout_bg = view.findViewById(R.id.lLayout_bg);
+        txt_title = view.findViewById(R.id.txt_title);
         txt_title.setVisibility(View.GONE);
-        txt_msg = (TextView) view.findViewById(R.id.txt_msg);
+        txt_msg = view.findViewById(R.id.txt_msg);
         txt_msg.setVisibility(View.GONE);
-        btn_neg = (Button) view.findViewById(R.id.btn_neg);
+        btn_neg = view.findViewById(R.id.btn_neg);
         btn_neg.setVisibility(View.GONE);
-        btn_pos = (Button) view.findViewById(R.id.btn_pos);
+        btn_pos = view.findViewById(R.id.btn_pos);
         btn_pos.setVisibility(View.GONE);
-        img_line = (ImageView) view.findViewById(R.id.img_line);
+        img_line = view.findViewById(R.id.img_line);
         img_line.setVisibility(View.GONE);
         editText=view.findViewById(R.id.ed_input);
 

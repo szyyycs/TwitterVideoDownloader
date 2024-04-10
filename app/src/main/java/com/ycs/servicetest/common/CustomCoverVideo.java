@@ -45,7 +45,7 @@ public class CustomCoverVideo extends StandardGSYVideoPlayer {
     @Override
     protected void init(Context context) {
         super.init(context);
-        mCoverImage = (ImageView) findViewById(R.id.thumbImage);
+        mCoverImage = findViewById(R.id.thumbImage);
         tweetTv = findViewById(R.id.text);
         // PlayerFactory.setPlayManager(SystemPlayerManager.class);
         PlayerFactory.setPlayManager(Exo2PlayerManager.class);//EXO模式

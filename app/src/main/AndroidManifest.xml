@@ -33,7 +33,7 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
         <activity android:name=".activity.TiktokActivity" />
-        <activity android:name=".activity.ShowVideoActivity" />
+        <activity android:name=".activity.VideoListActivity" />
         <activity
             android:name=".activity.PubuActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />

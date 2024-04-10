@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     //显示倒计时dialog
-    void showDialog() {
+    void showSurpriseDialog() {
         CustomImageDialog d = new CustomImageDialog(MainActivity.this).builder();
 
         d.show();
@@ -116,7 +116,6 @@ public class MainActivity extends AppCompatActivity {
     //检查时间
     void checkTime() {
         Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH) + 1;
         int day = calendar.get(Calendar.DAY_OF_MONTH);
         MMKV kv = MMKV.mmkvWithID("time");
@@ -130,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
             int month_saved = Integer.parseInt(values[0]);
             int day_saved = Integer.parseInt(values[1]);
             if (month == month_saved && day == day_saved) {
-                handler.postDelayed(this::showDialog, 2000);
+                handler.postDelayed(this::showSurpriseDialog, 2000);
                 return;
             }
         }
@@ -156,35 +155,6 @@ public class MainActivity extends AppCompatActivity {
         showGuide();
     }
 
-//    private void getVideoFromWebView() {
-//        webView = findViewById(R.id.webview);
-//
-//        webView.getSettings().setJavaScriptEnabled(true);
-//
-//        webView.getSettings().setBlockNetworkImage(true);
-//        webView.getSettings().setLoadsImagesAutomatically(false);
-//        // webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-//        webView.setWebViewClient(new WebViewClient() {
-//            @Override
-//            public void onPageStarted(WebView view, String url, Bitmap favicon) {
-//                super.onPageStarted(view, url, favicon);
-//                Log.d(TAG, "onPageStarted: " + view.getTitle());
-//
-//            }
-//
-//            @Override
-//            public void onPageFinished(WebView view, String url) {
-//                super.onPageFinished(view, url);
-//                Log.d("yyy", "onPageFinished:" + view.getTitle());
-//                webView.evaluateJavascript(fetchData, value -> {
-//                    // 这里的value就是JavaScript代码的执行结果
-//                    Log.d("yyy", "onReceiveValue value=" + value);
-//                });
-//            }
-//        });
-//        webView.loadUrl("https://xunlangbot.com/download");
-//
-//    }
 
     private void showGuide() {
         NewbieGuide.with(MainActivity.this)
@@ -258,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
         etInput = findViewById(R.id.input);
 
         ivDownloadFile.setOnClickListener(v -> {
-            Intent i = new Intent(MainActivity.this, ShowVideoActivity.class);
+            Intent i = new Intent(MainActivity.this, VideoListActivity.class);
             startActivity(i);
         });
 
@@ -274,10 +244,10 @@ public class MainActivity extends AppCompatActivity {
                 if (isAnalyse || isDownloading) {
                     if (!analyzeList.contains(text)) {
                         WebUtil.analyzeList.add(text);
-                        Log.e(Constant.TAG, "analyzeList的值：" + analyzeList.toString());
+                        Log.e(Constant.TAG, "analyzeList的值：" + analyzeList);
                         Toast.makeText(MainActivity.this, "已加入下载列表", Toast.LENGTH_SHORT).show();
                     } else {
-                        Log.e(Constant.TAG, "analyzeList的值：" + analyzeList.toString());
+                        Log.e(Constant.TAG, "analyzeList的值：" + analyzeList);
                         Toast.makeText(MainActivity.this, "已在下载列表中", Toast.LENGTH_SHORT).show();
                     }
 

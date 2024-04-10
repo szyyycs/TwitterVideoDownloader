@@ -36,6 +36,7 @@ import java.io.File
 import java.io.IOException
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
+import java.util.Locale
 import java.util.Random
 
 
@@ -46,8 +47,8 @@ class PubuActivity : AppCompatActivity() {
 
         //private var url = Environment.getExternalStorageDirectory().toString()+"/DCIM/Camera/"
         private var url = Environment.getExternalStorageDirectory().toString() + "/.savedPic/"
-        private val LOADTEXT = 3
-        private val UPDATEALL = 2
+        private const val LOAD_TEXT = 3
+        private const val UPDATE_ALL = 2
         private val heightArray = doubleArrayOf(0.45, 0.5, 0.55)
     }
 
@@ -67,12 +68,12 @@ class PubuActivity : AppCompatActivity() {
                 adapter.notifyDataSetChanged()
             }
 
-            UPDATEALL -> {
+            UPDATE_ALL -> {
                 adapter.notifyDataSetChanged()
                 loadText()
             }
 
-            LOADTEXT -> {
+            LOAD_TEXT -> {
                 adapter.notifyItemChanged(it.obj as Int)
             }
         }
@@ -94,7 +95,7 @@ class PubuActivity : AppCompatActivity() {
                         if (imageModels[i].len.isNullOrBlank()) {
                             imageModels[i].len = loadVideoLen(imageModels[i].url)
                             val msg = Message()
-                            msg.what = LOADTEXT
+                            msg.what = LOAD_TEXT
                             msg.obj = i
                             mHandler.sendMessage(msg)
                         }
@@ -162,7 +163,7 @@ class PubuActivity : AppCompatActivity() {
         }
     }
 
-    public fun initStaggeredGridLayout() {
+    fun initStaggeredGridLayout() {
         val staggeredGridLayoutManager =
             StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         staggeredGridLayoutManager.gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_NONE
@@ -266,7 +267,7 @@ class PubuActivity : AppCompatActivity() {
                     ) + " " + s.substring(8, 10) + ":" + s.substring(10, 12)
                 } else {
                     val timeee = fileVideo.lastModified()
-                    val formatter = SimpleDateFormat("yyyy/MM/dd HH:mm")
+                    val formatter = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.CHINA)
                     time = formatter.format(timeee)
 
                 }
@@ -287,7 +288,7 @@ class PubuActivity : AppCompatActivity() {
             }
 
             imageModels.shuffle()
-            mHandler.sendEmptyMessage(UPDATEALL)
+            mHandler.sendEmptyMessage(UPDATE_ALL)
         }.start()
     }
 
@@ -300,7 +301,7 @@ class PubuActivity : AppCompatActivity() {
         orientationUtils.backToProtVideo()
         if (GSYVideoManager.backFromWindowFull(this)) {
             isFullScreen = false
-            Log.e("yyy", "退出全屏")
+            //"退出全屏"
             return
         }
         if (!canChange) {
@@ -341,7 +342,7 @@ class PubuActivity : AppCompatActivity() {
             .setVideoAllCallBack(object : GSYSampleCallBack() {
                 override fun onPrepared(url: String, vararg objects: Any) {
                     super.onPrepared(url, *objects)
-                    orientationUtils.setEnable(detailPlayer.isRotateWithSystem())
+                    orientationUtils.isEnable = detailPlayer.isRotateWithSystem
                     isPlay = true
                 }
 

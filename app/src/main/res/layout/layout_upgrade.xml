@@ -99,7 +99,7 @@
             android:id="@+id/dialog_image"
             android:layout_width="match_parent"
             android:layout_height="120dp"
-            android:src="@mipmap/dialog_image2"
+            android:src="@mipmap/dialog_image"
             android:scaleType="fitXY"
             />
 

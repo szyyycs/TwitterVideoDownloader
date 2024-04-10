@@ -5,7 +5,7 @@ import android.util.Log
 import com.ycs.servicetest.common.Constant.TAG
 import com.ycs.servicetest.utils.LogUtil
 
-class CrashHandler constructor(): Thread.UncaughtExceptionHandler {
+class CrashHandler : Thread.UncaughtExceptionHandler {
     private var context: Context? = null
     fun init(context: Context?) {
         this.context = context

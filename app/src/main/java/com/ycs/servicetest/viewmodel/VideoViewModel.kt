@@ -16,6 +16,7 @@ import cn.bmob.v3.listener.FindListener
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.tencent.mmkv.MMKV
+import com.ycs.servicetest.MainApplication
 import com.ycs.servicetest.list.Items
 import com.ycs.servicetest.model.TwitterText
 import com.ycs.servicetest.utils.WebUtil
@@ -46,22 +47,24 @@ import java.util.Locale
  * </pre>
  */
 class VideoViewModel(application: Application) : AndroidViewModel(application) {
-    var itemsList = MutableLiveData<MutableList<Items>>()
-    var isNull = MutableLiveData<Boolean>()
-    var num = MutableLiveData<Int>()
-    var index = MutableLiveData<Int>()
-    var loadTweetNum = MutableLiveData<Int>()
+    val itemsList = MutableLiveData<MutableList<Items>>()
+    val isNull = MutableLiveData<Boolean>()
+    val num = MutableLiveData<Int>()
+    val index = MutableLiveData<Int>()
+    val loadTweetNum = MutableLiveData<Int>()
     var tweetNum = 0
-    var indexUploadTweet = MutableLiveData<Int>()
+    val indexUploadTweet = MutableLiveData<Int>()
     var tweet: String = ""
     var len: String = ""
     var tweetCountIndex = -1
-    var isScanning = MutableLiveData<Boolean>()
-    var context: Application = getApplication()
+    val isScanning = MutableLiveData<Boolean>()
+
 
     var url = Environment.getExternalStorageDirectory().toString() + "/.savedPic/"
-    private var kv: MMKV = MMKV.defaultMMKV()
-    private val kv_text by lazy {
+    private val kv: MMKV by lazy {
+        MMKV.defaultMMKV()
+    }
+    private val kvText by lazy {
         MMKV.mmkvWithID("text")
     }
 
@@ -75,9 +78,10 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun getSPUrl() {
-        val spp = context.getSharedPreferences("url", AppCompatActivity.MODE_PRIVATE)
-        if (spp.getString("url", "") != "") {
-            url = spp.getString("url", "")!!
+        val spp = MainApplication.getAppContext()
+            ?.getSharedPreferences("url", AppCompatActivity.MODE_PRIVATE)
+        if (spp?.getString("url", "") != "") {
+            url = spp?.getString("url", "")!!
         }
 
     }
@@ -108,7 +112,11 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
     fun startScan() {
         num.value = 0
         if (isScanning.value == true) {
-            Toast.makeText(context, "正在扫描中，请稍后重试...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                MainApplication.getAppContext(),
+                "正在扫描中，请稍后重试...",
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
         if (checkFileIsNull()) {
@@ -130,7 +138,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                         continue
                     }
                     val uu = url + s
-                    val text = kv_text.decodeString(s, "")
+                    val text = kvText.decodeString(s, "")
                     val i = Items()
                     val file = File(uu)
                     val d = BigDecimal(file.length() / (1024 * 1024.0))
@@ -184,7 +192,11 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
             }
             val response = getList.await()  //等待deferred 的返回
             CoroutineScope(Dispatchers.Main).launch { //启动一个协程，运行在主线程
-                Toast.makeText(context, "共找到${num.value}个视频", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    MainApplication.getAppContext(),
+                    "共找到${num.value}个视频",
+                    Toast.LENGTH_SHORT
+                ).show()
                 isNull.value = false
                 itemsList.value = response
                 isScanning.value = false
@@ -220,7 +232,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
             viewModelScope.launch(Dispatchers.Main) { //启动一个协程，运行在主线程
                 result?.let {
                     itemsList.value = result
-                    if (kv_text.count() == 0L || kv_text.decodeInt("len", 0) < 500) {
+                    if (kvText.count() == 0L || kvText.decodeInt("len", 0) < 500) {
                         loadTweet()
                     } else {
                         setDataList(url, result as ArrayList<Items>)
@@ -236,9 +248,9 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
 
     @Synchronized
     private fun handleTwitterList(list: List<TwitterText>) {
-        kv_text.encode("len", list.size + kv.decodeInt("len", 0))
+        kvText.encode("len", list.size + kv.decodeInt("len", 0))
         for (tt in list.indices) {
-            kv_text.encode(list[tt].filename, WebUtil.reverse(list[tt].text))
+            kvText.encode(list[tt].filename, WebUtil.reverse(list[tt].text))
             tweet = list[tt].text
             indexUploadTweet.value = tt
         }

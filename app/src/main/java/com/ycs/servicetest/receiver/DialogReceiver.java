@@ -86,7 +86,8 @@ public class DialogReceiver extends BroadcastReceiver {
 
     public void collapseStatusBar(Context context) {
         try {
-            @SuppressLint("WrongConstant") Object statusBarManager = context.getSystemService("statusbar");
+            @SuppressLint("WrongConstant")
+            Object statusBarManager = context.getSystemService("statusbar");
             Method collapse;
             collapse = statusBarManager.getClass().getMethod("collapsePanels");
             collapse.invoke(statusBarManager);
