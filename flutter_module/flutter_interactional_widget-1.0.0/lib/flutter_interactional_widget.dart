@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:sensors_plus/sensors_plus.dart';
+import 'package:flutter_interactional_widget/carson_sensors.dart';
 
 // ignore: must_be_immutable
 class InteractionalWidget extends StatefulWidget {
@@ -64,7 +64,7 @@ class _InteractionalWidgetState extends State<InteractionalWidget> {
   @override
   void initState() {
     super.initState();
-    _streamSubscriptions.add(gyroscopeEvents.listen((event) {
+    _streamSubscriptions.add(gyroscopeGameEventStream().listen((event) {
       setState(() {
         // 通过采集的旋转速度计算出背景 delta 偏移
         Offset deltaOffset = gyroscopeToOffset(-event.y, -event.x);
