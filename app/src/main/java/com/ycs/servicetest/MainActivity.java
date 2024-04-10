@@ -289,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
         });
         btn.setOnLongClickListener(v -> {
           //  startActivity(new Intent(MainActivity.this, PubuActivity.class));
-            startActivity(FlutterActivity.createDefaultIntent(MainActivity.this));
+           startActivity(FlutterActivity.createDefaultIntent(MainActivity.this));
             Log.d(TAG, "initView: 长安了");
             return true;
         });

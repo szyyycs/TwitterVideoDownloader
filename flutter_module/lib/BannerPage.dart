@@ -17,39 +17,32 @@ class _BannerPageState extends State<BannerPage> with TickerProviderStateMixin {
 
   late String src;
   final audioPlayer = AudioPlayer();
-  //late AudioCache audioCache;
 
   @override
   initState() {
     super.initState();
     src = "play";
-    //audioCache = AudioCache(fixedPlayer: audioPlayer);
+
     controller = AnimationController(
         duration: const Duration(milliseconds: 4000), vsync: this);
     animation = Tween(begin: 0.0, end: 1.0).animate(controller);
     controller.repeat();
-    // audioPlayer.setReleaseMode(ReleaseMode.release);
-    // audioPlayer.play(AssetSource('happy.mp3'));
-    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) async{
-    //   // await audioPlayer.setSource(AssetSource('happy.mp3'));
-    //   // await audioPlayer.resume();
-    //   await
-    // });
-    audioPlayer.play(AssetSource('assets/happy.mp3'));
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await audioPlayer.setReleaseMode(ReleaseMode.loop);
+      await audioPlayer.play(AssetSource('happy.mp3'));
+    });
+
   }
 
   @override
   void dispose() {
-   // audioCache.clearAll();
     audioPlayer.dispose();
     controller.dispose();
     super.dispose();
   }
 
   void play(){
-
     audioPlayer.resume();
-    //audioCache.loop('happy.mp3');
   }
 
   void pause() {

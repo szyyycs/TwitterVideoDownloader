@@ -75,7 +75,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun getDataList(tag: String): MutableList<Items> {
         var datalist = mutableListOf<Items>()
-        val strJson: String? = kv.decodeString(tag, null) ?: return datalist
+        val strJson: String = kv.decodeString(tag, null) ?: return datalist
         val gson = Gson()
         datalist = gson.fromJson(strJson, object : TypeToken<MutableList<Items?>?>() {}.type)
         return datalist
@@ -86,36 +86,37 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
         if (!f.exists()) {
             f.mkdirs()
         }
-        if (f.list() == null || f.list().isEmpty()) {
-            isNull.value=true
+        if (f.list() == null || f.list()!!.isEmpty()) {
+            isNull.value = true
             return true
-        }else{
-            isNull.value=false
+        } else {
+            isNull.value = false
         }
         return isNull.value!!
 
     }
-    fun startScan(){
+
+    fun startScan() {
         num.value = 0
-        if(isScaning.value==true){
+        if (isScaning.value == true) {
             Toast.makeText(context, "正在扫描中，请稍后重试...", Toast.LENGTH_SHORT).show()
             return
         }
-        if(checkFileIsNull()){
+        if (checkFileIsNull()) {
             return
         }
-        isScaning.value=true
+        isScaning.value = true
         scanItemListFromFile()
     }
 
-    private fun scanItemListFromFile(){
+    private fun scanItemListFromFile() {
         viewModelScope.launch(Dispatchers.Default) { //获取远端数据需要耗时，创建一个协程运行在子线程，不会阻塞
             val getList = async {
                 //使用 async 执行一个耗时任务，返回一个deferred
                 var tempNum = 0
-                var newList = mutableListOf<Items>()
+                val newList = mutableListOf<Items>()
                 val f = File(url)
-                for (s in f.list()) {
+                for (s in f.list()!!) {
                     if (!s.endsWith(".mp4")) {
                         continue
                     }
@@ -124,13 +125,16 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                     val i = Items()
                     val file = File(uu)
                     val d = BigDecimal(file.length() / (1024 * 1024.0))
-                            .setScale(2, BigDecimal.ROUND_HALF_UP).toDouble()
+                        .setScale(2, BigDecimal.ROUND_HALF_UP).toDouble()
                     val fileSize = d.toString() + "MB"
                     var attr: BasicFileAttributes?
                     var instant = null
                     var time: String?
                     if ((s.length == 22 || s.length == 21) && s.startsWith("20")) {
-                        time = s.substring(0, 4) + "/" + s.substring(4, 6) + "/" + s.substring(6, 8) + " " + s.substring(8, 10) + ":" + s.substring(10, 12)
+                        time = s.substring(0, 4) + "/" + s.substring(4, 6) + "/" + s.substring(
+                            6,
+                            8
+                        ) + " " + s.substring(8, 10) + ":" + s.substring(10, 12)
                     } else {
                         try {
                             var path: Path?
@@ -140,7 +144,8 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                                 instant = attr.creationTime().toInstant() as Nothing?
                             }
                             time = if (instant != null) {
-                                val temp = instant.toString().replace("T", " ").replace("Z", "").replace("-", "/")
+                                val temp = instant.toString().replace("T", " ").replace("Z", "")
+                                    .replace("-", "/")
                                 temp.substring(0, temp.length - 3)
                             } else {
                                 val timeee = file.lastModified()
@@ -186,20 +191,15 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
     private fun loadVideoDuration() {
         viewModelScope.launch(Dispatchers.Default) {
             val updateIndex = async {
-                var list = itemsList.value
-                if (list != null) {
+                val list = itemsList.value
+                if (!list.isNullOrEmpty()) {
                     for (i in list.indices) {
-                        if (list != null && list.size != 0) {
-                            len = loadVideoLen(list[i]?.url)
-                            if (list.isEmpty()) {
-                                return@async null
-                            }
-                            list[i].video_len = len
-                            index?.postValue(i)
-                        } else {
+                        len = loadVideoLen(list[i].url ?: "")
+                        if (list.isEmpty()) {
                             return@async null
                         }
-
+                        list[i].video_len = len
+                        index.postValue(i)
                     }
                 }
                 list
@@ -228,7 +228,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
         for (tt in list.indices) {
             kv_text.encode(list[tt].filename, WebUtil.reverse(list[tt].text))
             tweet = list[tt].text
-            indexUploadTweet.setValue(tt)
+            indexUploadTweet.value = tt
         }
         loadTweetNum.value = loadTweetNum.value?.plus(1)
     }
@@ -237,33 +237,33 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
     private fun queryFindList(skip: Int) {
         val query = BmobQuery<TwitterText>()
         query.order("createdAt")
-                .setLimit(500)
-                .setSkip(skip * 500)
-                .findObjects(object : FindListener<TwitterText>() {
-                    override fun done(list: MutableList<TwitterText>?, e: BmobException?) {
-                        if (e == null && list != null) {
-                            handleTwitterList(list)
-                        }
+            .setLimit(500)
+            .setSkip(skip * 500)
+            .findObjects(object : FindListener<TwitterText>() {
+                override fun done(list: MutableList<TwitterText>?, e: BmobException?) {
+                    if (e == null && list != null) {
+                        handleTwitterList(list)
                     }
-                })
+                }
+            })
     }
 
     private fun loadTweet() {
         val query = BmobQuery<TwitterText>()
         query.order("createdAt")
-                .count(TwitterText::class.java, object : CountListener() {
-                    override fun done(p0: Int?, p1: BmobException?) {
-                        if (p0 != null) {
-                            tweetNum = p0;
-                            tweetCountIndex = p0?.div(500) + 1
-                            var num = 0
-                            while (num < tweetCountIndex) {
-                                queryFindList(num)
-                                num++
-                            }
+            .count(TwitterText::class.java, object : CountListener() {
+                override fun done(p0: Int?, p1: BmobException?) {
+                    if (p0 != null) {
+                        tweetNum = p0
+                        tweetCountIndex = p0.div(500).plus(1)
+                        var num = 0
+                        while (num < tweetCountIndex) {
+                            queryFindList(num)
+                            num++
                         }
                     }
-                })
+                }
+            })
     }
 
     fun deSort(stus: ArrayList<Items>) {
@@ -314,7 +314,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun setDataList(tag: String, dataList: ArrayList<Items>) {
-        if (null == dataList || dataList.size <= 0) return
+        if (dataList.size <= 0) return
         val gson = Gson()
         //转换成json数据，再保存
         val strJson = gson.toJson(dataList)
@@ -331,8 +331,8 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun loadVideoLen(uu: String): String {
-        var tt: String
-        var mediaPlayer = MediaPlayer()
+        val tt: String
+        val mediaPlayer = MediaPlayer()
         try {
             mediaPlayer.setDataSource(uu)
         } catch (e: IOException) {
@@ -340,14 +340,9 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
         }
         try {
             mediaPlayer.prepare()
-        } catch (e: IOException) {
+        } catch (_: IOException) {
         }
-        var timee: Long
-        if (mediaPlayer.duration != null) {
-            timee = (mediaPlayer.duration / 1000).toLong()
-        } else {
-            return ""
-        }
+        val timee: Long = (mediaPlayer.duration / 1000).toLong()
         //获得了视频的时长（以毫秒为单位）
         mediaPlayer.release()
         tt = if (timee / 60 != 0L) {
