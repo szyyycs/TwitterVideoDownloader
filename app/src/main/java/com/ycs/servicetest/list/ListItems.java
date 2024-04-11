@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 
 import java.io.Serializable;
 
-public class Items implements Serializable {
+public class ListItems implements Serializable {
     private String text;
     private Bitmap src;
     private String size;
@@ -12,6 +12,7 @@ public class Items implements Serializable {
     private String video_len;
     private String url;
     private static final long serialVersionUID = 1L;
+
     public String getTwitterText() {
         return twitter_text;
     }

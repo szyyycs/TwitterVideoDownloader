@@ -32,6 +32,11 @@
         android:testOnly="false"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
+        <activity
+            android:name=".activity.SettingActivity"
+            android:exported="false"
+            android:label="@string/title_activity_setting"
+            android:theme="@style/ComposeTheme" />
         <activity android:name=".activity.TiktokActivity" />
         <activity android:name=".activity.VideoListActivity" />
         <activity
@@ -55,17 +60,13 @@
             android:name=".service.WebService"
             android:enabled="true"
             android:exported="false" />
-
         <service
             android:name=".service.MainService"
             android:enabled="true"
             android:exported="false" />
         <service
             android:name=".service.FloatWindowService"
-            android:exported="false" />
-
-<!--        <activity android:name=".activity.FloatActivity" />-->
-
+            android:exported="false" /> <!-- <activity android:name=".activity.FloatActivity" /> -->
         <activity
             android:name=".activity.MainActivity"
             android:exported="true"

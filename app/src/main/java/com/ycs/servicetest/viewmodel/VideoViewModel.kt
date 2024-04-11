@@ -17,7 +17,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.tencent.mmkv.MMKV
 import com.ycs.servicetest.MainApplication
-import com.ycs.servicetest.list.Items
+import com.ycs.servicetest.list.ListItems
 import com.ycs.servicetest.model.TwitterText
 import com.ycs.servicetest.utils.WebUtil
 import kotlinx.coroutines.CoroutineScope
@@ -47,7 +47,7 @@ import java.util.Locale
  * </pre>
  */
 class VideoViewModel(application: Application) : AndroidViewModel(application) {
-    val itemsList = MutableLiveData<MutableList<Items>>()
+    val itemsList = MutableLiveData<MutableList<ListItems>>()
     val isNull = MutableLiveData<Boolean>()
     val num = MutableLiveData<Int>()
     val index = MutableLiveData<Int>()
@@ -86,11 +86,11 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
 
     }
 
-    private fun getDataList(tag: String): MutableList<Items> {
-        var datalist = mutableListOf<Items>()
+    private fun getDataList(tag: String): MutableList<ListItems> {
+        var datalist = mutableListOf<ListItems>()
         val strJson: String = kv.decodeString(tag, null) ?: return datalist
         val gson = Gson()
-        datalist = gson.fromJson(strJson, object : TypeToken<MutableList<Items?>?>() {}.type)
+        datalist = gson.fromJson(strJson, object : TypeToken<MutableList<ListItems?>?>() {}.type)
         return datalist
     }
 
@@ -131,7 +131,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
             val getList = async {
                 //使用 async 执行一个耗时任务，返回一个deferred
                 var tempNum = 0
-                val newList = mutableListOf<Items>()
+                val newList = mutableListOf<ListItems>()
                 val f = File(url)
                 for (s in f.list()!!) {
                     if (!s.endsWith(".mp4")) {
@@ -139,7 +139,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                     }
                     val uu = url + s
                     val text = kvText.decodeString(s, "")
-                    val i = Items()
+                    val i = ListItems()
                     val file = File(uu)
                     val d = BigDecimal(file.length() / (1024 * 1024.0))
                         .setScale(2, RoundingMode.HALF_UP).toDouble()
@@ -235,7 +235,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                     if (kvText.count() == 0L || kvText.decodeInt("len", 0) < 500) {
                         loadTweet()
                     } else {
-                        setDataList(url, result as ArrayList<Items>)
+                        setDataList(url, result as ArrayList<ListItems>)
                         isNull.postValue(false)
                     }
 
@@ -290,9 +290,9 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
             })
     }
 
-    fun deSort(stus: ArrayList<Items>) {
-        Collections.sort(stus, object : Comparator<Items> {
-            override fun compare(o1: Items, o2: Items): Int {
+    fun deSort(stus: ArrayList<ListItems>) {
+        Collections.sort(stus, object : Comparator<ListItems> {
+            override fun compare(o1: ListItems, o2: ListItems): Int {
                 if (o2.time == null || o1.time == null) {
                     return 1
                 }
@@ -302,7 +302,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
 
     }
 
-    fun sortByLarge(stus: ArrayList<Items>) {
+    fun sortByLarge(stus: ArrayList<ListItems>) {
         stus.sortWith { o1, o2 ->
             if (o2.video_len == null || o1.video_len == null) {
                 1
@@ -311,7 +311,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun sortByComment(stus: ArrayList<Items>) {
+    fun sortByComment(stus: ArrayList<ListItems>) {
         stus.sortWith { o1, o2 ->
             if (o2.twitterText == null || o1.twitterText == null) {
                 1
@@ -319,8 +319,8 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun deSortByComment(stus: ArrayList<Items>) {
-        stus.sortWith { o1: Items, o2: Items ->
+    fun deSortByComment(stus: ArrayList<ListItems>) {
+        stus.sortWith { o1: ListItems, o2: ListItems ->
             if (o2.twitterText == null || o1.twitterText == null) {
                 1
             }
@@ -328,8 +328,8 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun deSortByLarge(stus: ArrayList<Items>) {
-        stus.sortWith { o1: Items, o2: Items ->
+    fun deSortByLarge(stus: ArrayList<ListItems>) {
+        stus.sortWith { o1: ListItems, o2: ListItems ->
             if (o2.video_len == null || o1.video_len == null) {
                 1
             }
@@ -337,7 +337,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun setDataList(tag: String, dataList: ArrayList<Items>) {
+    fun setDataList(tag: String, dataList: ArrayList<ListItems>) {
         if (dataList.size <= 0) return
         val gson = Gson()
         //转换成json数据，再保存
@@ -345,8 +345,8 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
         kv.encode(tag, strJson)
     }
 
-    fun sort(list: MutableList<Items>) {
-        list.sortWith(Comparator { o1: Items, o2: Items ->
+    fun sort(list: MutableList<ListItems>) {
+        list.sortWith(Comparator { o1: ListItems, o2: ListItems ->
             if (o2.time == null || o1.time == null) {
                 return@Comparator 1
             }

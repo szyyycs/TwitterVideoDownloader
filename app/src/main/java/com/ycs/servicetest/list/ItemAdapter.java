@@ -19,11 +19,11 @@ import java.util.List;
 
 
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
-    private List<Items> itemslist;
+    private List<ListItems> itemslist;
     private OnItemLongClickListener itemLongClickListener;
     private OnItemClickListener mListener;
 
-    public ItemAdapter(ArrayList<Items> itemsList) {
+    public ItemAdapter(ArrayList<ListItems> itemsList) {
         this.itemslist = itemsList;
     }
 
@@ -41,8 +41,8 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ItemAdapter.ViewHolder holder, int position) {
-        final Items items = itemslist.get(position);
-        holder.items_tv.setText(items.getText());
+        final ListItems listItems = itemslist.get(position);
+        holder.items_tv.setText(listItems.getText());
         if (context != null) {
             Glide.with(context)
                     .setDefaultRequestOptions(
@@ -51,20 +51,20 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
                                     .centerCrop()
                                     .error(R.mipmap.blank)
                     )
-                    .load(items.getUrl())
+                    .load(listItems.getUrl())
                     .into(holder.items_img);
         }
-        holder.size_tv.setText(items.getSize());
-        holder.time_tv.setText(items.getTime());
+        holder.size_tv.setText(listItems.getSize());
+        holder.time_tv.setText(listItems.getTime());
 
-        holder.text_tv.setText(items.getTwitterText());
+        holder.text_tv.setText(listItems.getTwitterText());
         if (holder.text_tv.getLineCount() > 3) {//判断行数大于多少时改变
             int lineEndIndex = holder.text_tv.getLayout().getLineEnd(2); //设置第4行打省略号
             String text = holder.text_tv.getText().subSequence(0, lineEndIndex - 2) + "...";
             holder.text_tv.setText(text);
         }
 
-        holder.videolen_tv.setText(items.getVideo_len());
+        holder.videolen_tv.setText(listItems.getVideo_len());
     }
 
     @Override
@@ -128,13 +128,13 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         this.itemLongClickListener = listener;
     }
 
-    public void update(List<Items> il) {
+    public void update(List<ListItems> il) {
         this.itemslist = il;
         //notifyItemInserted(0);
         notifyDataSetChanged();
     }
 
-    public void updateOne(List<Items> il) {
+    public void updateOne(List<ListItems> il) {
         this.itemslist = il;
         notifyItemInserted(il.size() - 1);
         notifyDataSetChanged();
@@ -151,7 +151,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         notifyDataSetChanged();
     }
 
-    public Items getItem(int position) {
+    public ListItems getItem(int position) {
         return itemslist.get(position);
 
     }

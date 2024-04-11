@@ -13,12 +13,14 @@ import java.util.List;
  * </pre>
  */
 public class DiffUtilCallBack extends DiffUtil.Callback {
-    public List<Items> newList;
-    public List<Items> oldList;
-    public DiffUtilCallBack(List newList, List oldList){
-        this.newList=newList;
-        this.oldList=oldList;
+    public List<ListItems> newList;
+    public List<ListItems> oldList;
+
+    public DiffUtilCallBack(List newList, List oldList) {
+        this.newList = newList;
+        this.oldList = oldList;
     }
+
     @Override
     public int getOldListSize() {
         return oldList.size();

@@ -32,7 +32,7 @@ import com.ycs.servicetest.common.CustomIosAlertDialog
 import com.ycs.servicetest.common.CustomLinearLayoutManager
 import com.ycs.servicetest.common.CustomVideoPlayer
 import com.ycs.servicetest.list.ItemAdapter
-import com.ycs.servicetest.list.Items
+import com.ycs.servicetest.list.ListItems
 import com.ycs.servicetest.model.VideoModel
 import com.ycs.servicetest.viewmodel.VideoViewModel
 import kotlinx.android.synthetic.main.activity_show_video.back
@@ -51,7 +51,7 @@ import java.io.File
 class VideoListActivity : AppCompatActivity() {
 
     private var vibrator: Vibrator? = null
-    private var itemsList = mutableListOf<Items>()
+    private var itemsList = mutableListOf<ListItems>()
     private var position = 0
     var sortArray = intArrayOf(0, 0, 0)
     private var orientationUtils: OrientationUtils? = null
@@ -192,7 +192,7 @@ class VideoListActivity : AppCompatActivity() {
             }
             viewModel.isNull.value = false
             itemsList = it
-            adapter.update(it as ArrayList<Items>?)
+            adapter.update(it as ArrayList<ListItems>?)
         }
         viewModel.isNull.observe(this) {
             if (it) {
@@ -231,7 +231,7 @@ class VideoListActivity : AppCompatActivity() {
         viewModel.indexUploadTweet.observe(this) {
             if (itemsList.isNotEmpty()) {
                 if (it == -1) {
-                    viewModel.setDataList(viewModel.url, itemsList as ArrayList<Items>)
+                    viewModel.setDataList(viewModel.url, itemsList as ArrayList<ListItems>)
                     return@observe
                 }
                 itemsList[it].twitterText = viewModel.tweet
@@ -267,7 +267,7 @@ class VideoListActivity : AppCompatActivity() {
         scanNum.text = "0"
         back.setOnClickListener { finish() }
         intoTiktok.setOnClickListener {
-            selectPlayType()
+            selectPlaybackType()
         }
         intoTiktok.setOnLongClickListener {
             intoTiktok(false)
@@ -286,7 +286,7 @@ class VideoListActivity : AppCompatActivity() {
         val layoutManager = CustomLinearLayoutManager(this)
         layoutManager.setScrollEnabled(true)
         recyclerView.layoutManager = layoutManager
-        adapter = ItemAdapter(itemsList as ArrayList<Items>)
+        adapter = ItemAdapter(itemsList as ArrayList<ListItems>)
         recyclerView.adapter = adapter
         adapter.setOnItemClickListener { view, postion ->
             position = postion
@@ -368,13 +368,13 @@ class VideoListActivity : AppCompatActivity() {
         })
     }
 
-    private fun selectPlayType() {
+    private fun selectPlaybackType() {
         XPopup.Builder(this)
             .atView(intoTiktok) // 依附于所点击的View，内部会自动判断在上方或者下方显示
             .asAttachList(
-                arrayOf("小红书模式", "抖音模式"),
-                intArrayOf(R.mipmap.pubulist, R.mipmap.tiktok)
-            ) { position: Int, text: String? ->
+                arrayOf("小红书模式", "  抖音模式 ", "  更多设置 "),/*null*/
+                intArrayOf(R.mipmap.redbook, R.mipmap.douyin, R.mipmap.setting)
+            ) { position: Int, _: String? ->
                 when (position) {
                     0 -> {
                         if (viewModel.isNull.value == true) {
@@ -391,6 +391,10 @@ class VideoListActivity : AppCompatActivity() {
 
                     1 -> {
                         intoTiktok(false)
+                    }
+
+                    2 -> {
+
                     }
                 }
             }
@@ -412,7 +416,7 @@ class VideoListActivity : AppCompatActivity() {
                     0 -> {
 
                         if (sortArray[position] % 2 == 0) {
-                            viewModel.deSort(itemsList as ArrayList<Items>)
+                            viewModel.deSort(itemsList as ArrayList<ListItems>)
                         } else {
                             viewModel.sort(itemsList)
                         }
@@ -425,9 +429,9 @@ class VideoListActivity : AppCompatActivity() {
                     1 -> {
 
                         if (sortArray[position] % 2 == 0) {
-                            viewModel.deSortByLarge(itemsList as ArrayList<Items>)
+                            viewModel.deSortByLarge(itemsList as ArrayList<ListItems>)
                         } else {
-                            viewModel.sortByLarge(itemsList as ArrayList<Items>)
+                            viewModel.sortByLarge(itemsList as ArrayList<ListItems>)
                         }
                         sortArray[position]++
                         viewModel.itemsList.value = itemsList
@@ -437,9 +441,9 @@ class VideoListActivity : AppCompatActivity() {
                     2 -> {
 
                         if (sortArray[position] % 2 == 0) {
-                            viewModel.deSortByComment(itemsList as ArrayList<Items>)
+                            viewModel.deSortByComment(itemsList as ArrayList<ListItems>)
                         } else {
-                            viewModel.sortByComment(itemsList as ArrayList<Items>)
+                            viewModel.sortByComment(itemsList as ArrayList<ListItems>)
                         }
                         sortArray[position]++
                         viewModel.itemsList.value = itemsList

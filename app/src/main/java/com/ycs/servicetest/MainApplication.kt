@@ -7,9 +7,8 @@ import cn.bmob.v3.Bmob
 import com.downloader.PRDownloader
 import com.tencent.bugly.Bugly
 import com.tencent.bugly.beta.Beta
-import com.tencent.bugly.crashreport.CrashReport
-import com.tencent.mmkv.MMKV
-
+import com.ycs.servicetest.common.KVKey
+import com.ycs.servicetest.utils.StoreUtil
 import com.ycs.servicetest.utils.WebUtil
 
 /**
@@ -24,9 +23,10 @@ class MainApplication : Application() {
         PRDownloader.initialize(mAppContext)
         WebUtil.init(mAppContext)
         Bugly.init(mAppContext, "b0a053b5dd", false)
-        MMKV.initialize(this)
         Bmob.initialize(this, "2d24c857824e0609dd2e185bf5378acc")
         Beta.upgradeDialogLayoutId = R.layout.layout_upgrade
+        val time = StoreUtil.getInt(KVKey.ENTER_APP_NUMBER) ?: 0
+        StoreUtil.setData(KVKey.ENTER_APP_NUMBER, time + 1)
     }
 
     override fun attachBaseContext(base: Context?): Unit {

@@ -45,15 +45,17 @@ import com.app.hubert.guide.listener.OnPageChangedListener;
 import com.app.hubert.guide.model.GuidePage;
 import com.app.hubert.guide.model.HighLight;
 import com.tencent.mmkv.MMKV;
-import com.ycs.servicetest.common.Constant;
-import com.ycs.servicetest.service.DownLoadWindowService;
 import com.ycs.servicetest.MainApplication;
-import com.ycs.servicetest.service.MainService;
 import com.ycs.servicetest.R;
-import com.ycs.servicetest.service.WebService;
-import com.ycs.servicetest.utils.ClipBoardUtil;
+import com.ycs.servicetest.common.Config;
+import com.ycs.servicetest.common.Constant;
 import com.ycs.servicetest.common.CustomImageDialog;
 import com.ycs.servicetest.common.CustomIosAlertDialog;
+import com.ycs.servicetest.common.KVKey;
+import com.ycs.servicetest.service.DownLoadWindowService;
+import com.ycs.servicetest.service.MainService;
+import com.ycs.servicetest.service.WebService;
+import com.ycs.servicetest.utils.ClipBoardUtil;
 import com.ycs.servicetest.utils.WebUtil;
 
 import java.util.Calendar;
@@ -64,7 +66,6 @@ import io.flutter.embedding.android.FlutterActivity;
 //import com.hjq.permissions.OnPermissionCallback;
 //import com.hjq.permissions.Permission;
 //import com.hjq.permissions.XXPermissions;
-
 
 
 public class MainActivity extends AppCompatActivity {
@@ -108,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
         handler.postDelayed(() -> runOnUiThread(() -> d.setAni(R.mipmap.one)), 2000);
         handler.postDelayed(() -> startActivity(
                 FlutterActivity.createDefaultIntent(Objects.requireNonNull(MainApplication.Companion.getAppContext()))
-        ),3000);
+        ), 3000);
         handler.postDelayed(d::dismiss, 4000);
 
     }
@@ -118,8 +119,8 @@ public class MainActivity extends AppCompatActivity {
         Calendar calendar = Calendar.getInstance();
         int month = calendar.get(Calendar.MONTH) + 1;
         int day = calendar.get(Calendar.DAY_OF_MONTH);
-        MMKV kv = MMKV.mmkvWithID("time");
-        if (kv.count() == 0) {
+        MMKV kv = MMKV.mmkvWithID(KVKey.BIRTH_DAY);
+        if (Config.INSTANCE.isFirstIntoAPP()) {
             kv.encode("sun", "12.10");
             kv.encode("yang", "5.26");
         }
@@ -129,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
             int month_saved = Integer.parseInt(values[0]);
             int day_saved = Integer.parseInt(values[1]);
             if (month == month_saved && day == day_saved) {
-                handler.postDelayed(this::showSurpriseDialog, 2000);
+                handler.postDelayed(this::showSurpriseDialog, 1000);
                 return;
             }
         }
@@ -263,8 +264,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         btn.setOnLongClickListener(v -> {
-          //  startActivity(new Intent(MainActivity.this, PubuActivity.class));
-           startActivity(FlutterActivity.createDefaultIntent(MainActivity.this));
+            //  startActivity(new Intent(MainActivity.this, PubuActivity.class));
+            startActivity(FlutterActivity.createDefaultIntent(MainActivity.this));
             Log.d(Constant.TAG, "initView: 长安了");
             return true;
         });
