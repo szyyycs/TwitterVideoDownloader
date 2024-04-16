@@ -4,7 +4,6 @@ package com.ycs.servicetest.activity
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
@@ -24,12 +23,14 @@ import com.shuyu.gsyvideoplayer.player.SystemPlayerManager
 import com.shuyu.gsyvideoplayer.utils.OrientationUtils
 import com.tencent.mmkv.MMKV
 import com.ycs.servicetest.R
-import com.ycs.servicetest.common.CustomIosAlertDialog
-import com.ycs.servicetest.common.CustomVideoPlayer
-import com.ycs.servicetest.common.SpaceItemDecoration
+import com.ycs.servicetest.common.Config
+import com.ycs.servicetest.common.Constant.TAG
 import com.ycs.servicetest.list.PubuAdapter
 import com.ycs.servicetest.list.PubuAdapter.OnItemClickListener
 import com.ycs.servicetest.model.ImageModel
+import com.ycs.servicetest.view.CustomIosAlertDialog
+import com.ycs.servicetest.view.CustomVideoPlayer
+import com.ycs.servicetest.view.SpaceItemDecoration
 import kotlinx.android.synthetic.main.activity_pubu.blank_layout
 import kotlinx.android.synthetic.main.activity_pubu.rvv
 import java.io.File
@@ -43,10 +44,9 @@ import java.util.Random
 class PubuActivity : AppCompatActivity() {
 
     companion object {
-        private const val TAG = "yyy"
-
-        //private var url = Environment.getExternalStorageDirectory().toString()+"/DCIM/Camera/"
-        private var url = Environment.getExternalStorageDirectory().toString() + "/.savedPic/"
+        val url by lazy {
+            Config.downloadPathUrl
+        }
         private const val LOAD_TEXT = 3
         private const val UPDATE_ALL = 2
         private val heightArray = doubleArrayOf(0.45, 0.5, 0.55)
@@ -154,16 +154,7 @@ class PubuActivity : AppCompatActivity() {
         detailPlayer.slideExit()
     }
 
-    private fun getSp() {
-        val spp = getSharedPreferences("url", MODE_PRIVATE)
-        if (spp.getString("url", "") != "") {
-            if (url !== spp.getString("url", "")) {
-                url = spp.getString("url", "")!!
-            }
-        }
-    }
-
-    fun initStaggeredGridLayout() {
+    private fun initStaggeredGridLayout() {
         val staggeredGridLayoutManager =
             StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         staggeredGridLayoutManager.gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_NONE
@@ -232,7 +223,6 @@ class PubuActivity : AppCompatActivity() {
         setStatusBarColor()
         vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
         initPlayer()
-        getSp()
         initStaggeredGridLayout()
         kv_text = MMKV.mmkvWithID("text")
         val file = File(url)
@@ -252,7 +242,6 @@ class PubuActivity : AppCompatActivity() {
                 if (s.substring(s.length - 4, s.length) != ".mp4") {
                     continue
                 }
-
                 val text: String = kv_text.decodeString(s, "")
                 val uu = url + s
                 val fileVideo = File(uu)

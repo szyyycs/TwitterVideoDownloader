@@ -1,4 +1,4 @@
-package com.ycs.servicetest.activity.ui.theme
+package com.ycs.servicetest.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

@@ -1,14 +1,14 @@
 package com.ycs.servicetest.receiver;
 
+import static com.ycs.servicetest.utils.WebUtil.isHttpUrl;
+
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -16,11 +16,9 @@ import androidx.annotation.NonNull;
 import com.ycs.servicetest.service.MainService;
 import com.ycs.servicetest.service.WebService;
 import com.ycs.servicetest.utils.ClipBoardUtil;
-import com.ycs.servicetest.common.CustomIosAlertDialog;
+import com.ycs.servicetest.view.CustomIosAlertDialog;
 
 import java.lang.reflect.Method;
-
-import static com.ycs.servicetest.utils.WebUtil.isHttpUrl;
 
 
 public class DialogReceiver extends BroadcastReceiver {

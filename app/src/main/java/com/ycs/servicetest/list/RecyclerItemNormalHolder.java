@@ -11,8 +11,8 @@ import com.shuyu.gsyvideoplayer.GSYVideoManager;
 import com.shuyu.gsyvideoplayer.builder.GSYVideoOptionBuilder;
 import com.shuyu.gsyvideoplayer.listener.GSYSampleCallBack;
 import com.ycs.servicetest.R;
-import com.ycs.servicetest.common.CustomCoverVideo;
 import com.ycs.servicetest.model.VideoModel;
+import com.ycs.servicetest.view.CustomCoverVideo;
 
 import java.lang.ref.WeakReference;
 

@@ -10,9 +10,7 @@ import static com.ycs.servicetest.utils.WebUtil.isHttpUrl;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -21,7 +19,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Vibrator;
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -47,16 +44,17 @@ import com.app.hubert.guide.model.HighLight;
 import com.tencent.mmkv.MMKV;
 import com.ycs.servicetest.MainApplication;
 import com.ycs.servicetest.R;
-import com.ycs.servicetest.common.Config;
 import com.ycs.servicetest.common.Constant;
-import com.ycs.servicetest.common.CustomImageDialog;
-import com.ycs.servicetest.common.CustomIosAlertDialog;
 import com.ycs.servicetest.common.KVKey;
 import com.ycs.servicetest.service.DownLoadWindowService;
 import com.ycs.servicetest.service.MainService;
 import com.ycs.servicetest.service.WebService;
 import com.ycs.servicetest.utils.ClipBoardUtil;
+import com.ycs.servicetest.utils.KVUtil;
+import com.ycs.servicetest.utils.StatusBarUtil;
 import com.ycs.servicetest.utils.WebUtil;
+import com.ycs.servicetest.view.CustomImageDialog;
+import com.ycs.servicetest.view.CustomIosAlertDialog;
 
 import java.util.Calendar;
 import java.util.Objects;
@@ -73,7 +71,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Button btn;
     private EditText etInput;
-    //private WebView webView;
     private Boolean isFloatWindowsshow = false;
     private final String[] permissions = {SYSTEM_ALERT_WINDOW,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -83,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
             MANAGE_EXTERNAL_STORAGE
     };
     private ImageView ivDownloadFile;
-    private Vibrator vibrator;
+
     //跳到下载
     private final Handler handler = new Handler(Looper.myLooper()) {
         @Override
@@ -119,11 +116,7 @@ public class MainActivity extends AppCompatActivity {
         Calendar calendar = Calendar.getInstance();
         int month = calendar.get(Calendar.MONTH) + 1;
         int day = calendar.get(Calendar.DAY_OF_MONTH);
-        MMKV kv = MMKV.mmkvWithID(KVKey.BIRTH_DAY);
-        if (Config.INSTANCE.isFirstIntoAPP()) {
-            kv.encode("sun", "12.10");
-            kv.encode("yang", "5.26");
-        }
+        MMKV kv = KVUtil.Companion.getMMKV(KVKey.BIRTH_DAY);
         for (String key : kv.allKeys()) {
             String value = kv.decodeString(key);
             String[] values = value.split("\\.");
@@ -140,13 +133,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
         Objects.requireNonNull(getSupportActionBar()).hide();
         checkTime();
-        Window window = getWindow();
-        window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorIosBlue));
-        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        StatusBarUtil.INSTANCE.setStatusBarColor(this, R.color.colorIosBlue, false);
         getPermission();
         //getXXPermission();
         showNotification();
@@ -289,30 +279,6 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
 
             }
-        });
-        ivDownloadFile.setOnLongClickListener(v -> {
-            CustomIosAlertDialog dialog = new CustomIosAlertDialog(MainActivity.this).builder();
-            SharedPreferences ssp = getSharedPreferences("url", Context.MODE_PRIVATE);
-            String url = ssp.getString("url", "");
-            if (url.equals("")) {
-                url = Environment.getExternalStorageDirectory() + "/.savedPic/";
-            }
-            dialog.setEditText(url)
-                    .setTitle("设置你的下载路径")
-                    .setPositiveButton("确定", v1 -> {
-                        if (!dialog.getEditText().isEmpty()) {
-                            SharedPreferences.Editor e = ssp.edit();
-                            e.putString("url", Environment.getExternalStorageDirectory() + "/" + dialog.getEditText() + "/");
-                            e.apply();
-                        }
-
-                    })
-                    .setNegativeButton("取消", v12 -> {
-
-                    })
-                    .show();
-
-            return true;
         });
     }
 

@@ -115,17 +115,10 @@
         android:id="@+id/r"
         android:layout_below="@+id/toolBar"
         >
-        <!--        <VideoView-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="@dimen/dp_300"-->
-        <!--            android:id="@+id/videoview"-->
-        <!--            android:layout_centerInParent="true"-->
-        <!--            />-->
-        <com.ycs.servicetest.common.CustomVideoPlayer
+        <com.ycs.servicetest.view.CustomVideoPlayer
             android:id="@+id/detail_player"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_400"
-            />
+            android:layout_height="@dimen/dp_400" />
     </RelativeLayout>
 
     <androidx.recyclerview.widget.RecyclerView

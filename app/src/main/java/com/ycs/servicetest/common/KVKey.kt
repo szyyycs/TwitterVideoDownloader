@@ -7,4 +7,5 @@ package com.ycs.servicetest.common
 object KVKey {
     const val ENTER_APP_NUMBER = "enterAppNumber"
     const val BIRTH_DAY = "time"
+    const val SAVE_URL = "saveUrl"
 }

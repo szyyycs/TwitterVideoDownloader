@@ -1,4 +1,4 @@
-package com.ycs.servicetest.common;
+package com.ycs.servicetest.view;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -20,8 +20,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ycs.servicetest.service.MainService;
 import com.ycs.servicetest.R;
+import com.ycs.servicetest.service.MainService;
 
 public class CustomIosAlertDialog {
     private final Context context;

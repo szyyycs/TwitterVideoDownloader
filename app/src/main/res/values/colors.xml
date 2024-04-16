@@ -18,6 +18,8 @@
     <color name="transparent">#00000000</color>
     <color name="Blue">#6DBCF8</color>
     <color name="green">#45bda1</color>
+    <color name="background">#EEE</color>
+    <color name="iconColor">#f2f2f2</color>
     <!--半透明-->
     <color name="colorBanTransparent">#11000000</color>
 </resources>

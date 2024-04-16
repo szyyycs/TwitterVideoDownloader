@@ -3,9 +3,7 @@ package com.ycs.servicetest.viewmodel
 import android.app.Application
 import android.media.MediaPlayer
 import android.os.Build
-import android.os.Environment
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -17,6 +15,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.tencent.mmkv.MMKV
 import com.ycs.servicetest.MainApplication
+import com.ycs.servicetest.common.Config
 import com.ycs.servicetest.list.ListItems
 import com.ycs.servicetest.model.TwitterText
 import com.ycs.servicetest.utils.WebUtil
@@ -58,9 +57,9 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
     var len: String = ""
     var tweetCountIndex = -1
     val isScanning = MutableLiveData<Boolean>()
-
-
-    var url = Environment.getExternalStorageDirectory().toString() + "/.savedPic/"
+    val url by lazy {
+        Config.downloadPathUrl
+    }
     private val kv: MMKV by lazy {
         MMKV.defaultMMKV()
     }
@@ -69,7 +68,6 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     init {
-        getSPUrl()
         num.value = 0
         loadTweetNum.value = 0
         isNull.value = true
@@ -77,14 +75,6 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
         itemsList.value = getDataList(url)
     }
 
-    private fun getSPUrl() {
-        val spp = MainApplication.getAppContext()
-            ?.getSharedPreferences("url", AppCompatActivity.MODE_PRIVATE)
-        if (spp?.getString("url", "") != "") {
-            url = spp?.getString("url", "")!!
-        }
-
-    }
 
     private fun getDataList(tag: String): MutableList<ListItems> {
         var datalist = mutableListOf<ListItems>()

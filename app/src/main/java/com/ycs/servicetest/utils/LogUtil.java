@@ -1,6 +1,6 @@
 package com.ycs.servicetest.utils;
 
-import android.os.Environment;
+import com.ycs.servicetest.common.Config;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -39,7 +39,7 @@ public class LogUtil {
                     BufferedReader buffRead = new BufferedReader(new InputStreamReader(process.getInputStream()));//获取输入流
                     Runtime.getRuntime().exec(clearLog.toArray(new String[0]));//清除是为了下次抓取不会从头抓取
                     String str;
-                    File logFile = new File(Environment.getExternalStorageDirectory() + "/.savedPic/log.txt");//打开文件
+                    File logFile = new File(Config.INSTANCE.getDownloadPathUrl() + "log.txt");//打开文件
                     fos = new FileOutputStream(logFile, true);//true表示在写的时候在文件末尾追加
                     String newline = System.getProperty("line.separator");//换行的字符串
                     //Date date = new Date(System.currentTimeMillis());

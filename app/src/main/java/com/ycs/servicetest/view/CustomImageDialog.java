@@ -1,4 +1,4 @@
-package com.ycs.servicetest.common;
+package com.ycs.servicetest.view;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;

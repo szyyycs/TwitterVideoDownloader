@@ -7,7 +7,6 @@ import android.media.MediaMetadataRetriever
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Build
-import android.os.Environment
 import android.os.Handler
 import android.util.Log
 import android.util.Patterns
@@ -31,6 +30,7 @@ import com.twitter.sdk.android.core.TwitterCore
 import com.twitter.sdk.android.core.TwitterException
 import com.twitter.sdk.android.core.models.Tweet
 import com.ycs.servicetest.MainApplication
+import com.ycs.servicetest.common.Config
 import com.ycs.servicetest.common.Constant
 import com.ycs.servicetest.model.DownloadResponse
 import com.ycs.servicetest.model.TwitterText
@@ -137,7 +137,8 @@ object WebUtil {
                 isAnalyse = false
                 Log.d(TAG, "success: " + result.data)
                 if (result.data.extendedEntities == null && (result.data.entities.media == null ||
-                            result.data.entities.media.size == 0)) {
+                            result.data.entities.media.size == 0)
+                ) {
                     showInformationToUser("链接中未找到文件，下载失败")
                 } else if (result.data.extendedEntities != null) {
                     Log.e(TAG, result.data.extendedEntities.media[0].type)
@@ -301,7 +302,7 @@ object WebUtil {
             }
             download(
                 handler, url,
-                Environment.getExternalStorageDirectory().toString() + "/.savedPic/",
+                Config.downloadPathUrl,
                 filename, context
             )
         } else {
@@ -324,9 +325,15 @@ object WebUtil {
     }
 
     @Synchronized
-    fun download(handler: Handler, url: String, path: String, filename: String, context: Context) {
+    fun download(
+        handler: Handler,
+        downloadUrl: String,
+        savePath: String,
+        filename: String,
+        context: Context
+    ) {
         isDownloading = true
-        downloadId = PRDownloader.download(url, path, filename)
+        downloadId = PRDownloader.download(downloadUrl, savePath, filename)
             .build()
             .setOnStartOrResumeListener { isDownloading = true }
             .setOnProgressListener(object : OnProgressListener {
@@ -338,20 +345,20 @@ object WebUtil {
                     if (flag) {
                         flag = false
                         sum = BigDecimal(progress.totalBytes / (1024 * 1024.0))
-                            .setScale(2,  RoundingMode.HALF_UP).toDouble()
+                            .setScale(2, RoundingMode.HALF_UP).toDouble()
                         val len = sum.toString() + "MB"
                         Toast.makeText(context, filename + "开始下载，共" + len, Toast.LENGTH_SHORT)
                             .show()
                     }
                     if (sum == 0.0) {
                         sum = BigDecimal(progress.totalBytes / (1024 * 1024.0))
-                            .setScale(2,  RoundingMode.HALF_UP).toDouble()
+                            .setScale(2, RoundingMode.HALF_UP).toDouble()
                     }
                     currentBytes = BigDecimal(progress.currentBytes / (1024 * 1024.0))
-                        .setScale(2,  RoundingMode.HALF_UP).toDouble()
+                        .setScale(2, RoundingMode.HALF_UP).toDouble()
                     percent = if (sum != 0.0) {
                         BigDecimal(currentBytes / sum)
-                            .setScale(2,  RoundingMode.HALF_UP).toDouble()
+                            .setScale(2, RoundingMode.HALF_UP).toDouble()
                     } else {
                         0.5
                     }
@@ -369,15 +376,15 @@ object WebUtil {
                         MainService.update(filename + "下载完成")
                         DownLoadWindowService.recover()
                     }, 1000)
-                    val f = File(File(path), filename)
+                    val f = File(File(savePath), filename)
                     uri = if (Build.VERSION.SDK_INT >= 24) {
                         FileProvider.getUriForFile(context, "com.ycs.servicetest.provider", f)
                     } else {
                         Uri.fromFile(f)
                     }
                     context.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri))
-                    if (downloadMap.containsKey(url)) {
-                        downloadMap.remove(url)
+                    if (downloadMap.containsKey(downloadUrl)) {
+                        downloadMap.remove(downloadUrl)
                     }
                     if (downloadMap.size == 0) {
                         if (analyzeList.size == 0) {
@@ -397,14 +404,16 @@ object WebUtil {
 
                 override fun onError(error: Error) {
                     isDownloading = false
-                    Log.e(
-                        TAG,
-                        "下载失败！错误信息为连接错误：" + error.isConnectionError + "服务错误：" + error.isServerError
-                    )
-                    showInformationToUser("下载失败！连接错误：${error.isConnectionError};服务错误：${error.isServerError}")
+                    val tipText =
+                        "下载失败！${
+                            if (error.isConnectionError) "请检查网络" else ""
+                        }${
+                            if (error.isServerError) "服务器错误" else ""
+                        }"
+                    showInformationToUser(tipText)
                     DownLoadWindowService.recover()
-                    if (downloadMap.containsKey(url)) {
-                        downloadMap.remove(url)
+                    if (downloadMap.containsKey(downloadUrl)) {
+                        downloadMap.remove(downloadUrl)
                     }
                     if (downloadMap.size == 0) {
                         handler.sendEmptyMessage(STOP_SERVICE)

@@ -28,12 +28,13 @@ import com.shuyu.gsyvideoplayer.utils.OrientationUtils
 import com.ycs.servicetest.R
 import com.ycs.servicetest.common.Constant
 import com.ycs.servicetest.common.Constant.TAG
-import com.ycs.servicetest.common.CustomIosAlertDialog
-import com.ycs.servicetest.common.CustomLinearLayoutManager
-import com.ycs.servicetest.common.CustomVideoPlayer
 import com.ycs.servicetest.list.ItemAdapter
 import com.ycs.servicetest.list.ListItems
 import com.ycs.servicetest.model.VideoModel
+import com.ycs.servicetest.utils.StatusBarUtil
+import com.ycs.servicetest.view.CustomIosAlertDialog
+import com.ycs.servicetest.view.CustomLinearLayoutManager
+import com.ycs.servicetest.view.CustomVideoPlayer
 import com.ycs.servicetest.viewmodel.VideoViewModel
 import kotlinx.android.synthetic.main.activity_show_video.back
 import kotlinx.android.synthetic.main.activity_show_video.blank_layout
@@ -63,7 +64,7 @@ class VideoListActivity : AppCompatActivity() {
         ViewModelProvider(
             this,
             ViewModelProvider.AndroidViewModelFactory.getInstance(application)
-        ).get(VideoViewModel::class.java)
+        )[VideoViewModel::class.java]
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -261,7 +262,7 @@ class VideoListActivity : AppCompatActivity() {
 
     private fun initView() {
         supportActionBar?.hide()
-        setStatusBarColor()
+        StatusBarUtil.setStatusBarColor(this, isLight = true)
         toScan.visibility = View.INVISIBLE
         scan.visibility = View.VISIBLE
         scanNum.text = "0"
@@ -283,7 +284,8 @@ class VideoListActivity : AppCompatActivity() {
     }
 
     private fun initRecycleView() {
-        val layoutManager = CustomLinearLayoutManager(this)
+        val layoutManager =
+            CustomLinearLayoutManager(this)
         layoutManager.setScrollEnabled(true)
         recyclerView.layoutManager = layoutManager
         adapter = ItemAdapter(itemsList as ArrayList<ListItems>)
@@ -386,7 +388,7 @@ class VideoListActivity : AppCompatActivity() {
                             return@asAttachList
                         }
                         startActivity(Intent(this@VideoListActivity, PubuActivity::class.java))
-                        finish()
+                        //finish()
                     }
 
                     1 -> {
@@ -394,7 +396,7 @@ class VideoListActivity : AppCompatActivity() {
                     }
 
                     2 -> {
-
+                        startActivity(Intent(this@VideoListActivity, SettingActivity::class.java))
                     }
                 }
             }
@@ -477,7 +479,7 @@ class VideoListActivity : AppCompatActivity() {
         intent.putExtra("i", position)
         intent.setClass(this, TiktokActivity::class.java)
         startActivity(intent)
-        finish()
+        //finish()
     }
 
     private fun setStatusBarColor() {
