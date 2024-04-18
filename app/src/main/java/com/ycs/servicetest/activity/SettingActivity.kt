@@ -256,16 +256,25 @@ fun AddBirthDayDialogContent(list: MutableList<String>, onAddDate: () -> Unit) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
+                    .height(110.dp)
             ) {
                 Text(
-                    text = "<空>",
+                    text = "无",
                     textAlign = TextAlign.Center,
+                    fontSize = 12.sp,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.Center),
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 10.dp),
                     color = Color(0xffbbbbbb),
                     fontWeight = FontWeight.SemiBold,
+                )
+                Image(
+                    painter = painterResource(id = R.mipmap.blank),
+                    contentDescription = "null",
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 10.dp)
                 )
             }
             Divider(
@@ -406,10 +415,10 @@ fun AddDatePickerDialog(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun te() {
-    SettingItems(Modifier, "11", "222", "33", mutableStateOf(true))
+    AddBirthDayDialogContent(mutableListOf(), {})
 }
 
 @Composable
