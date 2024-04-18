@@ -1,11 +1,9 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 
 import 'BannerPage.dart';
 
 void main() {
   runApp(MyApp());
-
 }
 
 class MyApp extends StatelessWidget {
@@ -26,7 +24,5 @@ class MyApp extends StatelessWidget {
       ),
     );
   }
-
-
 }
 

@@ -10,7 +10,6 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Vibrator
 import android.provider.Settings
-import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
@@ -27,7 +26,6 @@ import com.shuyu.gsyvideoplayer.player.SystemPlayerManager
 import com.shuyu.gsyvideoplayer.utils.OrientationUtils
 import com.ycs.servicetest.R
 import com.ycs.servicetest.common.Constant
-import com.ycs.servicetest.common.Constant.TAG
 import com.ycs.servicetest.list.ItemAdapter
 import com.ycs.servicetest.list.ListItems
 import com.ycs.servicetest.model.VideoModel
@@ -39,7 +37,7 @@ import com.ycs.servicetest.viewmodel.VideoViewModel
 import kotlinx.android.synthetic.main.activity_show_video.back
 import kotlinx.android.synthetic.main.activity_show_video.blank_layout
 import kotlinx.android.synthetic.main.activity_show_video.detail_player
-import kotlinx.android.synthetic.main.activity_show_video.intoTiktok
+import kotlinx.android.synthetic.main.activity_show_video.more
 import kotlinx.android.synthetic.main.activity_show_video.recyclerView
 import kotlinx.android.synthetic.main.activity_show_video.scan
 import kotlinx.android.synthetic.main.activity_show_video.scanNum
@@ -232,7 +230,7 @@ class VideoListActivity : AppCompatActivity() {
         viewModel.indexUploadTweet.observe(this) {
             if (itemsList.isNotEmpty()) {
                 if (it == -1) {
-                    viewModel.setDataList(viewModel.url, itemsList as ArrayList<ListItems>)
+                    viewModel.setDataList(viewModel.path, itemsList as ArrayList<ListItems>)
                     return@observe
                 }
                 itemsList[it].twitterText = viewModel.tweet
@@ -267,10 +265,10 @@ class VideoListActivity : AppCompatActivity() {
         scan.visibility = View.VISIBLE
         scanNum.text = "0"
         back.setOnClickListener { finish() }
-        intoTiktok.setOnClickListener {
-            selectPlaybackType()
+        more.setOnClickListener {
+            selectMoreMenu()
         }
-        intoTiktok.setOnLongClickListener {
+        more.setOnLongClickListener {
             intoTiktok(false)
             false
         }
@@ -370,9 +368,9 @@ class VideoListActivity : AppCompatActivity() {
         })
     }
 
-    private fun selectPlaybackType() {
+    private fun selectMoreMenu() {
         XPopup.Builder(this)
-            .atView(intoTiktok) // 依附于所点击的View，内部会自动判断在上方或者下方显示
+            .atView(more) // 依附于所点击的View，内部会自动判断在上方或者下方显示
             .asAttachList(
                 arrayOf("小红书模式", "  抖音模式 ", "  更多设置 "),/*null*/
                 intArrayOf(R.mipmap.redbook, R.mipmap.douyin, R.mipmap.setting)
@@ -396,7 +394,12 @@ class VideoListActivity : AppCompatActivity() {
                     }
 
                     2 -> {
-                        startActivity(Intent(this@VideoListActivity, SettingActivity::class.java))
+                        startActivity(
+                            Intent(
+                                this@VideoListActivity,
+                                SettingActivity::class.java
+                            )
+                        )
                     }
                 }
             }
@@ -515,7 +518,6 @@ class VideoListActivity : AppCompatActivity() {
             orientationUtils?.backToProtVideo()
         }
         if (GSYVideoManager.backFromWindowFull(this)) {
-            Log.e(TAG, "退出全屏")
             return
         }
         if (canChange) {

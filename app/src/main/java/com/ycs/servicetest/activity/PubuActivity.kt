@@ -24,7 +24,7 @@ import com.shuyu.gsyvideoplayer.utils.OrientationUtils
 import com.tencent.mmkv.MMKV
 import com.ycs.servicetest.R
 import com.ycs.servicetest.common.Config
-import com.ycs.servicetest.common.Constant.TAG
+import com.ycs.servicetest.common.TAG
 import com.ycs.servicetest.list.PubuAdapter
 import com.ycs.servicetest.list.PubuAdapter.OnItemClickListener
 import com.ycs.servicetest.model.ImageModel

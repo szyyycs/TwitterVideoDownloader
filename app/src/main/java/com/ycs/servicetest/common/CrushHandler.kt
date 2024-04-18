@@ -2,7 +2,6 @@ package com.ycs.servicetest.common
 
 import android.content.Context
 import android.util.Log
-import com.ycs.servicetest.common.Constant.TAG
 import com.ycs.servicetest.utils.LogUtil
 
 class CrashHandler : Thread.UncaughtExceptionHandler {

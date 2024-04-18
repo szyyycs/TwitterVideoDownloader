@@ -78,19 +78,19 @@
             android:layout_height="@dimen/dp_23"
             android:background="?selectableItemBackgroundBorderless"
             android:src="@mipmap/more"
-            android:id="@+id/intoTiktok"
+            android:id="@+id/more"
             android:layout_centerVertical="true"
 
-            android:layout_marginRight="@dimen/dp_10"
+            android:layout_marginEnd="@dimen/dp_10"
             android:scaleType="fitXY"
             android:layout_marginTop="3dp"
-            android:layout_alignParentRight="true" />
+            android:layout_alignParentEnd="true" />
         <RelativeLayout
             android:layout_width="@dimen/dp_30"
             android:layout_height="match_parent"
-            android:layout_toLeftOf="@+id/intoTiktok"
+            android:layout_toStartOf="@+id/more"
             android:id="@+id/sort"
-            android:layout_marginRight="@dimen/dp_3"
+            android:layout_marginEnd="@dimen/dp_3"
             >
 
             <ImageView

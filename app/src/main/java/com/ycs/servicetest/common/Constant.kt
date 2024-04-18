@@ -16,3 +16,4 @@ object Constant {
     const val TAG = "yyy"
 
 }
+const val TAG = "yyy"

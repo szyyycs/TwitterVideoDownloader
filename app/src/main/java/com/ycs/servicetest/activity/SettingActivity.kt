@@ -13,14 +13,11 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,6 +37,8 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Surface
+import androidx.compose.material.Switch
+import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.BasicAlertDialog
@@ -71,9 +70,13 @@ import com.ycs.servicetest.R
 import com.ycs.servicetest.common.Config.defaultDownloadPath
 import com.ycs.servicetest.common.KVKey
 import com.ycs.servicetest.compose.DatePicker
+import com.ycs.servicetest.ui.theme.BlueLight
+import com.ycs.servicetest.ui.theme.BlueMain
+import com.ycs.servicetest.utils.BiometricUtil
 import com.ycs.servicetest.utils.KVUtil
 import com.ycs.servicetest.utils.StatusBarUtil
 import com.ycs.servicetest.utils.VibratorUtil
+import com.ycs.servicetest.utils.showToast
 import com.ycs.servicetest.view.CustomIosAlertDialog
 import com.ycs.servicetest.view.CustomToolBar
 import kotlinx.coroutines.launch
@@ -81,14 +84,21 @@ import kotlinx.coroutines.launch
 
 class SettingActivity : ComponentActivity() {
     private val settingList: MutableList<String> by lazy {
-        mutableListOf("设置下载路径", "设置彩蛋弹出日期", "关于VideoDownload")
+        mutableListOf(
+            "设置下载路径",
+            "设置彩蛋弹出日期",
+            "设置是否开启指纹验证",
+            "关于VideoDownload"
+        )
     }
     private val path =
         MutableLiveData<String>(KVUtil.getString(KVKey.SAVE_URL, defaultDownloadPath))
+
     private val descriptionList: MutableList<String> by lazy {
         mutableListOf(
             "设置视频的下载文件夹名字，命名为.开头的文件夹名可以在相册中不显示，只在应用中显示",
             "在设置的日期内弹出彩蛋",
+            "开启后，需要指纹验证后才能进入视频列表",
             ""
         )
     }
@@ -98,14 +108,14 @@ class SettingActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val tips by path.observeAsState()
-            val openMoreDialog = remember {
-                mutableStateOf(false)
-            }
             val openDatePickerDialog = remember {
                 mutableStateOf(false)
             }
             val birthDayList = mutableStateListOf<String>().apply {
                 getBirthdayDate(this)
+            }
+            val isOpenFingerVerify = remember {
+                mutableStateOf(KVUtil.getBool(KVKey.OPEN_FINGER, false, KVKey.SETTING) ?: false)
             }
             val scope = rememberCoroutineScope()
             ShowBottomPopUp(list = birthDayList, openDialog = openDatePickerDialog) { state ->
@@ -122,17 +132,7 @@ class SettingActivity : ComponentActivity() {
                         ) {
                             itemsIndexed(settingList) { index, message ->
                                 SettingItems(
-                                    message,
-                                    descriptionList[index],
-                                    if (index == 0) Environment.getExternalStorageDirectory()
-                                        .toString() + "/" + tips else "",
                                     modifier = Modifier
-                                        .clickable(
-                                            indication = null,
-                                            interactionSource = remember { MutableInteractionSource() },
-                                            onClick = {
-                                            }
-                                        )
                                         .pointerInput(Unit) {
                                             detectTapGestures(
                                                 onLongPress = {
@@ -141,13 +141,18 @@ class SettingActivity : ComponentActivity() {
                                                     when (index) {
                                                         0 -> showDialog()
                                                         1 -> scope.launch { state.show() }
-                                                        2 -> openMoreDialog.value = true
-
+                                                        2 -> {}
+                                                        3 -> {}
                                                     }
                                                 }
 
                                             )
-                                        }
+                                        },
+                                    message,
+                                    descriptionList[index],
+                                    if (index == 0) Environment.getExternalStorageDirectory()
+                                        .toString() + "/" + tips else "",
+                                    if (index == 2) isOpenFingerVerify else null
                                 )
                             }
                         }
@@ -164,10 +169,14 @@ class SettingActivity : ComponentActivity() {
 
     private fun getBirthdayDate(list: MutableList<String>) {
         val mmkv = KVUtil.getMMKV(KVKey.BIRTH_DAY)
-        for (key in mmkv.allKeys()) {
-            list.add("${key}.${mmkv.decodeString(key)}")
+        val allKey = mmkv.allKeys()
+        allKey?.let {
+            for (key in allKey) {
+                list.add("${key}.${mmkv.decodeString(key)}")
+            }
         }
     }
+
 
     private fun showDialog() {
         val dialog = CustomIosAlertDialog(this@SettingActivity).builder()
@@ -187,7 +196,6 @@ class SettingActivity : ComponentActivity() {
 
     }
 
-    private fun ee() {}
 }
 
 
@@ -215,11 +223,6 @@ fun ShowBottomPopUp(
     }
 }
 
-@Preview(showBackground = true, widthDp = 500, heightDp = 1500)
-@Composable
-fun ttt() {
-    AddBirthDayDialogContent(mutableListOf("1", "22", "222"), {})
-}
 
 @Composable
 fun AddBirthDayDialogContent(list: MutableList<String>, onAddDate: () -> Unit) {
@@ -376,48 +379,6 @@ fun parseItem(item: String): String {
     return ""
 }
 
-@Composable
-fun AddMoreDialog(openDialog: MutableState<Boolean>, list: MutableList<String>) {
-    AnimatedVisibility(
-        visible = openDialog.value,
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onLongPress = {},
-                        onTap = {
-                            openDialog.value = false
-                        })
-                }
-                .background(color = Color(0x66000000))
-        ) {
-            AnimatedVisibility(
-                visible = openDialog.value,
-                enter = slideInVertically { 0 },
-                exit = slideOutVertically { 500 },
-                modifier = Modifier.align(Alignment.BottomCenter),
-            )
-            {
-                Surface(
-                    shape = RoundedCornerShape(15.dp),
-                    modifier = Modifier
-                        .padding(horizontal = 20.dp, vertical = 10.dp)
-                    // .align(Alignment.BottomCenter)
-                    ,
-                    elevation = 10.dp
-                ) {
-                    AddBirthDayDialogContent(list, {})
-                }
-            }
-
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -445,8 +406,20 @@ fun AddDatePickerDialog(
     }
 }
 
+@Preview
 @Composable
-fun SettingItems(title: String, description: String, tips: String, modifier: Modifier = Modifier) {
+fun te() {
+    SettingItems(Modifier, "11", "222", "33", mutableStateOf(true))
+}
+
+@Composable
+fun SettingItems(
+    modifier: Modifier = Modifier,
+    title: String,
+    description: String,
+    tips: String,
+    isSwitchItem: MutableState<Boolean>? = null,
+) {
 
     Box(
         modifier = modifier
@@ -492,14 +465,36 @@ fun SettingItems(title: String, description: String, tips: String, modifier: Mod
                 )
             }
         }
-        Image(
-            painter = painterResource(id = R.mipmap.enter),
-            contentDescription = "",
-            modifier = Modifier
-                .width(50.dp)
-                .align(Alignment.CenterEnd)
-                .size(25.dp)
-        )
+        if (isSwitchItem != null) {
+            Switch(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 10.dp),
+                checked = isSwitchItem.value,
+                onCheckedChange = {
+                    if (BiometricUtil.biometricEnable()) {
+                        isSwitchItem.value = !isSwitchItem.value
+                        KVUtil.setData(KVKey.OPEN_FINGER, isSwitchItem.value, KVKey.SETTING)
+                    } else {
+                        showToast("硬件不支持或设备未开启指纹验证")
+                    }
+                },
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = BlueMain,
+                    checkedTrackColor = BlueLight
+                )
+            )
+        } else {
+            Image(
+                painter = painterResource(id = R.mipmap.enter),
+                contentDescription = "",
+                modifier = Modifier
+                    .width(50.dp)
+                    .align(Alignment.CenterEnd)
+                    .size(25.dp)
+            )
+        }
+
     }
 }
 

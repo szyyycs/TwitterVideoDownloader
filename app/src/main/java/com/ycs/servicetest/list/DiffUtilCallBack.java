@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * <pre>
  *     author : yangchaosheng
- *     e-mail : yangchaosheng@hisense.com
+ *     e-mail : yangchaosheng@qq.com
  *     time   : 2022/05/20
  *     desc   :
  * </pre>

@@ -49,6 +49,7 @@ import com.ycs.servicetest.common.KVKey;
 import com.ycs.servicetest.service.DownLoadWindowService;
 import com.ycs.servicetest.service.MainService;
 import com.ycs.servicetest.service.WebService;
+import com.ycs.servicetest.utils.BiometricUtil;
 import com.ycs.servicetest.utils.ClipBoardUtil;
 import com.ycs.servicetest.utils.KVUtil;
 import com.ycs.servicetest.utils.StatusBarUtil;
@@ -117,14 +118,17 @@ public class MainActivity extends AppCompatActivity {
         int month = calendar.get(Calendar.MONTH) + 1;
         int day = calendar.get(Calendar.DAY_OF_MONTH);
         MMKV kv = KVUtil.Companion.getMMKV(KVKey.BIRTH_DAY);
-        for (String key : kv.allKeys()) {
-            String value = kv.decodeString(key);
-            String[] values = value.split("\\.");
-            int month_saved = Integer.parseInt(values[0]);
-            int day_saved = Integer.parseInt(values[1]);
-            if (month == month_saved && day == day_saved) {
-                handler.postDelayed(this::showSurpriseDialog, 1000);
-                return;
+        String[] allKeys = kv.allKeys();
+        if (allKeys != null && allKeys.length != 0) {
+            for (String key : allKeys) {
+                String value = kv.decodeString(key);
+                String[] values = value.split("\\.");
+                int month_saved = Integer.parseInt(values[0]);
+                int day_saved = Integer.parseInt(values[1]);
+                if (month == month_saved && day == day_saved) {
+                    handler.postDelayed(this::showSurpriseDialog, 1000);
+                    return;
+                }
             }
         }
 
@@ -219,8 +223,17 @@ public class MainActivity extends AppCompatActivity {
         etInput = findViewById(R.id.input);
 
         ivDownloadFile.setOnClickListener(v -> {
-            Intent i = new Intent(MainActivity.this, VideoListActivity.class);
-            startActivity(i);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
+                    Boolean.TRUE.equals(
+                            KVUtil.Companion.getBool(KVKey.OPEN_FINGER, false, KVKey.SETTING))
+            ) {
+                BiometricUtil.INSTANCE.fingerVerify(() -> {
+                    startActivity(new Intent(MainActivity.this, VideoListActivity.class));
+                    return null;
+                });
+            } else {
+                startActivity(new Intent(MainActivity.this, VideoListActivity.class));
+            }
         });
 
         btn.setOnClickListener(v -> {

@@ -1,8 +1,6 @@
 package com.ycs.servicetest.service;
 
 
-import static com.ycs.servicetest.common.Constant.TAG;
-
 import android.animation.ObjectAnimator;
 import android.app.Service;
 import android.content.Intent;
@@ -11,7 +9,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -130,7 +127,6 @@ public class DownLoadWindowService extends Service {
                     windowManager.updateViewLayout(view, layoutParams);
                     break;
                 case MotionEvent.ACTION_UP:
-                    Log.d(TAG, "onTouch: 333");
                     int Y = (int) event.getRawY();
                     int mY = Y - y;
                     y = Y;

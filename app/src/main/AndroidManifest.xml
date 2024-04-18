@@ -22,7 +22,7 @@
         android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.VIBRATE" />
-
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <application
         android:name=".MainApplication"
         android:allowBackup="true"

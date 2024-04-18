@@ -40,7 +40,7 @@ import java.util.Locale
 /**
  * <pre>
  *     author : yangchaosheng
- *     e-mail : yangchaosheng@hisense.com
+ *     e-mail : yangchaosheng@qq.com
  *     time   : 2022/05/20
  *     desc   :
  * </pre>
@@ -57,7 +57,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
     var len: String = ""
     var tweetCountIndex = -1
     val isScanning = MutableLiveData<Boolean>()
-    val url by lazy {
+    val path by lazy {
         Config.downloadPathUrl
     }
     private val kv: MMKV by lazy {
@@ -72,20 +72,20 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
         loadTweetNum.value = 0
         isNull.value = true
         isScanning.value = false
-        itemsList.value = getDataList(url)
+        itemsList.value = getDataList(path)
     }
 
 
-    private fun getDataList(tag: String): MutableList<ListItems> {
+    private fun getDataList(url: String): MutableList<ListItems> {
         var datalist = mutableListOf<ListItems>()
-        val strJson: String = kv.decodeString(tag, null) ?: return datalist
+        val strJson: String = kv.decodeString(url, null) ?: return datalist
         val gson = Gson()
         datalist = gson.fromJson(strJson, object : TypeToken<MutableList<ListItems?>?>() {}.type)
         return datalist
     }
 
     private fun checkFileIsNull(): Boolean {
-        val f = File(url)
+        val f = File(path)
         if (!f.exists()) {
             f.mkdirs()
         }
@@ -122,12 +122,12 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                 //使用 async 执行一个耗时任务，返回一个deferred
                 var tempNum = 0
                 val newList = mutableListOf<ListItems>()
-                val f = File(url)
+                val f = File(path)
                 for (s in f.list()!!) {
                     if (!s.endsWith(".mp4")) {
                         continue
                     }
-                    val uu = url + s
+                    val uu = path + s
                     val text = kvText.decodeString(s, "")
                     val i = ListItems()
                     val file = File(uu)
@@ -221,11 +221,11 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
             val result = updateIndex.await()
             viewModelScope.launch(Dispatchers.Main) { //启动一个协程，运行在主线程
                 result?.let {
-                    itemsList.value = result
+                    itemsList.value = result!!
                     if (kvText.count() == 0L || kvText.decodeInt("len", 0) < 500) {
                         loadTweet()
                     } else {
-                        setDataList(url, result as ArrayList<ListItems>)
+                        setDataList(path, result as ArrayList<ListItems>)
                         isNull.postValue(false)
                     }
 
