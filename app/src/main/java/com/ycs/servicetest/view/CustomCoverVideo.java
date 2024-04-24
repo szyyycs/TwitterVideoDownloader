@@ -278,7 +278,7 @@ public class CustomCoverVideo extends StandardGSYVideoPlayer {
             } else if (mCurrentState == CURRENT_STATE_ERROR) {
                 imageView.setImageResource(R.drawable.video_click_error_selector);
             } else {
-                imageView.setImageResource(R.mipmap.play);
+                imageView.setImageResource(R.drawable.play);
                 imageView.setImageAlpha(70);
             }
         }

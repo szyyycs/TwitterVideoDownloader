@@ -53,7 +53,7 @@
             android:layout_height="21dp"
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="13dp"
-            android:src="@mipmap/next"
+            android:src="@drawable/next"
             />
         <TextView
             android:id="@+id/current"

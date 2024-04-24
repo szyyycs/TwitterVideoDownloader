@@ -39,7 +39,7 @@ fun CustomToolBar(title: String) {
             color = Color(0xFF444444)
         )
         Image(
-            painter = painterResource(id = R.mipmap.back),
+            painter = painterResource(id = R.drawable.back),
             contentDescription = "back",
             modifier = Modifier
                 .align(

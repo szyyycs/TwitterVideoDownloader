@@ -19,7 +19,7 @@
             android:id="@+id/back"
             android:layout_width="35dp"
             android:layout_height="35dp"
-            android:src="@mipmap/back"
+            android:src="@drawable/back"
             android:layout_centerVertical="true"
             />
 
@@ -56,7 +56,7 @@
             android:layout_marginRight="@dimen/dp_12"
             android:scaleType="fitCenter"
             android:layout_centerVertical="true"
-            android:src="@mipmap/find"
+            android:src="@drawable/find"
             android:visibility="invisible" />
 
         <TextView
@@ -77,7 +77,7 @@
             android:layout_width="@dimen/dp_25"
             android:layout_height="@dimen/dp_23"
             android:background="?selectableItemBackgroundBorderless"
-            android:src="@mipmap/more"
+            android:src="@drawable/more"
             android:id="@+id/more"
             android:layout_centerVertical="true"
 
@@ -97,7 +97,7 @@
                 android:layout_width="@dimen/dp_20"
                 android:layout_height="@dimen/dp_25"
                 android:layout_centerInParent="true"
-                android:src="@mipmap/sortt"
+                android:src="@drawable/sortt"
                 android:background="?selectableItemBackgroundBorderless"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="@dimen/dp_9"
@@ -140,7 +140,7 @@
         <ImageView
             android:layout_width="@dimen/dp_80"
             android:layout_height="@dimen/dp_80"
-            android:src="@mipmap/blank"
+            android:src="@drawable/blank"
             android:visibility="visible"
             android:id="@+id/blank"
             android:layout_centerHorizontal="true"

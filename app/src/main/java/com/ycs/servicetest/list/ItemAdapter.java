@@ -49,7 +49,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
                             new RequestOptions()
                                     .frame(0)
                                     .centerCrop()
-                                    .error(R.mipmap.blank)
+                                    .error(R.drawable.blank)
                     )
                     .load(listItems.getUrl())
                     .into(holder.items_img);

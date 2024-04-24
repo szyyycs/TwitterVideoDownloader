@@ -20,7 +20,7 @@
     <ImageView
         android:layout_width="@dimen/dp_20"
         android:layout_height="@dimen/dp_20"
-        android:src="@mipmap/arrow"
+        android:src="@drawable/arrow"
         android:layout_alignParentRight="true"
         android:layout_marginRight="@dimen/dp_60"
         android:layout_marginTop="@dimen/dp_50" />

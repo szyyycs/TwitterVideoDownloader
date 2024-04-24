@@ -20,7 +20,7 @@
 
         android:layout_width="@dimen/dp_20"
         android:layout_height="@dimen/dp_200"
-        android:src="@mipmap/arrow1"
+        android:src="@drawable/arrow1"
         android:layout_centerInParent="true"
         android:paddingBottom="@dimen/dp_180"
 
@@ -30,7 +30,7 @@
 
         android:layout_width="@dimen/dp_20"
         android:layout_height="@dimen/dp_300"
-        android:src="@mipmap/arrow2"
+        android:src="@drawable/arrow2"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/tipp"
         android:layout_marginLeft="@dimen/dp_20"

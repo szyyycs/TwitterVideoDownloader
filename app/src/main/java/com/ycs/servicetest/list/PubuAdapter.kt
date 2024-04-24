@@ -14,8 +14,8 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.ycs.servicetest.model.ImageModel
 import com.ycs.servicetest.R
+import com.ycs.servicetest.model.ImageModel
 
 
 class PubuAdapter(dataList: MutableList<ImageModel>) :
@@ -57,7 +57,7 @@ class PubuAdapter(dataList: MutableList<ImageModel>) :
                 RequestOptions()
                     .frame(0)
                     .centerCrop()
-                    .error(R.mipmap.blank)
+                    .error(R.drawable.blank)
             )
             .load(model.url)
             .into(holder.showIv)

@@ -29,7 +29,7 @@
         <ImageView
             android:layout_width="@dimen/dp_80"
             android:layout_height="@dimen/dp_80"
-            android:src="@mipmap/blank"
+            android:src="@drawable/blank"
             android:visibility="visible"
             android:id="@+id/blank"
             android:layout_centerHorizontal="true"

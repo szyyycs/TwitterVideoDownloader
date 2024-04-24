@@ -373,7 +373,7 @@ class VideoListActivity : AppCompatActivity() {
             .atView(more) // 依附于所点击的View，内部会自动判断在上方或者下方显示
             .asAttachList(
                 arrayOf("小红书模式", "  抖音模式 ", "  更多设置 "),/*null*/
-                intArrayOf(R.mipmap.redbook, R.mipmap.douyin, R.mipmap.setting)
+                intArrayOf(R.drawable.redbook, R.drawable.douyin, R.drawable.setting)
             ) { position: Int, _: String? ->
                 when (position) {
                     0 -> {
@@ -411,7 +411,7 @@ class VideoListActivity : AppCompatActivity() {
             .atView(sort) // 依附于所点击的View，内部会自动判断在上方或者下方显示
             .asAttachList(
                 arrayOf("按下载时间排序", "按视频时长排序", "按描述长度排序"),
-                intArrayOf(R.mipmap.downloadtime, R.mipmap.video, R.mipmap.miaoshu)
+                intArrayOf(R.drawable.downloadtime, R.drawable.video, R.drawable.miaoshu)
             ) { position: Int, text: String? ->
                 if (viewModel.isScanning.value == true) {
                     Toast.makeText(this, "正在扫描中，请稍后再试", Toast.LENGTH_SHORT).show()

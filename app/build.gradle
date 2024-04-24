@@ -124,6 +124,9 @@ dependencies {
     //   implementation 'com.tencent.bugly:crashreport:3.4.4'
     implementation 'com.tencent.bugly:crashreport_upgrade:1.5.23'
     implementation 'com.tencent.bugly:nativecrashreport:3.9.2'
+    implementation("com.tencent.shiply:upgrade:2.0.0-RC01")
+    implementation("com.tencent.shiply:upgrade-ui:2.1.5-RC01")
+
     implementation 'com.android.support:multidex:1.0.0'
 
     implementation 'com.mapzen:on-the-road:0.8.1'

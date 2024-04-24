@@ -42,6 +42,9 @@ import com.app.hubert.guide.listener.OnPageChangedListener;
 import com.app.hubert.guide.model.GuidePage;
 import com.app.hubert.guide.model.HighLight;
 import com.tencent.mmkv.MMKV;
+import com.tencent.upgrade.bean.UpgradeConfig;
+import com.tencent.upgrade.core.DefaultUpgradeStrategyRequestCallback;
+import com.tencent.upgrade.core.UpgradeManager;
 import com.ycs.servicetest.MainApplication;
 import com.ycs.servicetest.R;
 import com.ycs.servicetest.common.Constant;
@@ -103,8 +106,8 @@ public class MainActivity extends AppCompatActivity {
         CustomImageDialog d = new CustomImageDialog(MainActivity.this).builder();
 
         d.show();
-        handler.postDelayed(() -> runOnUiThread(() -> d.setAni(R.mipmap.two)), 1000);
-        handler.postDelayed(() -> runOnUiThread(() -> d.setAni(R.mipmap.one)), 2000);
+        handler.postDelayed(() -> runOnUiThread(() -> d.setAni(R.drawable.two)), 1000);
+        handler.postDelayed(() -> runOnUiThread(() -> d.setAni(R.drawable.one)), 2000);
         handler.postDelayed(() -> startActivity(
                 FlutterActivity.createDefaultIntent(Objects.requireNonNull(MainApplication.Companion.getAppContext()))
         ), 3000);
@@ -148,6 +151,12 @@ public class MainActivity extends AppCompatActivity {
         showFloatWindows();
         checkPermission();
         showGuide();
+        UpgradeConfig.Builder builder = new UpgradeConfig.Builder();
+        UpgradeConfig config =
+                builder.appId("3be8930169").appKey("20ce525f-4bc0-4cd2-8352-1609443c47cc").build();
+        UpgradeManager.getInstance().init(getApplication(), config);
+        UpgradeManager.getInstance()
+                .checkUpgrade(false, null, new DefaultUpgradeStrategyRequestCallback());
     }
 
 

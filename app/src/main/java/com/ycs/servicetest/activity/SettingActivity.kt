@@ -270,7 +270,7 @@ fun AddBirthDayDialogContent(list: MutableList<String>, onAddDate: () -> Unit) {
                     fontWeight = FontWeight.SemiBold,
                 )
                 Image(
-                    painter = painterResource(id = R.mipmap.blank),
+                    painter = painterResource(id = R.drawable.blank),
                     contentDescription = "null",
                     modifier = Modifier
                         .align(Alignment.TopCenter)
@@ -495,7 +495,7 @@ fun SettingItems(
             )
         } else {
             Image(
-                painter = painterResource(id = R.mipmap.enter),
+                painter = painterResource(id = R.drawable.enter),
                 contentDescription = "",
                 modifier = Modifier
                     .width(50.dp)

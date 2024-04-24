@@ -23,7 +23,7 @@
 
         android:layout_width="@dimen/dp_40"
         android:layout_height="@dimen/dp_40"
-        android:src="@mipmap/down"
+        android:src="@drawable/down"
         android:id="@+id/civ"
         android:scaleType="fitCenter"
         />
