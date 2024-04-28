@@ -30,6 +30,10 @@ public class CustomCoverVideo extends StandardGSYVideoPlayer {
     ImageView mCoverImage;
     TextView tweetTv;
     TextView speedTv;
+    Context context;
+
+    DeleteFileCallBack deleteFileCallBack;
+
     public CustomCoverVideo(Context context, Boolean fullFlag) {
         super(context, fullFlag);
     }
@@ -45,6 +49,7 @@ public class CustomCoverVideo extends StandardGSYVideoPlayer {
     @Override
     protected void init(Context context) {
         super.init(context);
+        this.context = context;
         mCoverImage = findViewById(R.id.thumbImage);
         tweetTv = findViewById(R.id.text);
         // PlayerFactory.setPlayManager(SystemPlayerManager.class);
@@ -123,12 +128,7 @@ public class CustomCoverVideo extends StandardGSYVideoPlayer {
         if (delay == 0) {
             backToNormal();
         } else {
-            postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    backToNormal();
-                }
-            }, delay);
+            postDelayed(() -> backToNormal(), delay);
         }
 
     }
@@ -149,6 +149,9 @@ public class CustomCoverVideo extends StandardGSYVideoPlayer {
         switch (e.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 if (mCurrentState == CURRENT_STATE_PAUSE) {
+                    if (deleteFileCallBack != null) {
+                        deleteFileCallBack.onDelete();
+                    }
                     break;
                 }
                 speedTv.setVisibility(VISIBLE);
@@ -472,5 +475,9 @@ public class CustomCoverVideo extends StandardGSYVideoPlayer {
 
     public void setTweetTv(String text) {
         tweetTv.setText(text);
+    }
+
+    public void setDeleteFileCallBack(DeleteFileCallBack deleteFileCallBack) {
+        this.deleteFileCallBack = deleteFileCallBack;
     }
 }

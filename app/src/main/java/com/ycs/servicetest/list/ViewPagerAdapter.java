@@ -15,7 +15,6 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 public class ViewPagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private final static String TAG = "RecyclerBaseAdapter";
 
     private List<VideoModel> itemDataList;
     private final WeakReference<Context> context ;
@@ -54,7 +53,7 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         return 1;
     }
 
-    public void setListData(List<VideoModel> data) {
+    public void update(List<VideoModel> data) {
         itemDataList = data;
         notifyDataSetChanged();
     }

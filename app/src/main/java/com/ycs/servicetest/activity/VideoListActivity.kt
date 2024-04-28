@@ -30,6 +30,7 @@ import com.ycs.servicetest.list.ItemAdapter
 import com.ycs.servicetest.list.ListItems
 import com.ycs.servicetest.model.VideoModel
 import com.ycs.servicetest.utils.StatusBarUtil
+import com.ycs.servicetest.utils.showToast
 import com.ycs.servicetest.view.CustomIosAlertDialog
 import com.ycs.servicetest.view.CustomLinearLayoutManager
 import com.ycs.servicetest.view.CustomVideoPlayer
@@ -268,10 +269,7 @@ class VideoListActivity : AppCompatActivity() {
         more.setOnClickListener {
             selectMoreMenu()
         }
-        more.setOnLongClickListener {
-            intoTiktok(false)
-            false
-        }
+
         sort.setOnClickListener {
             selectSortType()
         }
@@ -386,11 +384,12 @@ class VideoListActivity : AppCompatActivity() {
                             return@asAttachList
                         }
                         startActivity(Intent(this@VideoListActivity, PubuActivity::class.java))
-                        //finish()
+                        finish()
                     }
 
                     1 -> {
                         intoTiktok(false)
+                        finish()
                     }
 
                     2 -> {
@@ -476,13 +475,13 @@ class VideoListActivity : AppCompatActivity() {
             vm.shuffle()
             Toast.makeText(this, "随机模式", Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(this, "顺序模式", Toast.LENGTH_SHORT).show()
+            showToast("顺序模式")
         }
         intent.putExtra("list", vm)
         intent.putExtra("i", position)
         intent.setClass(this, TiktokActivity::class.java)
         startActivity(intent)
-        //finish()
+        finish()
     }
 
     private fun setStatusBarColor() {

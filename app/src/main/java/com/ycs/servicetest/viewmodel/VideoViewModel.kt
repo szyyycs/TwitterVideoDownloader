@@ -77,11 +77,8 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
 
 
     private fun getDataList(url: String): MutableList<ListItems> {
-        var datalist = mutableListOf<ListItems>()
-        val strJson: String = kv.decodeString(url, null) ?: return datalist
-        val gson = Gson()
-        datalist = gson.fromJson(strJson, object : TypeToken<MutableList<ListItems?>?>() {}.type)
-        return datalist
+        val strJson: String = kv.decodeString(url, null) ?: return mutableListOf()
+        return Gson().fromJson(strJson, object : TypeToken<MutableList<ListItems?>?>() {}.type)
     }
 
     private fun checkFileIsNull(): Boolean {
@@ -124,7 +121,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                 val newList = mutableListOf<ListItems>()
                 val f = File(path)
                 for (s in f.list()!!) {
-                    if (!s.endsWith(".mp4")) {
+                    if (!s.endsWith(".mp4") || s.startsWith(".")) {
                         continue
                     }
                     val uu = path + s
@@ -207,14 +204,18 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
             val updateIndex = async {
                 val list = itemsList.value
                 if (!list.isNullOrEmpty()) {
-                    for (i in list.indices) {
-                        len = loadVideoLen(list[i].url ?: "")
-                        if (list.isEmpty()) {
-                            return@async null
+                    val mediaPlayer = MediaPlayer()
+                    synchronized(mediaPlayer) {
+                        for (i in list.indices) {
+                            len = loadVideoLen(list[i].url ?: "", mediaPlayer)
+                            if (list.isEmpty()) {
+                                return@async null
+                            }
+                            list[i].video_len = len
+                            index.postValue(i)
                         }
-                        list[i].video_len = len
-                        index.postValue(i)
                     }
+                    mediaPlayer.release()
                 }
                 list
             }
@@ -344,32 +345,32 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
         })
     }
 
-    private fun loadVideoLen(uu: String): String {
+    private fun loadVideoLen(url: String, mediaPlayer: MediaPlayer): String {
         val tt: String
-        val mediaPlayer = MediaPlayer()
         try {
-            mediaPlayer.setDataSource(uu)
+            mediaPlayer.reset()
+            mediaPlayer.setDataSource(url)
         } catch (e: IOException) {
-            e.printStackTrace()
+            return "00:00"
         }
         try {
             mediaPlayer.prepare()
         } catch (_: IOException) {
+            return "00:00"
         }
-        val timee: Long = (mediaPlayer.duration / 1000).toLong()
+        val duration: Long = (mediaPlayer.duration / 1000).toLong()
         //获得了视频的时长（以毫秒为单位）
-        mediaPlayer.release()
-        tt = if (timee / 60 != 0L) {
-            if (timee % 60 < 10) {
-                (timee / 60).toString() + ":0" + timee % 60
+        tt = if (duration / 60 != 0L) {
+            if (duration % 60 < 10) {
+                (duration / 60).toString() + ":0" + duration % 60
             } else {
-                (timee / 60).toString() + ":" + timee % 60
+                (duration / 60).toString() + ":" + duration % 60
             }
         } else {
-            if (timee % 60 < 10) {
-                "00:0" + timee % 60
+            if (duration % 60 < 10) {
+                "00:0" + duration % 60
             } else {
-                "00:" + timee % 60
+                "00:" + duration % 60
             }
         }
         return tt

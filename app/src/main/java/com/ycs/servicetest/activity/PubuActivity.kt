@@ -28,6 +28,7 @@ import com.ycs.servicetest.common.TAG
 import com.ycs.servicetest.list.PubuAdapter
 import com.ycs.servicetest.list.PubuAdapter.OnItemClickListener
 import com.ycs.servicetest.model.ImageModel
+import com.ycs.servicetest.utils.showToast
 import com.ycs.servicetest.view.CustomIosAlertDialog
 import com.ycs.servicetest.view.CustomVideoPlayer
 import com.ycs.servicetest.view.SpaceItemDecoration
@@ -94,7 +95,7 @@ class PubuActivity : AppCompatActivity() {
                     if (i < imageModels.size) {
                         if (imageModels[i].len.isNullOrBlank()) {
                             imageModels[i].len = loadVideoLen(imageModels[i].url)
-                            val msg = Message()
+                            val msg = Message.obtain()
                             msg.what = LOAD_TEXT
                             msg.obj = i
                             mHandler.sendMessage(msg)
@@ -204,7 +205,7 @@ class PubuActivity : AppCompatActivity() {
                         if (f.exists()) {
                             f.delete()
                         }
-                        Toast.makeText(this@PubuActivity, "删除成功！", Toast.LENGTH_SHORT).show()
+                        showToast("删除成功！")
                         imageModels.removeAt(postion)
                         adapter.update(imageModels)
                         if (imageModels.size == 0) {
@@ -236,7 +237,7 @@ class PubuActivity : AppCompatActivity() {
         }
         Thread {
             for (s in file.list()!!) {
-                if (!s.endsWith(".mp4")) {
+                if (!s.endsWith(".mp4") || s.startsWith(".")) {
                     continue
                 }
                 if (s.substring(s.length - 4, s.length) != ".mp4") {

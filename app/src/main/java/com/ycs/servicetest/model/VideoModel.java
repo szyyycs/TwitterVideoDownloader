@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 public class VideoModel implements Serializable {
     private String url;
+    private String tweet;
 
     public String getTweet() {
         return tweet;
@@ -12,8 +13,6 @@ public class VideoModel implements Serializable {
     public void setTweet(String tweet) {
         this.tweet = tweet;
     }
-
-    private String tweet;
 
     public String getUrl() {
         return url;

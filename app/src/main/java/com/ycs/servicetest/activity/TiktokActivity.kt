@@ -1,6 +1,6 @@
 package com.ycs.servicetest.activity
 
-//import androidx.lifecycle.lifecycleScope
+
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
@@ -12,12 +12,22 @@ import com.ycs.servicetest.R
 import com.ycs.servicetest.list.RecyclerItemNormalHolder
 import com.ycs.servicetest.list.ViewPagerAdapter
 import com.ycs.servicetest.model.VideoModel
+import com.ycs.servicetest.utils.showToast
+import com.ycs.servicetest.view.CustomIosAlertDialog
 import kotlinx.android.synthetic.main.tiktok_activity.view_pager2
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.io.File
+import kotlin.math.min
+
 
 class TiktokActivity : AppCompatActivity() {
 
-    var dataList: List<VideoModel>? = ArrayList()
-    var viewPagerAdapter: ViewPagerAdapter? = null
+    private var dataList: MutableList<VideoModel> = mutableListOf()
+    private lateinit var viewPagerAdapter: ViewPagerAdapter
+    private var deleteList: MutableList<String> = mutableListOf()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.tiktok_activity)
@@ -26,7 +36,7 @@ class TiktokActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
-        dataList = intent.getSerializableExtra("list") as ArrayList<VideoModel>?
+        dataList = (intent.getSerializableExtra("list") as ArrayList<VideoModel>).toMutableList()
         viewPagerAdapter = ViewPagerAdapter(this, dataList)
 
         view_pager2.orientation = ViewPager2.ORIENTATION_VERTICAL
@@ -71,18 +81,55 @@ class TiktokActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         GSYVideoManager.releaseAllVideos()
+        deleteList.forEach {
+            val f = File(it)
+            if (f.exists()) {
+                f.delete()
+            }
+        }
+        super.onDestroy()
     }
 
     private fun playPosition(position: Int) {
-        val viewHolder =
-            (view_pager2!!.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(position)
+        var viewHolder =
+            (view_pager2.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(position)
         if (viewHolder != null) {
-            val recyclerItemNormalHolder = viewHolder as RecyclerItemNormalHolder
-            recyclerItemNormalHolder.player.setUp(dataList!![position].url, false, "")
-            recyclerItemNormalHolder.player.startPlayLogic()
+            setupPlayer(viewHolder, position)
+        } else {
+            MainScope().launch {
+                delay(200)
+                viewHolder =
+                    (view_pager2.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(
+                        position
+                    )
+                viewHolder?.let {
+                    setupPlayer(it, position)
+                }
+            }
         }
     }
 
+    private fun setupPlayer(viewHolder: RecyclerView.ViewHolder, position: Int) {
+        val recyclerItemNormalHolder = viewHolder as RecyclerItemNormalHolder
+        recyclerItemNormalHolder.player.setUp(dataList[position].url, false, "")
+        recyclerItemNormalHolder.player.setDeleteFileCallBack {
+            CustomIosAlertDialog(this@TiktokActivity)
+                .builder()
+                .setTitle("提示")
+                .setMsg("确认删除该视频吗？")
+                .setNegativeButton("取消") { }
+                .setPositiveButton("确认") {
+                    deleteList.add(dataList[position].url)
+                    showToast("删除成功！")
+                    view_pager2.currentItem = min(dataList.size - 1, position + 1)
+                    MainScope().launch {
+                        delay(200)
+                        playPosition(min(dataList.size - 1, position + 1))
+                    }
+                }
+                .show()
+        }
+        recyclerItemNormalHolder.player.startPlayLogic()
+    }
 }

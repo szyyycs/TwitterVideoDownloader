@@ -1,7 +1,6 @@
 package com.ycs.servicetest.list;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -29,23 +28,21 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder {
         gsyVideoPlayer = v.findViewById(R.id.video_item_player);
         gsyVideoOptionBuilder = new GSYVideoOptionBuilder();
     }
-        public void onBind(final int position, VideoModel vm) {
-            Log.e(TAG, "vm.getUrl(): " + vm.getUrl() + "position" + position);
-            if (imageView == null) {
-                imageView = new ImageView(context.get());
-                Log.d("ViewPager2", "holder里第" + position + "项初始化 ");
-                Glide.with(context.get())
-                        .setDefaultRequestOptions(
-                                new RequestOptions()
-                                        //提取视频哪一帧
-                                        .frame(0)
-                                        .centerInside()
-                        )
-                        .load(vm.getUrl())
+
+    public void onBind(int position, VideoModel vm) {
+        if (imageView == null) {
+            imageView = new ImageView(context.get());
+            Glide.with(context.get())
+                    .setDefaultRequestOptions(
+                            new RequestOptions()
+                                    //提取视频哪一帧
+                                    .frame(0)
+                                    .centerInside()
+                    )
+                    .load(vm.getUrl())
                         .into(imageView);
             }
             gsyVideoOptionBuilder
-                    //.setIsTouchWiget(false)
                     .setThumbImageView(imageView)
                     .setCacheWithPlay(true)
                     .setPlayTag(TAG)
@@ -67,7 +64,6 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder {
                         @Override
                         public void onStartPrepared(String url, Object... objects) {
                             super.onStartPrepared(url, objects);
-                            Log.e(TAG, "onStartPrepared");
                         }
 
                         @Override
