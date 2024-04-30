@@ -14,6 +14,8 @@ object Constant {
     )
     const val REQUEST_CODE = 20
     const val TAG = "yyy"
+    const val INTENT_POSITION = "POSITION"
+    const val INTENT_LIST = "LIST"
 
 }
 const val TAG = "yyy"

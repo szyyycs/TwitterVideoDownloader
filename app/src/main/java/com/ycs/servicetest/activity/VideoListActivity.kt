@@ -25,10 +25,15 @@ import com.shuyu.gsyvideoplayer.player.PlayerFactory
 import com.shuyu.gsyvideoplayer.player.SystemPlayerManager
 import com.shuyu.gsyvideoplayer.utils.OrientationUtils
 import com.ycs.servicetest.R
+import com.ycs.servicetest.common.Config
 import com.ycs.servicetest.common.Constant
+import com.ycs.servicetest.common.Constant.INTENT_LIST
+import com.ycs.servicetest.common.Constant.INTENT_POSITION
+import com.ycs.servicetest.common.KVKey
 import com.ycs.servicetest.list.ItemAdapter
 import com.ycs.servicetest.list.ListItems
 import com.ycs.servicetest.model.VideoModel
+import com.ycs.servicetest.utils.KVUtil
 import com.ycs.servicetest.utils.StatusBarUtil
 import com.ycs.servicetest.utils.showToast
 import com.ycs.servicetest.view.CustomIosAlertDialog
@@ -47,6 +52,7 @@ import kotlinx.android.synthetic.main.activity_show_video.toScan
 import kotlinx.android.synthetic.main.activity_show_video.toolBar
 import kotlinx.coroutines.cancel
 import java.io.File
+
 
 class VideoListActivity : AppCompatActivity() {
 
@@ -73,7 +79,7 @@ class VideoListActivity : AppCompatActivity() {
         initView()
         initPlay()
         initData()
-
+        changeToolBar()
     }
 
     private fun initPlay() {
@@ -358,7 +364,6 @@ class VideoListActivity : AppCompatActivity() {
                 playerParam.height = height
                 detail_player.layoutParams = playerParam
                 detail_player.startPlay()
-
             }
 
             override fun onAnimationCancel(animation: Animator) {}
@@ -388,7 +393,13 @@ class VideoListActivity : AppCompatActivity() {
                     }
 
                     1 -> {
-                        intoTiktok(false)
+                        intoTiktok(
+                            KVUtil.getBool(
+                                KVKey.SHUFFLE_VIDEOS,
+                                Config.DEFAULT_SHUFFLE_VIDEOS,
+                                KVKey.SETTING
+                            ) ?: Config.DEFAULT_SHUFFLE_VIDEOS
+                        )
                         finish()
                     }
 
@@ -457,7 +468,7 @@ class VideoListActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun intoTiktok(isOrder: Boolean) {
+    private fun intoTiktok(isShuffle: Boolean) {
         if (viewModel.isNull.value == true) {
             Toast.makeText(this, "您视频列表为空，请下载视频后再进入抖音模式哦！", Toast.LENGTH_SHORT)
                 .show()
@@ -471,14 +482,14 @@ class VideoListActivity : AppCompatActivity() {
             vvv.tweet = ii.twitterText
             vm.add(vvv)
         }
-        if (!isOrder) {
+        if (isShuffle) {
             vm.shuffle()
             Toast.makeText(this, "随机模式", Toast.LENGTH_SHORT).show()
         } else {
             showToast("顺序模式")
         }
-        intent.putExtra("list", vm)
-        intent.putExtra("i", position)
+        intent.putExtra(INTENT_LIST, vm)
+        intent.putExtra(INTENT_POSITION, position)
         intent.setClass(this, TiktokActivity::class.java)
         startActivity(intent)
         finish()
@@ -539,6 +550,11 @@ class VideoListActivity : AppCompatActivity() {
         val attrs = window.attributes
         attrs.flags = attrs.flags and WindowManager.LayoutParams.FLAG_FULLSCREEN.inv()
         window.attributes = attrs
+    }
+
+    private fun changeToolBar() {
+//        toolBarBackground.animate().setDuration(500).x(3000f).startDelay = 1000
+//        title_tv.animate().setDuration(500).alpha(0f).startDelay = 1000
     }
 
     private fun reChangeList() {

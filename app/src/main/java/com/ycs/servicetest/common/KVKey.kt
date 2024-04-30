@@ -10,4 +10,6 @@ object KVKey {
     const val SAVE_URL = "saveUrl"
     const val SETTING = "setting"
     const val OPEN_FINGER = "openFinger"
+    const val SHUFFLE_VIDEOS = "ShuffleVideos"
+    const val XHS_PLAY_MODE_TYPE = "XhsPlayModeType"
 }

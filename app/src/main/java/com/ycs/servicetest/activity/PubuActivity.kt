@@ -1,6 +1,7 @@
 package com.ycs.servicetest.activity
 
 
+import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
@@ -24,10 +25,14 @@ import com.shuyu.gsyvideoplayer.utils.OrientationUtils
 import com.tencent.mmkv.MMKV
 import com.ycs.servicetest.R
 import com.ycs.servicetest.common.Config
-import com.ycs.servicetest.common.TAG
+import com.ycs.servicetest.common.Constant.INTENT_LIST
+import com.ycs.servicetest.common.Constant.INTENT_POSITION
+import com.ycs.servicetest.common.KVKey
 import com.ycs.servicetest.list.PubuAdapter
 import com.ycs.servicetest.list.PubuAdapter.OnItemClickListener
 import com.ycs.servicetest.model.ImageModel
+import com.ycs.servicetest.model.VideoModel
+import com.ycs.servicetest.utils.KVUtil
 import com.ycs.servicetest.utils.showToast
 import com.ycs.servicetest.view.CustomIosAlertDialog
 import com.ycs.servicetest.view.CustomVideoPlayer
@@ -55,14 +60,28 @@ class PubuActivity : AppCompatActivity() {
 
     private lateinit var vibrator: Vibrator
     private var canChange: Boolean = true
-    private lateinit var detailPlayer: CustomVideoPlayer
-    private lateinit var kv_text: MMKV
+    private val detailPlayer: CustomVideoPlayer by lazy {
+        findViewById(R.id.detail_player)
+    }
+    private val xhsPlayModeTypeIsTiktok: Boolean by lazy {
+        KVUtil.getBool(
+            KVKey.XHS_PLAY_MODE_TYPE,
+            Config.DEFAULT_IS_XHS_PLAY_INTO_TIKTOK,
+            KVKey.SETTING
+        ) ?: Config.DEFAULT_IS_XHS_PLAY_INTO_TIKTOK
+    }
+    private val kv_text: MMKV by lazy {
+        MMKV.mmkvWithID("text")
+    }
     private lateinit var orientationUtils: OrientationUtils
     private val imageModels: MutableList<ImageModel> = mutableListOf()
     private var adapter: PubuAdapter = PubuAdapter(imageModels)
     private var isPlay = false
     private var isFullScreen = false
     private var position = 0
+    private val videoList by lazy {
+        ArrayList<VideoModel>()
+    }
     private var mHandler = Handler(Looper.getMainLooper()) {
         when (it.what) {
             1 -> {
@@ -164,32 +183,13 @@ class PubuActivity : AppCompatActivity() {
         rvv.addItemDecoration(dividerItemDecoration)
         rvv.adapter = adapter
         adapter.setOnItemClickListener(object : OnItemClickListener {
-            override fun onItemClick(view: View?, postion: Int) {
-                isFullScreen = true
-                detailPlayer.setUp(imageModels[postion].url, true, imageModels[postion].desc)
-                detailPlayer.visibility = View.VISIBLE
-                showVideoView()
-                detailPlayer.startPlay()
-                hideStatusBar()
-                detailPlayer.nextVideo.setOnClickListener(View.OnClickListener {
-                    if (imageModels.size <= position + 1) {
-                        position = (position + 1) % imageModels.size
-                        isPlay = true
-                        detailPlayer.currentPlayer.release()
-                        detailPlayer.setUp(
-                            imageModels[position].url,
-                            true,
-                            imageModels[position].url
-                        )
-                        detailPlayer.startPlay()
-                        return@OnClickListener
-                    }
-                    position++
-                    isPlay = true
-                    detailPlayer.currentPlayer.release()
-                    detailPlayer.setUp(imageModels[position].url, true, imageModels[position].url)
-                    detailPlayer.startPlay()
-                })
+            override fun onItemClick(view: View?, position: Int) {
+                if (xhsPlayModeTypeIsTiktok) {
+                    enterTiktokPlayMode(position)
+                } else {
+                    enterNormalPlayMode(position)
+                }
+
             }
 
         })
@@ -223,13 +223,18 @@ class PubuActivity : AppCompatActivity() {
         setContentView(R.layout.activity_pubu)
         setStatusBarColor()
         vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
-        initPlayer()
+        if (!xhsPlayModeTypeIsTiktok) {
+            initPlayer()
+        }
         initStaggeredGridLayout()
-        kv_text = MMKV.mmkvWithID("text")
+        loadVideoList()
+
+    }
+
+    private fun loadVideoList() {
         val file = File(url)
         if (!file.exists()) {
             file.mkdirs()
-            Log.e(TAG, "不存在")
         }
         if (file.list().isNullOrEmpty()) {
             setBlankUI()
@@ -272,11 +277,9 @@ class PubuActivity : AppCompatActivity() {
                 imageModels.add(i)
             }
             if (imageModels.isEmpty()) {
-
                 setBlankUI()
                 return@Thread
             }
-
             imageModels.shuffle()
             mHandler.sendEmptyMessage(UPDATE_ALL)
         }.start()
@@ -286,37 +289,82 @@ class PubuActivity : AppCompatActivity() {
         blank_layout.visibility = View.VISIBLE
     }
 
-    override fun onBackPressed() {
+    fun enterTiktokPlayMode(position: Int) {
+        val intent = Intent()
+        if (videoList.isEmpty()) {
+            for (imageModel in imageModels) {
+                val videoModel = VideoModel()
+                videoModel.url = imageModel.url
+                videoModel.tweet = imageModel.desc
+                videoList.add(videoModel)
+            }
+        }
+        Log.d("yang", "position$position")
+        intent.putExtra(INTENT_LIST, videoList)
+        intent.putExtra(INTENT_POSITION, position)
+        intent.setClass(this, TiktokActivity::class.java)
+        startActivity(intent)
+    }
 
-        orientationUtils.backToProtVideo()
-        if (GSYVideoManager.backFromWindowFull(this)) {
-            isFullScreen = false
-            //"退出全屏"
-            return
+    fun enterNormalPlayMode(position: Int) {
+        isFullScreen = true
+        detailPlayer.setUp(imageModels[position].url, true, imageModels[position].desc)
+        detailPlayer.visibility = View.VISIBLE
+        showVideoView()
+        detailPlayer.startPlay()
+        hideStatusBar()
+        detailPlayer.nextVideo.setOnClickListener(View.OnClickListener {
+            if (imageModels.size <= this.position + 1) {
+                this.position = (this.position + 1) % imageModels.size
+                isPlay = true
+                detailPlayer.currentPlayer.release()
+                detailPlayer.setUp(
+                    imageModels[this.position].url,
+                    true,
+                    imageModels[this.position].url
+                )
+                detailPlayer.startPlay()
+                return@OnClickListener
+            }
+            this.position++
+            isPlay = true
+            detailPlayer.currentPlayer.release()
+            detailPlayer.setUp(imageModels[this.position].url, true, imageModels[this.position].url)
+            detailPlayer.startPlay()
+        })
+    }
+
+    override fun onBackPressed() {
+        if (!xhsPlayModeTypeIsTiktok) {
+            orientationUtils.backToProtVideo()
+            if (GSYVideoManager.backFromWindowFull(this)) {
+                isFullScreen = false
+                //"退出全屏"
+                return
+            }
+            if (!canChange) {
+                showStatusBar()
+                hideVideoView()
+                mHandler.postDelayed({
+                    if (isPlay) {
+                        detailPlayer.currentPlayer.release()
+                        isPlay = false
+                    }
+                }, 300)
+                return
+            }
         }
-        if (!canChange) {
-            showStatusBar()
-            hideVideoView()
-            mHandler.postDelayed({
-                if (isPlay) {
-                    detailPlayer.currentPlayer.release()
-                    isPlay = false
-                }
-            }, 300)
-            return
-        }
+
         super.onBackPressed()
     }
 
     private fun initPlayer() {
-        detailPlayer = findViewById(R.id.detail_player)
         detailPlayer.titleTextView.visibility = View.GONE
         detailPlayer.backButton.visibility = View.GONE
         PlayerFactory.setPlayManager(SystemPlayerManager::class.java)
         orientationUtils = OrientationUtils(this, detailPlayer)
         orientationUtils.isEnable = false
         val gsyVideoOption = GSYVideoOptionBuilder()
-
         gsyVideoOption
             .setIsTouchWiget(true)
             .setRotateViewAuto(true)

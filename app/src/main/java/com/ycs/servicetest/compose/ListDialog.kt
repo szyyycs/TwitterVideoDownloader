@@ -25,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
-import com.ycs.servicetest.activity.AddBirthDayDialogContent
 
 /**
  * Created on 2024/04/17.

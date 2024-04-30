@@ -30,55 +30,53 @@ public class RecyclerItemNormalHolder extends RecyclerItemBaseHolder {
     }
 
     public void onBind(int position, VideoModel vm) {
-        if (imageView == null) {
-            imageView = new ImageView(context.get());
-            Glide.with(context.get())
-                    .setDefaultRequestOptions(
-                            new RequestOptions()
-                                    //提取视频哪一帧
-                                    .frame(0)
-                                    .centerInside()
-                    )
-                    .load(vm.getUrl())
-                        .into(imageView);
-            }
-            gsyVideoOptionBuilder
-                    .setThumbImageView(imageView)
-                    .setCacheWithPlay(true)
-                    .setPlayTag(TAG)
-                    .setLooping(true)
-                    .setNeedShowWifiTip(false)
-                    .setPlayPosition(position)
-                    .setVideoAllCallBack(new GSYSampleCallBack() {
-                        @Override
-                        public void onPrepared(String url, Object... objects) {
-                            super.onPrepared(url, objects);
-                            imageView = null;
-                            if (!gsyVideoPlayer.isIfCurrentIsFullscreen()) {
-                                //非静音
-                                GSYVideoManager.instance().setNeedMute(false);
-                            }
-
+        imageView = new ImageView(context.get());
+        Glide.with(context.get())
+                .setDefaultRequestOptions(
+                        new RequestOptions()
+                                //提取视频哪一帧
+                                .frame(0)
+                                .centerInside()
+                )
+                .load(vm.getUrl())
+                .into(imageView);
+        gsyVideoOptionBuilder
+                .setThumbImageView(imageView)
+                .setCacheWithPlay(true)
+                .setPlayTag(TAG)
+                .setLooping(true)
+                .setNeedShowWifiTip(false)
+                .setPlayPosition(position)
+                .setVideoAllCallBack(new GSYSampleCallBack() {
+                    @Override
+                    public void onPrepared(String url, Object... objects) {
+                        super.onPrepared(url, objects);
+                        imageView = null;
+                        if (!gsyVideoPlayer.isIfCurrentIsFullscreen()) {
+                            //非静音
+                            GSYVideoManager.instance().setNeedMute(false);
                         }
 
-                        @Override
-                        public void onStartPrepared(String url, Object... objects) {
-                            super.onStartPrepared(url, objects);
-                        }
+                    }
 
-                        @Override
-                        public void onAutoComplete(String url, Object... objects) {
-                            super.onAutoComplete(url, objects);
-                            gsyVideoPlayer.restart();
-                        }
-                    })
-                    .build(gsyVideoPlayer);
-            gsyVideoPlayer.setUp(vm.getUrl(), false, "");
-            if (vm.getTweet() != null) {
-                gsyVideoPlayer.setTweetTv(vm.getTweet());
-            }
+                    @Override
+                    public void onStartPrepared(String url, Object... objects) {
+                        super.onStartPrepared(url, objects);
+                    }
 
+                    @Override
+                    public void onAutoComplete(String url, Object... objects) {
+                        super.onAutoComplete(url, objects);
+                        gsyVideoPlayer.restart();
+                    }
+                })
+                .build(gsyVideoPlayer);
+        gsyVideoPlayer.setUp(vm.getUrl(), false, "");
+        if (vm.getTweet() != null) {
+            gsyVideoPlayer.setTweetTv(vm.getTweet());
         }
+
+    }
 
     /**
      * 全屏幕按键处理

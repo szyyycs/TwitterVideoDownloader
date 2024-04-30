@@ -187,7 +187,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                 isNull.value = false
                 itemsList.value = response
                 isScanning.value = false
-                loadVideoDuration()
+                loadVideoListDuration()
             }
 
         }
@@ -199,22 +199,21 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.cancel()
     }
 
-    private fun loadVideoDuration() {
+    private fun loadVideoListDuration() {
         viewModelScope.launch(Dispatchers.Default) {
             val updateIndex = async {
                 val list = itemsList.value
                 if (!list.isNullOrEmpty()) {
                     val mediaPlayer = MediaPlayer()
-                    synchronized(mediaPlayer) {
-                        for (i in list.indices) {
-                            len = loadVideoLen(list[i].url ?: "", mediaPlayer)
-                            if (list.isEmpty()) {
-                                return@async null
-                            }
+                    for (i in list.indices) {
+                        len = loadVideoDuration(list[i].url ?: "", mediaPlayer)
+                        if (list.isEmpty()) {
+                            return@async null
+                        }
                             list[i].video_len = len
                             index.postValue(i)
                         }
-                    }
+
                     mediaPlayer.release()
                 }
                 list
@@ -345,7 +344,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
         })
     }
 
-    private fun loadVideoLen(url: String, mediaPlayer: MediaPlayer): String {
+    private fun loadVideoDuration(url: String, mediaPlayer: MediaPlayer): String {
         val tt: String
         try {
             mediaPlayer.reset()

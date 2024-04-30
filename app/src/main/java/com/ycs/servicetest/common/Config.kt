@@ -18,5 +18,7 @@ object Config {
                         defaultDownloadPath
                     ) ?: defaultDownloadPath
                 }/"
-
+    const val DEFAULT_OPEN_FINGER = false
+    const val DEFAULT_SHUFFLE_VIDEOS = true
+    const val DEFAULT_IS_XHS_PLAY_INTO_TIKTOK = true
 }
