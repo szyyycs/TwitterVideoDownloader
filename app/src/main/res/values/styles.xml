@@ -1,15 +1,15 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
-<!--        <item name="android:windowBackground">@color/colorAccent</item>-->
-<!--        <item name="android:windowFullscreen">true</item>-->
-<!--        <item name="android:windowDrawsSystemBarBackgrounds">false</item>-->
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-    </style>
+    <!--    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">-->
+    <!--        &lt;!&ndash; Customize your theme here. &ndash;&gt;-->
+    <!--&lt;!&ndash;        <item name="android:windowBackground">@color/colorAccent</item>&ndash;&gt;-->
+    <!--&lt;!&ndash;        <item name="android:windowFullscreen">true</item>&ndash;&gt;-->
+    <!--&lt;!&ndash;        <item name="android:windowDrawsSystemBarBackgrounds">false</item>&ndash;&gt;-->
+    <!--        <item name="android:windowIsTranslucent">true</item>-->
+    <!--        <item name="colorPrimary">@color/colorPrimary</item>-->
+    <!--        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>-->
+    <!--        <item name="colorAccent">@color/colorAccent</item>-->
+    <!--    </style>-->
     <style name="AlertDialogStyle" parent="@android:style/Theme.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>
@@ -19,6 +19,7 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowIsTranslucent">true</item>
     </style>
+
     <style name="FlutterPageTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!--状态栏透明-->
         <item name="android:windowTranslucentStatus">true</item>

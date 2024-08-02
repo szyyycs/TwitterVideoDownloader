@@ -56,18 +56,18 @@
 
         <service
             android:name=".service.DownLoadWindowService"
-            android:foregroundServiceType="specialUse"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="specialUse" />
         <service
             android:name=".service.WebService"
             android:enabled="true"
-            android:foregroundServiceType="specialUse"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="specialUse" />
         <service
             android:name=".service.MainService"
             android:enabled="true"
-            android:foregroundServiceType="specialUse"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="specialUse" />
         <service
             android:name=".service.FloatWindowService"
             android:exported="false" /> <!-- <activity android:name=".activity.FloatActivity" /> -->

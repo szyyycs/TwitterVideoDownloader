@@ -2,4 +2,6 @@
 <resources>
 
     <style name="ComposeTheme" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!--    <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar" />-->
 </resources>

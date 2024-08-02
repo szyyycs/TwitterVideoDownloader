@@ -6,7 +6,7 @@ package com.ycs.servicetest.model
  */
 data class DownloadResponse(
     val success: Boolean,
-    val variants: List<VideoListResponse>
+    val variants: List<VideoListResponse>?
 )
 
 data class VideoListResponse(

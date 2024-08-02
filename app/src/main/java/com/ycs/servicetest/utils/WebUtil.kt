@@ -245,6 +245,11 @@ object WebUtil {
                         Log.d(TAG, "onSuccess: $body")
                         val result =
                             Gson().fromJson(body, DownloadResponse::class.java)
+                        if (result.variants.isNullOrEmpty()) {
+                            showInformationToUser("解析失败，失败详情：" + response.body!!.string())
+                            isAnalyse = false
+                            return
+                        }
                         showInformationToUser("解析成功，共有${result.variants.size}个文件")
                         for (i in result.variants) {
                             Log.e(TAG, "收到链接啦${i.url}")
