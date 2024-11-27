@@ -126,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
             for (String key : allKeys) {
                 String value = kv.decodeString(key);
                 String[] values = value.split("\\.");
+                if (values.length != 2) return;
                 int month_saved = Integer.parseInt(values[0]);
                 int day_saved = Integer.parseInt(values[1]);
                 if (month == month_saved && day == day_saved) {

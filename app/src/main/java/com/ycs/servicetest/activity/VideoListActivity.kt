@@ -231,8 +231,10 @@ class VideoListActivity : AppCompatActivity() {
             }
         }
         viewModel.index.observe(this) {
-            itemsList[it].video_len = viewModel.len
-            adapter.updateOnepic(it)
+            if (itemsList.size > it) {
+                itemsList[it].video_len = viewModel.len
+                adapter.updateOnepic(it)
+            }
         }
         viewModel.indexUploadTweet.observe(this) {
             if (itemsList.isNotEmpty()) {

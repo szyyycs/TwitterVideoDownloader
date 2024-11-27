@@ -127,17 +127,6 @@ fun AddBirthDayDialogContent(list: MutableList<String>, onAddDate: () -> Unit) {
                     .fillMaxWidth()
                     .height(110.dp)
             ) {
-                Text(
-                    text = "无",
-                    textAlign = TextAlign.Center,
-                    fontSize = 12.sp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 10.dp),
-                    color = Color(0xffbbbbbb),
-                    fontWeight = FontWeight.SemiBold,
-                )
                 Image(
                     painter = painterResource(id = R.drawable.blank),
                     contentDescription = "null",

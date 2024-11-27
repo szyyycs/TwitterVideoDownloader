@@ -1,6 +1,7 @@
 package com.ycs.servicetest.activity
 
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
 import android.view.View
@@ -9,6 +10,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -16,16 +18,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
 import com.ycs.servicetest.common.Config
 import com.ycs.servicetest.common.Config.defaultDownloadPath
@@ -98,45 +103,55 @@ class SettingActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        CustomToolBar("设置")
-                        LazyColumn(
-                            Modifier
-                                .fillMaxSize()
-                                .background(Color(0xffeeeeee))
-                                .padding(top = 20.dp)
-                        ) {
-                            itemsIndexed(map.keys.toList()) { index, message ->
-                                SettingItems(
-                                    modifier = Modifier
-                                        .pointerInput(Unit) {
-                                            detectTapGestures(
-                                                onLongPress = {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            CustomToolBar("设置")
+                            LazyColumn(
+                                Modifier
+                                    .fillMaxSize()
+                                    .background(Color(0xffeeeeee))
+                                    .padding(top = 20.dp)
+                            ) {
+                                itemsIndexed(map.keys.toList()) { index, message ->
+                                    SettingItems(
+                                        modifier = Modifier
+                                            .pointerInput(Unit) {
+                                                detectTapGestures(
+                                                    onLongPress = {
 
-                                                }, onTap = {
-                                                    when (index) {
-                                                        0 -> showDialog()
-                                                        1 -> scope.launch { state.show() }
-                                                        2 -> {}
-                                                        3 -> {}
+                                                    }, onTap = {
+                                                        when (index) {
+                                                            0 -> showDialog()
+                                                            1 -> scope.launch { state.show() }
+                                                            2 -> {}
+                                                            3 -> {}
+                                                        }
                                                     }
-                                                }
 
-                                            )
-                                        },
-                                    title = message,
-                                    description = map[message]!!,
-                                    tips = if (index == 0) Environment.getExternalStorageDirectory()
-                                        .toString() + "/" + tips else "",
-                                    settingType = when (index) {
-                                        2 -> SettingType.FingerType(isOpenFingerVerify)
-                                        3 -> SettingType.ShuffleVideosType(isShufflePlay)
-                                        4 -> SettingType.XhsPlayModeType(isXhsPlayIntoTiktok)
-                                        else -> null
-                                    }
-                                )
+                                                )
+                                            },
+                                        title = message,
+                                        description = map[message]!!,
+                                        tips = if (index == 0) Environment.getExternalStorageDirectory()
+                                            .toString() + "/" + tips else "",
+                                        settingType = when (index) {
+                                            2 -> SettingType.FingerType(isOpenFingerVerify)
+                                            3 -> SettingType.ShuffleVideosType(isShufflePlay)
+                                            4 -> SettingType.XhsPlayModeType(isXhsPlayIntoTiktok)
+                                            else -> null
+                                        }
+                                    )
+                                }
                             }
                         }
+                        Text(
+                            text = "v${getVersionCode()}",
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(bottom = 10.dp),
+                            fontSize = 15.sp,
+                            color = Color(0xFFaaaaaa)
+                        )
                     }
                 }
             }
@@ -156,6 +171,17 @@ class SettingActivity : ComponentActivity() {
                 list.add("${key}.${mmkv.decodeString(key)}")
             }
         }
+    }
+
+    private fun getVersionCode(): String {
+        return try {
+            val pInfo = packageManager.getPackageInfo(packageName, 0)
+            pInfo.versionName
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
+            "0"
+        }
+
     }
 
 
